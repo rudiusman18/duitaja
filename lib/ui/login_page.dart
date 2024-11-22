@@ -32,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           TextFormField(
             controller: controller,
+            obscureText: title.toLowerCase() == "password" ? true : false,
             decoration: InputDecoration(
               hintText: title,
               border: OutlineInputBorder(
@@ -94,7 +95,9 @@ class _LoginPageState extends State<LoginPage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/main-page');
+                    },
                     child: Text(
                       "Masuk",
                       style: inter.copyWith(
