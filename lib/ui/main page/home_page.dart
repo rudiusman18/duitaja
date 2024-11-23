@@ -129,6 +129,154 @@ class HomePage extends StatelessWidget {
       );
     }
 
+    Widget generateMenuItem({
+      required String title,
+      required String image,
+    }) {
+      return Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(
+              20,
+            ),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: greyColor,
+              ),
+            ),
+            child: Image.asset(
+              image,
+              width: 24,
+              height: 24,
+            ),
+          ),
+          const SizedBox(
+            height: 12,
+          ),
+          Text(
+            title,
+            style: inter.copyWith(
+              fontSize: 10,
+              fontWeight: medium,
+            ),
+          ),
+        ],
+      );
+    }
+
+    Widget generateSalesHistoryItem({
+      required String buyerName,
+      required String orderAmount,
+      required String date,
+      required String time,
+      required String status,
+      required String price,
+    }) {
+      return Column(
+        children: [
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: greyColor600,
+          ),
+          const SizedBox(
+            height: 14,
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(
+              horizontal: 31,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          buyerName,
+                          style: inter.copyWith(
+                            fontSize: 15,
+                            fontWeight: semiBold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 9,
+                      ),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          "$orderAmount Pesanan",
+                          style: inter.copyWith(
+                            fontSize: 13,
+                            fontWeight: medium,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 11,
+                      ),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          "$date|$time",
+                          style: inter.copyWith(
+                            fontSize: 10,
+                            fontWeight: medium,
+                            color: greyColor600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        borderRadius: BorderRadius.circular(
+                          20,
+                        ),
+                      ),
+                      child: Text(
+                        status,
+                        style: inter.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 9,
+                    ),
+                    Text(
+                      price,
+                      style: inter.copyWith(
+                        fontSize: 15,
+                        fontWeight: semiBold,
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+        ],
+      );
+    }
+
     return Scaffold(
       backgroundColor: primaryColor,
       body: Container(
@@ -173,8 +321,71 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  child: ListView(
-                    children: [],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(
+                        height: 11,
+                      ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 35,
+                        ),
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              generateMenuItem(
+                                title: "Kasir",
+                                image: "assets/cart.png",
+                              ),
+                              generateMenuItem(
+                                title: "E-Commerce",
+                                image: "assets/chart.png",
+                              ),
+                              generateMenuItem(
+                                title: "Stok Opname",
+                                image: "assets/desk.png",
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 40,
+                      ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                        ),
+                        child: Text(
+                          "Riwayat Penjualan",
+                          style: inter.copyWith(
+                            fontWeight: medium,
+                            fontSize: 13,
+                            color: greyColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Expanded(
+                        child: ListView(
+                          children: [
+                            for (var i = 0; i < 20; i++)
+                              generateSalesHistoryItem(
+                                buyerName: "Imam",
+                                orderAmount: "4",
+                                date: "15 November 2024",
+                                time: "15:28PM",
+                                status: "Lunas",
+                                price: "Rp. 123.000",
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

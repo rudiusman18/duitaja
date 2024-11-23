@@ -2,7 +2,7 @@ import 'dart:ffi';
 
 import 'package:duidku/cubit/page_cubit.dart';
 import 'package:duidku/shared/theme.dart';
-import 'package:duidku/ui/main%20page/cashier_page.dart';
+import 'package:duidku/ui/main%20page/stock_page.dart';
 import 'package:duidku/ui/main%20page/home_page.dart';
 import 'package:duidku/ui/main%20page/sale_page.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +23,7 @@ class _MainPageState extends State<MainPage> {
         case 0:
           return const HomePage();
         case 1:
-          return const CashierPage();
+          return const StockPage();
         case 2:
           return const SalePage();
         default:
@@ -39,10 +39,10 @@ class _MainPageState extends State<MainPage> {
             selectedLabelStyle:
                 inter.copyWith(fontSize: 10, color: primaryColor),
             unselectedLabelStyle:
-                inter.copyWith(fontSize: 10, color: disableColor),
+                inter.copyWith(fontSize: 10, color: greyColor),
             iconSize: 24,
             selectedItemColor: primaryColor,
-            unselectedItemColor: disableColor,
+            unselectedItemColor: greyColor,
             onTap: (int index) {
               context.read<PageCubit>().setPage(index);
             },
@@ -54,21 +54,21 @@ class _MainPageState extends State<MainPage> {
                   fit: BoxFit.cover,
                   color: context.read<PageCubit>().state == 0
                       ? primaryColor
-                      : disableColor,
+                      : greyColor,
                   width: 24,
                 ),
                 label: "Home",
               ),
               BottomNavigationBarItem(
                 icon: Image.asset(
-                  'assets/cart.png',
+                  'assets/package_search.png',
                   fit: BoxFit.cover,
                   color: context.read<PageCubit>().state == 1
                       ? primaryColor
-                      : disableColor,
+                      : greyColor,
                   width: 24,
                 ),
-                label: "Kasir",
+                label: "Stok Manajemen",
               ),
               BottomNavigationBarItem(
                 icon: Image.asset(
@@ -76,7 +76,7 @@ class _MainPageState extends State<MainPage> {
                   fit: BoxFit.cover,
                   color: context.read<PageCubit>().state == 2
                       ? primaryColor
-                      : disableColor,
+                      : greyColor,
                   width: 24,
                 ),
                 label: "Penjualan",
