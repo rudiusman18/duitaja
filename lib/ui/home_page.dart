@@ -64,13 +64,20 @@ class HomePage extends StatelessWidget {
           horizontal: 20,
         ),
         decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: const Offset(0, 3), // changes position of shadow
+            ),
+          ],
           borderRadius: BorderRadius.circular(6),
-          gradient: LinearGradient(
-            colors: [
-              cardColor2.withAlpha(99),
-              cardColor1,
-              cardColor2,
-            ],
+          image: const DecorationImage(
+            image: AssetImage(
+              'assets/card-background.png',
+            ),
+            fit: BoxFit.cover,
           ),
         ),
         child: Row(
@@ -335,9 +342,17 @@ class HomePage extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              generateMenuItem(
-                                title: "Kasir",
-                                image: "assets/cart.png",
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/main-page/cashier-page',
+                                  );
+                                },
+                                child: generateMenuItem(
+                                  title: "Kasir",
+                                  image: "assets/cart.png",
+                                ),
                               ),
                               generateMenuItem(
                                 title: "E-Commerce",

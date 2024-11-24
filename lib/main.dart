@@ -1,11 +1,18 @@
 import 'package:duidku/cubit/page_cubit.dart';
+import 'package:duidku/ui/cashier_page.dart';
 import 'package:duidku/ui/login_page.dart';
 import 'package:duidku/ui/main_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:page_transition/page_transition.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp, // Portrait mode
+    DeviceOrientation.portraitDown, // Upside-down portrait mode
+  ]);
   runApp(const MainApp());
 }
 
@@ -35,6 +42,11 @@ class MainApp extends StatelessWidget {
               return PageTransition(
                 child: const MainPage(),
                 type: PageTransitionType.bottomToTop,
+              );
+            case '/main-page/cashier-page':
+              return PageTransition(
+                child: const CashierPage(),
+                type: PageTransitionType.rightToLeft,
               );
             default:
               return null;

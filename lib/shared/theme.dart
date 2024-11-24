@@ -9,6 +9,7 @@ Color primaryColor = const Color(0xff460C8D);
 Color disableColor = const Color(0xff94A3B8);
 Color greyColor = const Color(0xff6B7280);
 Color greyColor600 = const Color(0xff4B5563);
+Color greyColor400 = const Color(0xffD9D9D9);
 
 Color cardColor1 = const Color(0xff6A33AD);
 Color cardColor2 = const Color(0xff26DEBD);

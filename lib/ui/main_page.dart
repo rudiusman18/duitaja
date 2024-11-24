@@ -2,9 +2,9 @@ import 'dart:ffi';
 
 import 'package:duidku/cubit/page_cubit.dart';
 import 'package:duidku/shared/theme.dart';
-import 'package:duidku/ui/main%20page/stock_page.dart';
-import 'package:duidku/ui/main%20page/home_page.dart';
-import 'package:duidku/ui/main%20page/sale_page.dart';
+import 'package:duidku/ui/stock_page.dart';
+import 'package:duidku/ui/home_page.dart';
+import 'package:duidku/ui/sale_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -57,7 +57,7 @@ class _MainPageState extends State<MainPage> {
                       : greyColor,
                   width: 24,
                 ),
-                label: "Home",
+                label: "Beranda",
               ),
               BottomNavigationBarItem(
                 icon: Image.asset(
