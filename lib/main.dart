@@ -1,3 +1,4 @@
+import 'package:duidku/cubit/cashier_cubit.dart';
 import 'package:duidku/cubit/page_cubit.dart';
 import 'package:duidku/ui/cashier_page.dart';
 import 'package:duidku/ui/login_page.dart';
@@ -25,7 +26,10 @@ class MainApp extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) => PageCubit(),
-        )
+        ),
+        BlocProvider(
+          create: (context) => IndexCashierFilterCubit(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

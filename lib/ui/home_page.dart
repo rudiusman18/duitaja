@@ -185,7 +185,7 @@ class HomePage extends StatelessWidget {
           Divider(
             height: 1,
             thickness: 1,
-            color: greyColor600,
+            color: greyColor1,
           ),
           const SizedBox(
             height: 14,
