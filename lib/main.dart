@@ -1,6 +1,7 @@
 import 'package:duidku/cubit/cashier_cubit.dart';
 import 'package:duidku/cubit/page_cubit.dart';
 import 'package:duidku/ui/cashier_page.dart';
+import 'package:duidku/ui/detail_order_page.dart';
 import 'package:duidku/ui/login_page.dart';
 import 'package:duidku/ui/main_page.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,9 @@ class MainApp extends StatelessWidget {
         BlocProvider(
           create: (context) => IndexCashierFilterCubit(),
         ),
+        BlocProvider(
+          create: (context) => ProductCartCubit(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -50,6 +54,11 @@ class MainApp extends StatelessWidget {
             case '/main-page/cashier-page':
               return PageTransition(
                 child: const CashierPage(),
+                type: PageTransitionType.rightToLeft,
+              );
+            case '/main-page/cashier-page/detail-order-page':
+              return PageTransition(
+                child: const DetailOrderPage(),
                 type: PageTransitionType.rightToLeft,
               );
             default:

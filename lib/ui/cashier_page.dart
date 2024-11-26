@@ -1,8 +1,11 @@
 import 'package:duidku/cubit/cashier_cubit.dart';
+import 'package:duidku/model/product_model.dart';
 import 'package:duidku/shared/theme.dart';
+import 'package:duidku/shared/utils.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:collection/collection.dart';
 
 class CashierPage extends StatefulWidget {
   const CashierPage({super.key});
@@ -16,6 +19,30 @@ class _CashierPageState extends State<CashierPage> {
 
   @override
   Widget build(BuildContext context) {
+    final groupedProduct = groupBy(
+        context.read<ProductCartCubit>().state, (item) => item.productId);
+
+    Map<int?, int> counts = {};
+    int totalCount = 0;
+    Map<int?, int> groupPriceSums = {};
+    int totalPrice = 0;
+    if (groupedProduct.isNotEmpty) {
+      counts = groupedProduct.map((id, group) => MapEntry(id, group.length));
+      // Sum all counts
+      totalCount = counts.values.reduce((a, b) => a + b);
+
+      // Calculate the sum of prices for each group
+      groupPriceSums = groupedProduct.map(
+        (id, group) => MapEntry(
+          id,
+          group.fold(0, (sum, item) => sum + (item.price ?? 0)),
+        ),
+      );
+
+      // Calculate the total sum of prices across all items
+      totalPrice = groupPriceSums.values.reduce((a, b) => a + b);
+    }
+
     Widget searchSetup() {
       return Container(
         margin: const EdgeInsets.symmetric(
@@ -239,14 +266,18 @@ class _CashierPageState extends State<CashierPage> {
 
     Widget orderListSetup() {
       return ExpandablePanel(
+          controller: ExpandableController(initialExpanded: true),
           theme: const ExpandableThemeData(
             headerAlignment: ExpandablePanelHeaderAlignment
                 .center, // Ensures alignment consistency
             tapBodyToExpand: true,
             tapBodyToCollapse: true,
-            hasIcon: false, // Disable default arrow icon
+            hasIcon: true, // Disable default arrow icon
           ),
           header: Container(
+            padding: const EdgeInsets.only(
+              top: 15,
+            ),
             margin: const EdgeInsets.only(
               bottom: 18,
               left: 20,
@@ -274,10 +305,10 @@ class _CashierPageState extends State<CashierPage> {
                     fontWeight: light,
                   ),
                 ),
-                const Icon(
-                  Icons.expand_more, // Icon for expand/collapse
-                  size: 24,
-                ),
+                // const Icon(
+                //   Icons.expand_more, // Icon for expand/collapse
+                //   size: 24,
+                // ),
               ],
             ),
           ),
@@ -309,13 +340,148 @@ class _CashierPageState extends State<CashierPage> {
           ));
     }
 
-    Widget itemMenuListSetup({
-      required String productURL,
-      required String productName,
-      required String stock,
-      required String description,
-      required String price,
-    }) {
+    // Menampilkan bottom dialog dari menu yang dipilih
+    // ignore: no_leading_underscores_for_local_identifiers
+    void _showBottomSheet(BuildContext context,
+        {required ProductModel product}) {
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        isScrollControlled:
+            true, // To make the sheet adjustable for larger content
+        builder: (context) {
+          return Column(
+            mainAxisSize: MainAxisSize.min, // Adjusts height to fit content
+            children: [
+              const SizedBox(
+                height: 12,
+              ),
+              Container(
+                width: 50,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 13),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 23,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 140,
+                      height: 140,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        image: DecorationImage(
+                          image: NetworkImage(
+                            product.productURL ?? "",
+                          ),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 18,
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product.productName ?? "",
+                            style: inter.copyWith(
+                              fontSize: 15,
+                              fontWeight: semiBold,
+                            ),
+                          ),
+                          Text(
+                            "Stok: ${product.stock ?? 0}",
+                            style: inter.copyWith(
+                              fontSize: 12,
+                              fontWeight: extraLight,
+                            ),
+                          ),
+                          Text(
+                            product.description ?? "",
+                            style: inter.copyWith(
+                              fontSize: 12,
+                              fontWeight: extraLight,
+                            ),
+                            textAlign: TextAlign.justify,
+                          ),
+                          const SizedBox(
+                            height: 25,
+                          ),
+                          Text(
+                            formatCurrency(
+                              product.price ?? 0,
+                            ),
+                            style: inter.copyWith(
+                              fontSize: 15,
+                              fontWeight: semiBold,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 24,
+                          ),
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                var products =
+                                    context.read<ProductCartCubit>().state;
+                                products.add(product);
+                                context
+                                    .read<ProductCartCubit>()
+                                    .addProduct(products);
+                                ScaffoldMessenger.of(context)
+                                    .hideCurrentSnackBar();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    backgroundColor: primaryColor,
+                                    content: Text(
+                                      "Berhasil Menambahkan Produk",
+                                      style: inter,
+                                    ),
+                                  ),
+                                );
+                                setState(() {});
+                              },
+                              child: Text(
+                                "Tambah Pesanan",
+                                style: inter.copyWith(
+                                  fontWeight: medium,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 18,
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    Widget itemMenuListSetup({required ProductModel product}) {
       return Column(
         children: [
           Divider(
@@ -340,7 +506,7 @@ class _CashierPageState extends State<CashierPage> {
                     borderRadius: BorderRadius.circular(6),
                     image: DecorationImage(
                       image: NetworkImage(
-                        productURL,
+                        product.productURL ?? "",
                       ),
                       fit: BoxFit.cover,
                     ),
@@ -354,21 +520,21 @@ class _CashierPageState extends State<CashierPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        productName,
+                        product.productName ?? "",
                         style: inter.copyWith(
                           fontWeight: semiBold,
                           fontSize: 15,
                         ),
                       ),
                       Text(
-                        "Stok : $stock",
+                        "Stok : ${product.stock ?? 0}",
                         style: inter.copyWith(
                           fontSize: 12,
                           fontWeight: extraLight,
                         ),
                       ),
                       Text(
-                        description,
+                        product.description ?? "-",
                         style: inter.copyWith(
                           fontSize: 12,
                           fontWeight: extraLight,
@@ -382,7 +548,7 @@ class _CashierPageState extends State<CashierPage> {
                 Column(
                   children: [
                     Text(
-                      price,
+                      formatCurrency(product.price ?? 0),
                       style: inter.copyWith(
                         fontSize: 15,
                         fontWeight: semiBold,
@@ -392,7 +558,9 @@ class _CashierPageState extends State<CashierPage> {
                       height: 6,
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        _showBottomSheet(context, product: product);
+                      },
                       child: Container(
                         padding: const EdgeInsets.all(
                           5,
@@ -442,56 +610,128 @@ class _CashierPageState extends State<CashierPage> {
             ),
             centerTitle: true,
           ),
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          body: Stack(
             children: [
-              const SizedBox(
-                height: 24,
-              ),
-              searchSetup(),
-              const SizedBox(
-                height: 36,
-              ),
-              filterSetup(),
-              const SizedBox(
-                height: 24,
-              ),
-              orderListSetup(),
-              const SizedBox(
-                height: 24,
-              ),
-              Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                child: Text(
-                  "Menu",
-                  textAlign: TextAlign.center, // Center align the text
-                  style: inter.copyWith(
-                    fontSize: 16,
-                    fontWeight: medium,
+              // Content
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    height: 24,
                   ),
-                ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Expanded(
-                child: ListView(
-                  children: [
-                    for (var i = 0; i < 20; i++)
-                      itemMenuListSetup(
-                        productURL:
-                            "https://i.pinimg.com/originals/73/5a/31/735a3179ff4baf792989573c363b2af9.jpg",
-                        productName: "Mie Goreng",
-                        price: "Rp. 123.000",
-                        description:
-                            "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet",
-                        stock: "5",
+                  searchSetup(),
+                  const SizedBox(
+                    height: 36,
+                  ),
+                  filterSetup(),
+                  const SizedBox(
+                    height: 24,
+                  ),
+                  orderListSetup(),
+                  const SizedBox(
+                    height: 24,
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                    ),
+                    child: Text(
+                      "Menu",
+                      textAlign: TextAlign.center, // Center align the text
+                      style: inter.copyWith(
+                        fontSize: 16,
+                        fontWeight: medium,
                       ),
-                  ],
-                ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        for (var i = 0; i < 20; i++)
+                          itemMenuListSetup(
+                            product: ProductModel(
+                              productId: i,
+                              productURL:
+                                  "https://i.pinimg.com/originals/73/5a/31/735a3179ff4baf792989573c363b2af9.jpg",
+                              productName: "Mie Goreng $i",
+                              stock: 5,
+                              description:
+                                  "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet",
+                              price: 123000,
+                            ),
+                          ),
+                        groupedProduct.isNotEmpty
+                            ? const SizedBox(
+                                height: 100,
+                              )
+                            : const SizedBox(),
+                      ],
+                    ),
+                  ),
+                ],
               ),
+
+              // Floating card
+              context.read<ProductCartCubit>().state.isEmpty
+                  ? const SizedBox()
+                  : Align(
+                      alignment: Alignment.bottomCenter,
+                      child: GestureDetector(
+                        onTap: () {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          Navigator.pushNamed(context,
+                                  "/main-page/cashier-page/detail-order-page")
+                              .then((_) => setState(() {}));
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 36,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 15,
+                            horizontal: 33,
+                          ),
+                          decoration: BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Row(
+                            children: [
+                              Image.asset(
+                                "assets/subtract.png",
+                                width: 30,
+                                height: 30,
+                              ),
+                              const SizedBox(
+                                width: 16,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  "$totalCount Pesanan",
+                                  style: inter.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: medium,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                formatCurrency(totalPrice),
+                                style: inter.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: semiBold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
             ],
           ),
         );
