@@ -16,6 +16,8 @@ class CashierPage extends StatefulWidget {
 
 class _CashierPageState extends State<CashierPage> {
   TextEditingController menuSearchTextField = TextEditingController(text: "");
+  ExpandableController expandableController =
+      ExpandableController(initialExpanded: true);
 
   @override
   Widget build(BuildContext context) {
@@ -266,7 +268,7 @@ class _CashierPageState extends State<CashierPage> {
 
     Widget orderListSetup() {
       return ExpandablePanel(
-          controller: ExpandableController(initialExpanded: true),
+          controller: expandableController,
           theme: const ExpandableThemeData(
             headerAlignment: ExpandablePanelHeaderAlignment
                 .center, // Ensures alignment consistency
@@ -305,10 +307,6 @@ class _CashierPageState extends State<CashierPage> {
                     fontWeight: light,
                   ),
                 ),
-                // const Icon(
-                //   Icons.expand_more, // Icon for expand/collapse
-                //   size: 24,
-                // ),
               ],
             ),
           ),
@@ -419,14 +417,36 @@ class _CashierPageState extends State<CashierPage> {
                           const SizedBox(
                             height: 25,
                           ),
-                          Text(
-                            formatCurrency(
-                              product.price ?? 0,
-                            ),
-                            style: inter.copyWith(
-                              fontSize: 15,
-                              fontWeight: semiBold,
-                            ),
+                          Row(
+                            children: [
+                              Text(
+                                formatCurrency(
+                                  product.discountPrice == 0
+                                      ? product.price ?? 0
+                                      : product.discountPrice ?? 0,
+                                ),
+                                style: inter.copyWith(
+                                  fontSize: 15,
+                                  fontWeight: semiBold,
+                                ),
+                              ),
+                              if (product.discountPrice != 0) ...{
+                                const SizedBox(
+                                  width: 7,
+                                ),
+                                Text(
+                                  formatCurrency(
+                                    product.price ?? 0,
+                                  ),
+                                  style: inter.copyWith(
+                                    fontSize: 10,
+                                    fontWeight: medium,
+                                    color: greyColor2,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                              },
+                            ],
                           ),
                           const SizedBox(
                             height: 24,
@@ -445,17 +465,6 @@ class _CashierPageState extends State<CashierPage> {
                                 context
                                     .read<ProductCartCubit>()
                                     .addProduct(products);
-                                ScaffoldMessenger.of(context)
-                                    .hideCurrentSnackBar();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    backgroundColor: primaryColor,
-                                    content: Text(
-                                      "Berhasil Menambahkan Produk",
-                                      style: inter,
-                                    ),
-                                  ),
-                                );
                                 setState(() {});
                               },
                               child: Text(
@@ -546,14 +555,33 @@ class _CashierPageState extends State<CashierPage> {
                   ),
                 ),
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      formatCurrency(product.price ?? 0),
+                      formatCurrency(
+                        product.discountPrice != 0
+                            ? product.discountPrice ?? 0
+                            : product.price ?? 0,
+                      ),
                       style: inter.copyWith(
                         fontSize: 15,
                         fontWeight: semiBold,
                       ),
+                      textAlign: TextAlign.end,
                     ),
+                    product.discountPrice != 0
+                        ? Text(
+                            formatCurrency(
+                              product.price ?? 0,
+                            ),
+                            style: inter.copyWith(
+                              fontWeight: medium,
+                              fontSize: 10,
+                              color: greyColor2,
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          )
+                        : const SizedBox(),
                     const SizedBox(
                       height: 6,
                     ),
@@ -661,6 +689,7 @@ class _CashierPageState extends State<CashierPage> {
                               description:
                                   "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet",
                               price: 123000,
+                              discountPrice: i % 2 == 0 ? 8000 : 0,
                             ),
                           ),
                         groupedProduct.isNotEmpty
@@ -681,7 +710,6 @@ class _CashierPageState extends State<CashierPage> {
                       alignment: Alignment.bottomCenter,
                       child: GestureDetector(
                         onTap: () {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           Navigator.pushNamed(context,
                                   "/main-page/cashier-page/detail-order-page")
                               .then((_) => setState(() {}));

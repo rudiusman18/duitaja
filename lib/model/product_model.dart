@@ -5,6 +5,7 @@ class ProductModel {
   int? stock;
   String? description;
   int? price;
+  int? discountPrice;
 
   ProductModel({
     required this.productId,
@@ -13,5 +14,6 @@ class ProductModel {
     required this.stock,
     required this.description,
     required this.price,
+    required this.discountPrice,
   });
 }

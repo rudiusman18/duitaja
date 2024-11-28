@@ -36,7 +36,13 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
       groupPriceSums = groupedProduct.map(
         (id, group) => MapEntry(
           id,
-          group.fold(0, (sum, item) => sum + (item.price ?? 0)),
+          group.fold(
+              0,
+              (sum, item) =>
+                  sum +
+                  (item.discountPrice != 0
+                      ? item.discountPrice ?? 0
+                      : item.price ?? 0)),
         ),
       );
 
@@ -161,11 +167,27 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                           fontSize: 15,
                         ),
                       ),
+                      if (product.discountPrice != 0) ...{
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          formatCurrency(product.price ?? 0),
+                          style: inter.copyWith(
+                            fontWeight: extraLight,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      },
                       const SizedBox(
                         height: 5,
                       ),
                       Text(
-                        formatCurrency(product.price ?? 0),
+                        formatCurrency(
+                          product.discountPrice != 0
+                              ? product.discountPrice ?? 0
+                              : product.price ?? 0,
+                        ),
                         style: inter.copyWith(
                           fontSize: 15,
                           fontWeight: semiBold,
@@ -307,7 +329,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                 ),
                 Expanded(
                   child: Text(
-                    formatCurrency(totalPrice - 7000),
+                    formatCurrency(totalPrice + 7000),
                     style: inter,
                     textAlign: TextAlign.end,
                   ),
@@ -366,6 +388,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                           stock: 0,
                           description: '',
                           price: 0,
+                          discountPrice: 0,
                         ),
                   ),
                 },
@@ -440,7 +463,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                         ),
                       ),
                       Text(
-                        formatCurrency(totalPrice - 7000),
+                        formatCurrency(totalPrice + 7000),
                         style: inter,
                       ),
                     ],
