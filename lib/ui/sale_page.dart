@@ -72,34 +72,176 @@ class _SalePageState extends State<SalePage> {
       );
     }
 
-    Widget generateFilterItem({required String title}) {
-      return Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: disableColor,
+    Widget generateFilterContentItem({
+      required String name,
+    }) {
+      return Column(
+        children: [
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: greyColor1,
           ),
-          borderRadius: BorderRadius.circular(
-            8,
+          const SizedBox(
+            height: 14,
           ),
-        ),
-        child: Row(
-          children: [
-            Text(
-              title,
-              style: inter.copyWith(
-                color: primaryColor,
-                fontWeight: medium,
-              ),
+          Container(
+            margin: const EdgeInsets.symmetric(
+              horizontal: 41,
             ),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    name,
+                  ),
+                ),
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: greyColor1,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 14,
+          ),
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: greyColor1,
+          ),
+        ],
+      );
+    }
+
+// ignore: no_leading_underscores_for_local_identifiers
+    void _showBottomSheet(BuildContext context, {required String title}) {
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        isScrollControlled:
+            true, // To make the sheet adjustable for larger content
+        builder: (context) {
+          return SizedBox(
+            height: 472,
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // Adjusts height to fit content
+              children: [
+                const SizedBox(
+                  height: 12,
+                ),
+                Container(
+                  width: 50,
+                  height: 5,
+                  margin: const EdgeInsets.only(bottom: 13),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 11,
+                  ),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Icon(
+                          Icons.close,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 11,
+                      ),
+                      Text(
+                        "Pilih $title",
+                        style: inter.copyWith(
+                          fontSize: 20,
+                          fontWeight: semiBold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Expanded(
+                  child: ListView(
+                    children: [
+                      if (title.toLowerCase() == "penjualan") ...{
+                        generateFilterContentItem(name: "Semua Penjualan"),
+                        generateFilterContentItem(name: "Kasir"),
+                        generateFilterContentItem(name: "Tokopedia"),
+                        generateFilterContentItem(name: "TiktokShop"),
+                        generateFilterContentItem(name: "Shopee"),
+                        generateFilterContentItem(name: "GoFood"),
+                      } else if (title.toLowerCase() == "status") ...{
+                        generateFilterContentItem(name: "Semua Status"),
+                        generateFilterContentItem(name: "Lunas"),
+                        generateFilterContentItem(name: "Belum Lunas"),
+                      } else ...{
+                        generateFilterContentItem(name: "Semua Tanggal"),
+                        generateFilterContentItem(name: "30 Hari Terakhir"),
+                        generateFilterContentItem(name: "90 Hari Terakhir"),
+                        generateFilterContentItem(name: "Atur Tanggal"),
+                      },
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
+    Widget generateFilterItem({required String title}) {
+      return GestureDetector(
+        onTap: () {
+          _showBottomSheet(
+            context,
+            title: title,
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+            border: Border.all(
               color: disableColor,
-            )
-          ],
+            ),
+            borderRadius: BorderRadius.circular(
+              8,
+            ),
+          ),
+          child: Row(
+            children: [
+              Text(
+                title,
+                style: inter.copyWith(
+                  color: primaryColor,
+                  fontWeight: medium,
+                ),
+              ),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: disableColor,
+              )
+            ],
+          ),
         ),
       );
     }
@@ -216,157 +358,6 @@ class _SalePageState extends State<SalePage> {
       );
     }
 
-// ignore: no_leading_underscores_for_local_identifiers
-    void _showBottomSheet(BuildContext context,
-        {required ProductModel product}) {
-      showModalBottomSheet(
-        context: context,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        isScrollControlled:
-            true, // To make the sheet adjustable for larger content
-        builder: (context) {
-          return Column(
-            mainAxisSize: MainAxisSize.min, // Adjusts height to fit content
-            children: [
-              const SizedBox(
-                height: 12,
-              ),
-              Container(
-                width: 50,
-                height: 5,
-                margin: const EdgeInsets.only(bottom: 13),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 23,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 140,
-                      height: 140,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        image: DecorationImage(
-                          image: NetworkImage(
-                            product.productURL ?? "",
-                          ),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 18,
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            product.productName ?? "",
-                            style: inter.copyWith(
-                              fontSize: 15,
-                              fontWeight: semiBold,
-                            ),
-                          ),
-                          Text(
-                            "Stok: ${product.stock ?? 0}",
-                            style: inter.copyWith(
-                              fontSize: 12,
-                              fontWeight: extraLight,
-                            ),
-                          ),
-                          Text(
-                            product.description ?? "",
-                            style: inter.copyWith(
-                              fontSize: 12,
-                              fontWeight: extraLight,
-                            ),
-                            textAlign: TextAlign.justify,
-                          ),
-                          const SizedBox(
-                            height: 25,
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                formatCurrency(
-                                  product.discountPrice == 0
-                                      ? product.price ?? 0
-                                      : product.discountPrice ?? 0,
-                                ),
-                                style: inter.copyWith(
-                                  fontSize: 15,
-                                  fontWeight: semiBold,
-                                ),
-                              ),
-                              if (product.discountPrice != 0) ...{
-                                const SizedBox(
-                                  width: 7,
-                                ),
-                                Text(
-                                  formatCurrency(
-                                    product.price ?? 0,
-                                  ),
-                                  style: inter.copyWith(
-                                    fontSize: 10,
-                                    fontWeight: medium,
-                                    color: greyColor2,
-                                    decoration: TextDecoration.lineThrough,
-                                  ),
-                                ),
-                              },
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 24,
-                          ),
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: primaryColor,
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                                var products =
-                                    context.read<ProductCartCubit>().state;
-                                products.add(product);
-                                context
-                                    .read<ProductCartCubit>()
-                                    .addProduct(products);
-                                setState(() {});
-                              },
-                              child: Text(
-                                "Tambah Pesanan",
-                                style: inter.copyWith(
-                                  fontWeight: medium,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 18,
-              ),
-            ],
-          );
-        },
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
@@ -380,64 +371,66 @@ class _SalePageState extends State<SalePage> {
         leading: const SizedBox(),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          const SizedBox(
-            height: 24,
-          ),
-          searchSetup(),
-          const SizedBox(
-            height: 24,
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                child: Row(
-                  children: [
-                    generateFilterItem(
-                      title: "Penjualan",
-                    ),
-                    const SizedBox(
-                      width: 24,
-                    ),
-                    generateFilterItem(
-                      title: "Status",
-                    ),
-                    const SizedBox(
-                      width: 24,
-                    ),
-                    generateFilterItem(
-                      title: "Tanggal",
-                    ),
-                  ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 24,
+            ),
+            searchSetup(),
+            const SizedBox(
+              height: 24,
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                  ),
+                  child: Row(
+                    children: [
+                      generateFilterItem(
+                        title: "Penjualan",
+                      ),
+                      const SizedBox(
+                        width: 24,
+                      ),
+                      generateFilterItem(
+                        title: "Status",
+                      ),
+                      const SizedBox(
+                        width: 24,
+                      ),
+                      generateFilterItem(
+                        title: "Tanggal",
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 24,
-          ),
-          Expanded(
-            child: ListView(
-              children: [
-                for (var i = 0; i < 20; i++)
-                  generateSalesHistoryItem(
-                    buyerName: "Imam",
-                    orderAmount: "4",
-                    date: "15 November 2024",
-                    time: "15:28PM",
-                    status: "Lunas",
-                    price: "Rp. 123.000",
-                  ),
-              ],
+            const SizedBox(
+              height: 24,
             ),
-          ),
-        ],
+            Expanded(
+              child: ListView(
+                children: [
+                  for (var i = 0; i < 20; i++)
+                    generateSalesHistoryItem(
+                      buyerName: "Imam",
+                      orderAmount: "4",
+                      date: "15 November 2024",
+                      time: "15:28PM",
+                      status: "Lunas",
+                      price: "Rp. 123.000",
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
