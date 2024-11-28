@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:duidku/cubit/cashier_cubit.dart';
 import 'package:duidku/model/product_model.dart';
+import 'package:duidku/shared/modal_alert.dart';
 import 'package:duidku/shared/theme.dart';
 import 'package:duidku/shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -211,13 +212,37 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                       GestureDetector(
                         onTap: () {
                           var products = context.read<ProductCartCubit>().state;
-                          products.remove(product);
+                          if (products.length < 2) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => ModalAlert(
+                                title: "",
+                                message:
+                                    "Apakah anda ingin membatalkan pesanan?",
+                                completion: () {
+                                  products.remove(product);
 
-                          context.read<ProductCartCubit>().addProduct(products);
-                          if (products.isEmpty) {
-                            Navigator.pop(context);
+                                  context
+                                      .read<ProductCartCubit>()
+                                      .addProduct(products);
+                                  if (products.isEmpty) {
+                                    Navigator.pop(context);
+                                  }
+                                  setState(() {});
+                                },
+                              ),
+                            );
+                          } else {
+                            products.remove(product);
+
+                            context
+                                .read<ProductCartCubit>()
+                                .addProduct(products);
+                            if (products.isEmpty) {
+                              Navigator.pop(context);
+                            }
+                            setState(() {});
                           }
-                          setState(() {});
                         },
                         child: const Icon(
                           Icons.remove,
@@ -491,9 +516,17 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) => ModalAlert(
+                              title: "",
+                              message: "Apakah anda telah menerima pembayaran?",
+                              completion: () {},
+                            ));
+                  },
                   child: Text(
-                    "bayar Sekarang",
+                    "Bayar Sekarang",
                     style: inter,
                   ),
                 ),

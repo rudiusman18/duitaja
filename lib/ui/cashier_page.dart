@@ -615,155 +615,151 @@ class _CashierPageState extends State<CashierPage> {
       );
     }
 
-    return BlocBuilder<IndexCashierFilterCubit, int>(
-      builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: primaryColor,
-            title: Text(
-              "Kasir",
-              style: inter.copyWith(
-                fontWeight: medium,
-                fontSize: 20,
-              ),
-            ),
-            leading: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: const Icon(
-                Icons.chevron_left,
-                size: 24,
-              ),
-            ),
-            centerTitle: true,
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: primaryColor,
+        title: Text(
+          "Kasir",
+          style: inter.copyWith(
+            fontWeight: medium,
+            fontSize: 20,
           ),
-          body: Stack(
+        ),
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.chevron_left,
+            size: 24,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: Stack(
+        children: [
+          // Content
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Content
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(
-                    height: 24,
-                  ),
-                  searchSetup(),
-                  const SizedBox(
-                    height: 36,
-                  ),
-                  filterSetup(),
-                  const SizedBox(
-                    height: 24,
-                  ),
-                  orderListSetup(),
-                  const SizedBox(
-                    height: 24,
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                    ),
-                    child: Text(
-                      "Menu",
-                      textAlign: TextAlign.center, // Center align the text
-                      style: inter.copyWith(
-                        fontSize: 16,
-                        fontWeight: medium,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        for (var i = 0; i < 20; i++)
-                          itemMenuListSetup(
-                            product: ProductModel(
-                              productId: i,
-                              productURL:
-                                  "https://i.pinimg.com/originals/73/5a/31/735a3179ff4baf792989573c363b2af9.jpg",
-                              productName: "Mie Goreng $i",
-                              stock: 5,
-                              description:
-                                  "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet",
-                              price: 123000,
-                              discountPrice: i % 2 == 0 ? 8000 : 0,
-                            ),
-                          ),
-                        groupedProduct.isNotEmpty
-                            ? const SizedBox(
-                                height: 100,
-                              )
-                            : const SizedBox(),
-                      ],
-                    ),
-                  ),
-                ],
+              const SizedBox(
+                height: 24,
               ),
-
-              // Floating card
-              context.read<ProductCartCubit>().state.isEmpty
-                  ? const SizedBox()
-                  : Align(
-                      alignment: Alignment.bottomCenter,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context,
-                                  "/main-page/cashier-page/detail-order-page")
-                              .then((_) => setState(() {}));
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 36,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 15,
-                            horizontal: 33,
-                          ),
-                          decoration: BoxDecoration(
-                            color: primaryColor,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Row(
-                            children: [
-                              Image.asset(
-                                "assets/subtract.png",
-                                width: 30,
-                                height: 30,
-                              ),
-                              const SizedBox(
-                                width: 16,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  "$totalCount Pesanan",
-                                  style: inter.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: medium,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                formatCurrency(totalPrice),
-                                style: inter.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: semiBold,
-                                  fontSize: 15,
-                                ),
-                              ),
-                            ],
-                          ),
+              searchSetup(),
+              const SizedBox(
+                height: 36,
+              ),
+              filterSetup(),
+              const SizedBox(
+                height: 24,
+              ),
+              orderListSetup(),
+              const SizedBox(
+                height: 24,
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                ),
+                child: Text(
+                  "Menu",
+                  textAlign: TextAlign.center, // Center align the text
+                  style: inter.copyWith(
+                    fontSize: 16,
+                    fontWeight: medium,
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              Expanded(
+                child: ListView(
+                  children: [
+                    for (var i = 0; i < 20; i++)
+                      itemMenuListSetup(
+                        product: ProductModel(
+                          productId: i,
+                          productURL:
+                              "https://i.pinimg.com/originals/73/5a/31/735a3179ff4baf792989573c363b2af9.jpg",
+                          productName: "Mie Goreng $i",
+                          stock: 5,
+                          description:
+                              "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet",
+                          price: 123000,
+                          discountPrice: i % 2 == 0 ? 8000 : 0,
                         ),
                       ),
-                    ),
+                    groupedProduct.isNotEmpty
+                        ? const SizedBox(
+                            height: 100,
+                          )
+                        : const SizedBox(),
+                  ],
+                ),
+              ),
             ],
           ),
-        );
-      },
+
+          // Floating card
+          context.read<ProductCartCubit>().state.isEmpty
+              ? const SizedBox()
+              : Align(
+                  alignment: Alignment.bottomCenter,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context,
+                              "/main-page/cashier-page/detail-order-page")
+                          .then((_) => setState(() {}));
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 36,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 15,
+                        horizontal: 33,
+                      ),
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            "assets/subtract.png",
+                            width: 30,
+                            height: 30,
+                          ),
+                          const SizedBox(
+                            width: 16,
+                          ),
+                          Expanded(
+                            child: Text(
+                              "$totalCount Pesanan",
+                              style: inter.copyWith(
+                                color: Colors.white,
+                                fontWeight: medium,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            formatCurrency(totalPrice),
+                            style: inter.copyWith(
+                              color: Colors.white,
+                              fontWeight: semiBold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+        ],
+      ),
     );
   }
 }
