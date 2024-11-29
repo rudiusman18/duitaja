@@ -39,7 +39,7 @@ class MainApp extends StatelessWidget {
           create: (context) => FilterCubit(),
         ),
         BlocProvider(
-          create: (context) => previousPageCubit(),
+          create: (context) => PreviousPageCubit(),
         ),
       ],
       child: MaterialApp(

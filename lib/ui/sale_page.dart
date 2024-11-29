@@ -116,6 +116,9 @@ class _SalePageState extends State<SalePage> {
                                 ?.contains(name) ??
                             false) {
                           filterList[groupName]!.remove(name);
+                          if (filterList[groupName]!.isEmpty) {
+                            filterList.remove(groupName);
+                          }
                         } else {
                           filterList.putIfAbsent(groupName, () => []).add(name);
                         }
@@ -304,7 +307,7 @@ class _SalePageState extends State<SalePage> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      context.read<previousPageCubit>().setPage(2);
+                      context.read<PreviousPageCubit>().setPage(2);
                       context.read<PageCubit>().setPage(2);
                       Navigator.pushNamedAndRemoveUntil(
                           context, '/main-page', (route) => false);
@@ -516,6 +519,34 @@ class _SalePageState extends State<SalePage> {
                   ),
                   child: Row(
                     children: [
+                      if (context.read<FilterCubit>().state.isNotEmpty) ...{
+                        GestureDetector(
+                          onTap: () {
+                            var filterList = context.read<FilterCubit>().state;
+                            filterList.clear();
+                            context.read<FilterCubit>().setFilter(filterList);
+                            setState(() {});
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(
+                              6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.circular(
+                                8,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 24,
+                        ),
+                      },
                       generateFilterItem(
                         groupName: "Penjualan",
                         title: (context

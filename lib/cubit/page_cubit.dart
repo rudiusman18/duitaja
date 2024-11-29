@@ -8,8 +8,8 @@ class PageCubit extends Cubit<int> {
   }
 }
 
-class previousPageCubit extends Cubit<int> {
-  previousPageCubit() : super(0);
+class PreviousPageCubit extends Cubit<int> {
+  PreviousPageCubit() : super(0);
   void setPage(int pageNumber) {
     emit(pageNumber);
   }

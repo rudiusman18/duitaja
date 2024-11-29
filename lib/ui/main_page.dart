@@ -27,7 +27,7 @@ class _MainPageState extends State<MainPage> {
         case 2:
           return SalePage(
             clearFilterCubit: context.read<PageCubit>().state !=
-                    context.read<previousPageCubit>().state
+                    context.read<PreviousPageCubit>().state
                 ? true
                 : false,
           );
@@ -50,7 +50,7 @@ class _MainPageState extends State<MainPage> {
             unselectedItemColor: greyColor,
             onTap: (int index) {
               context
-                  .read<previousPageCubit>()
+                  .read<PreviousPageCubit>()
                   .setPage(context.read<PageCubit>().state);
               context.read<PageCubit>().setPage(index);
             },
