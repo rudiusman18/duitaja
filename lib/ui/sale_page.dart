@@ -1,11 +1,13 @@
-import 'package:duidku/cubit/cashier_cubit.dart';
+import 'package:duidku/cubit/filter_cubit.dart';
+import 'package:duidku/cubit/page_cubit.dart';
 import 'package:duidku/shared/theme.dart';
-import 'package:duidku/shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+// ignore: must_be_immutable
 class SalePage extends StatefulWidget {
-  const SalePage({super.key});
+  bool clearFilterCubit = false;
+  SalePage({super.key, required this.clearFilterCubit});
 
   @override
   State<SalePage> createState() => _SalePageState();
@@ -16,6 +18,10 @@ class _SalePageState extends State<SalePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.clearFilterCubit == true) {
+      final _ = context.read<FilterCubit>().setFilter({});
+    }
+
     Widget searchSetup() {
       return Container(
         margin: const EdgeInsets.symmetric(
@@ -73,49 +79,89 @@ class _SalePageState extends State<SalePage> {
     }
 
     Widget generateFilterContentItem({
+      required BuildContext context,
+      required String groupName,
       required String name,
     }) {
-      return Column(
-        children: [
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: greyColor1,
-          ),
-          const SizedBox(
-            height: 14,
-          ),
-          Container(
-            margin: const EdgeInsets.symmetric(
-              horizontal: 41,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    name,
-                  ),
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Column(
+            children: [
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: greyColor1,
+              ),
+              const SizedBox(
+                height: 14,
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 41,
                 ),
-                Container(
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    color: greyColor1,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        name,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        var filterList = context.read<FilterCubit>().state;
+
+                        if (context
+                                .read<FilterCubit>()
+                                .state[groupName]
+                                ?.contains(name) ??
+                            false) {
+                          filterList[groupName]!.remove(name);
+                        } else {
+                          filterList.putIfAbsent(groupName, () => []).add(name);
+                        }
+
+                        context.read<FilterCubit>().setFilter(filterList);
+                        setState(() {});
+                      },
+                      child: Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: (context
+                                      .read<FilterCubit>()
+                                      .state[groupName]
+                                      ?.contains(name) ??
+                                  false)
+                              ? primaryColor
+                              : greyColor1,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: (context
+                                    .read<FilterCubit>()
+                                    .state[groupName]
+                                    ?.contains(name) ??
+                                false)
+                            ? const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                              )
+                            : const SizedBox(),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 14,
-          ),
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: greyColor1,
-          ),
-        ],
+              ),
+              const SizedBox(
+                height: 14,
+              ),
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: greyColor1,
+              ),
+            ],
+          );
+        },
       );
     }
 
@@ -180,24 +226,102 @@ class _SalePageState extends State<SalePage> {
                   child: ListView(
                     children: [
                       if (title.toLowerCase() == "penjualan") ...{
-                        generateFilterContentItem(name: "Semua Penjualan"),
-                        generateFilterContentItem(name: "Kasir"),
-                        generateFilterContentItem(name: "Tokopedia"),
-                        generateFilterContentItem(name: "TiktokShop"),
-                        generateFilterContentItem(name: "Shopee"),
-                        generateFilterContentItem(name: "GoFood"),
+                        generateFilterContentItem(
+                          groupName: title,
+                          name: "Semua Penjualan",
+                          context: context,
+                        ),
+                        generateFilterContentItem(
+                          groupName: title,
+                          name: "Kasir",
+                          context: context,
+                        ),
+                        generateFilterContentItem(
+                          groupName: title,
+                          name: "Tokopedia",
+                          context: context,
+                        ),
+                        generateFilterContentItem(
+                          groupName: title,
+                          name: "TiktokShop",
+                          context: context,
+                        ),
+                        generateFilterContentItem(
+                          groupName: title,
+                          name: "Shopee",
+                          context: context,
+                        ),
+                        generateFilterContentItem(
+                          groupName: title,
+                          name: "GoFood",
+                          context: context,
+                        ),
                       } else if (title.toLowerCase() == "status") ...{
-                        generateFilterContentItem(name: "Semua Status"),
-                        generateFilterContentItem(name: "Lunas"),
-                        generateFilterContentItem(name: "Belum Lunas"),
+                        generateFilterContentItem(
+                          groupName: title,
+                          name: "Semua Status",
+                          context: context,
+                        ),
+                        generateFilterContentItem(
+                          groupName: title,
+                          name: "Lunas",
+                          context: context,
+                        ),
+                        generateFilterContentItem(
+                          groupName: title,
+                          name: "Belum Lunas",
+                          context: context,
+                        ),
                       } else ...{
-                        generateFilterContentItem(name: "Semua Tanggal"),
-                        generateFilterContentItem(name: "30 Hari Terakhir"),
-                        generateFilterContentItem(name: "90 Hari Terakhir"),
-                        generateFilterContentItem(name: "Atur Tanggal"),
+                        generateFilterContentItem(
+                          groupName: title,
+                          name: "Semua Tanggal",
+                          context: context,
+                        ),
+                        generateFilterContentItem(
+                          groupName: title,
+                          name: "30 Hari Terakhir",
+                          context: context,
+                        ),
+                        generateFilterContentItem(
+                          groupName: title,
+                          name: "90 Hari Terakhir",
+                          context: context,
+                        ),
+                        generateFilterContentItem(
+                          groupName: title,
+                          name: "Atur Tanggal",
+                          context: context,
+                        ),
                       },
                     ],
                   ),
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                  ),
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      context.read<previousPageCubit>().setPage(2);
+                      context.read<PageCubit>().setPage(2);
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, '/main-page', (route) => false);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                    ),
+                    child: Text(
+                      "Terapkan",
+                      style: inter.copyWith(
+                        fontWeight: medium,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
                 ),
               ],
             ),
@@ -206,12 +330,13 @@ class _SalePageState extends State<SalePage> {
       );
     }
 
-    Widget generateFilterItem({required String title}) {
+    Widget generateFilterItem(
+        {required String groupName, required String title}) {
       return GestureDetector(
         onTap: () {
           _showBottomSheet(
             context,
-            title: title,
+            title: groupName,
           );
         },
         child: Container(
@@ -392,19 +517,46 @@ class _SalePageState extends State<SalePage> {
                   child: Row(
                     children: [
                       generateFilterItem(
-                        title: "Penjualan",
+                        groupName: "Penjualan",
+                        title: (context
+                                    .read<FilterCubit>()
+                                    .state["Penjualan"]
+                                    ?.isEmpty ??
+                                true)
+                            ? "Penjualan"
+                            : "${context.read<FilterCubit>().state["Penjualan"]}"
+                                .replaceAll("[", "")
+                                .replaceAll("]", ""),
                       ),
                       const SizedBox(
                         width: 24,
                       ),
                       generateFilterItem(
-                        title: "Status",
+                        groupName: "Status",
+                        title: (context
+                                    .read<FilterCubit>()
+                                    .state["Status"]
+                                    ?.isEmpty ??
+                                true)
+                            ? "Status"
+                            : "${context.read<FilterCubit>().state["Status"]}"
+                                .replaceAll("[", "")
+                                .replaceAll("]", ""),
                       ),
                       const SizedBox(
                         width: 24,
                       ),
                       generateFilterItem(
-                        title: "Tanggal",
+                        groupName: "Tanggal",
+                        title: (context
+                                    .read<FilterCubit>()
+                                    .state["Tanggal"]
+                                    ?.isEmpty ??
+                                true)
+                            ? "Tanggal"
+                            : "${context.read<FilterCubit>().state["Tanggal"]}"
+                                .replaceAll("[", "")
+                                .replaceAll("]", ""),
                       ),
                     ],
                   ),

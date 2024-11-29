@@ -1,4 +1,5 @@
 import 'package:duidku/cubit/cashier_cubit.dart';
+import 'package:duidku/cubit/filter_cubit.dart';
 import 'package:duidku/cubit/page_cubit.dart';
 import 'package:duidku/ui/cashier_page.dart';
 import 'package:duidku/ui/detail_order_page.dart';
@@ -34,6 +35,12 @@ class MainApp extends StatelessWidget {
         BlocProvider(
           create: (context) => ProductCartCubit(),
         ),
+        BlocProvider(
+          create: (context) => FilterCubit(),
+        ),
+        BlocProvider(
+          create: (context) => previousPageCubit(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -49,7 +56,7 @@ class MainApp extends StatelessWidget {
             case '/main-page':
               return PageTransition(
                 child: const MainPage(),
-                type: PageTransitionType.bottomToTop,
+                type: PageTransitionType.fade,
               );
             case '/main-page/cashier-page':
               return PageTransition(

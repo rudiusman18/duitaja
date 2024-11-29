@@ -7,3 +7,10 @@ class PageCubit extends Cubit<int> {
     emit(pageNumber);
   }
 }
+
+class previousPageCubit extends Cubit<int> {
+  previousPageCubit() : super(0);
+  void setPage(int pageNumber) {
+    emit(pageNumber);
+  }
+}
