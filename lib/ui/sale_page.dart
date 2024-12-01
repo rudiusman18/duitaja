@@ -1,3 +1,4 @@
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:duidku/cubit/filter_cubit.dart';
 import 'package:duidku/cubit/page_cubit.dart';
 import 'package:duidku/shared/theme.dart';
@@ -16,10 +17,47 @@ class SalePage extends StatefulWidget {
 class _SalePageState extends State<SalePage> {
   TextEditingController searchTextField = TextEditingController(text: "");
 
+  String _getValueText(
+    CalendarDatePicker2Type datePickerType,
+    List<DateTime?> values,
+  ) {
+    values =
+        values.map((e) => e != null ? DateUtils.dateOnly(e) : null).toList();
+    var valueText = (values.isNotEmpty ? values[0] : null)
+        .toString()
+        .replaceAll('00:00:00.000', '');
+
+    if (datePickerType == CalendarDatePicker2Type.multi) {
+      valueText = values.isNotEmpty
+          ? values
+              .map((v) => v.toString().replaceAll('00:00:00.000', ''))
+              .join(', ')
+          : 'null';
+    } else if (datePickerType == CalendarDatePicker2Type.range) {
+      if (values.isNotEmpty) {
+        final startDate = values[0].toString().replaceAll('00:00:00.000', '');
+        final endDate = values.length > 1
+            ? values[1].toString().replaceAll('00:00:00.000', '')
+            : 'null';
+        valueText = '$startDate to $endDate';
+      } else {
+        return 'null';
+      }
+    }
+
+    return valueText;
+  }
+
   @override
   Widget build(BuildContext context) {
+    // ignore: no_leading_underscores_for_local_identifiers
+    List<DateTime?> _rangeDatePickerValueWithDefaultValue = [
+      DateTime.now(),
+    ];
+
     if (widget.clearFilterCubit == true) {
       final _ = context.read<FilterCubit>().setFilter({});
+      widget.clearFilterCubit = false;
     }
 
     Widget searchSetup() {
@@ -78,13 +116,65 @@ class _SalePageState extends State<SalePage> {
       );
     }
 
+    // ignore: no_leading_underscores_for_local_identifiers
+    Widget _buildRangeDatePickerWithValue() {
+      final config = CalendarDatePicker2Config(
+        centerAlignModePicker: true,
+        calendarType: CalendarDatePicker2Type.range,
+        selectedDayHighlightColor: primaryColor,
+        weekdayLabelTextStyle: const TextStyle(
+          color: Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
+        controlsTextStyle: const TextStyle(
+          color: Colors.black,
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
+        ),
+        dynamicCalendarRows: true,
+        weekdayLabels: ["Mi", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
+        disabledDayTextStyle:
+            const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
+      );
+      return SizedBox(
+        width: 375,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 10),
+            CalendarDatePicker2(
+              config: config,
+              value: _rangeDatePickerValueWithDefaultValue,
+              onValueChanged: (dates) =>
+                  setState(() => _rangeDatePickerValueWithDefaultValue = dates),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Selection(s):  '),
+                const SizedBox(width: 10),
+                Text(
+                  _getValueText(
+                    config.calendarType,
+                    _rangeDatePickerValueWithDefaultValue,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 25),
+          ],
+        ),
+      );
+    }
+
     Widget generateFilterContentItem({
       required BuildContext context,
       required String groupName,
       required String name,
     }) {
       return StatefulBuilder(
-        builder: (context, setState) {
+        builder: (context, stateSetter) {
           return Column(
             children: [
               Divider(
@@ -99,34 +189,55 @@ class _SalePageState extends State<SalePage> {
                 margin: const EdgeInsets.symmetric(
                   horizontal: 41,
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        name,
+                child: GestureDetector(
+                  onTap: () {
+                    context.read<PreviousPageCubit>().setPage(2);
+                    context.read<PageCubit>().setPage(2);
+
+                    var filterList = context.read<FilterCubit>().state;
+
+                    if (context
+                            .read<FilterCubit>()
+                            .state[groupName]
+                            ?.contains(name) ??
+                        false) {
+                      filterList[groupName]!.remove(name);
+                      if (filterList[groupName]!.isEmpty) {
+                        filterList.remove(groupName);
+                      }
+                    } else {
+                      if (name.toLowerCase() != "semua tanggal" &&
+                          name.toLowerCase() != "30 hari terakhir" &&
+                          name.toLowerCase() != "90 hari terakhir" &&
+                          groupName.toLowerCase() == "tanggal") {
+                        showModalBottomSheet(
+                            context: context,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(20)),
+                            ),
+                            isScrollControlled:
+                                true, // To make the sheet adjustable for larger content
+                            builder: (context) {
+                              return _buildRangeDatePickerWithValue();
+                            });
+                      } else {
+                        filterList.putIfAbsent(groupName, () => []).add(name);
+                      }
+                    }
+
+                    context.read<FilterCubit>().setFilter(filterList);
+                    setState(() {});
+                    stateSetter(() {});
+                  },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          name,
+                        ),
                       ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        var filterList = context.read<FilterCubit>().state;
-
-                        if (context
-                                .read<FilterCubit>()
-                                .state[groupName]
-                                ?.contains(name) ??
-                            false) {
-                          filterList[groupName]!.remove(name);
-                          if (filterList[groupName]!.isEmpty) {
-                            filterList.remove(groupName);
-                          }
-                        } else {
-                          filterList.putIfAbsent(groupName, () => []).add(name);
-                        }
-
-                        context.read<FilterCubit>().setFilter(filterList);
-                        setState(() {});
-                      },
-                      child: Container(
+                      Container(
                         width: 22,
                         height: 22,
                         decoration: BoxDecoration(
@@ -149,9 +260,9 @@ class _SalePageState extends State<SalePage> {
                                 color: Colors.white,
                               )
                             : const SizedBox(),
-                      ),
-                    ),
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(
@@ -300,29 +411,6 @@ class _SalePageState extends State<SalePage> {
                     ],
                   ),
                 ),
-                Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                  ),
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      context.read<PreviousPageCubit>().setPage(2);
-                      context.read<PageCubit>().setPage(2);
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, '/main-page', (route) => false);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                    ),
-                    child: Text(
-                      "Terapkan",
-                      style: inter.copyWith(
-                        fontWeight: medium,
-                      ),
-                    ),
-                  ),
-                ),
                 const SizedBox(
                   height: 20,
                 ),
@@ -348,6 +436,10 @@ class _SalePageState extends State<SalePage> {
             vertical: 8,
           ),
           decoration: BoxDecoration(
+            color:
+                (context.read<FilterCubit>().state[groupName]?.isEmpty ?? true)
+                    ? Colors.transparent
+                    : primaryColor,
             border: Border.all(
               color: disableColor,
             ),
@@ -360,13 +452,20 @@ class _SalePageState extends State<SalePage> {
               Text(
                 title,
                 style: inter.copyWith(
-                  color: primaryColor,
+                  color:
+                      (context.read<FilterCubit>().state[groupName]?.isEmpty ??
+                              true)
+                          ? primaryColor
+                          : Colors.white,
                   fontWeight: medium,
                 ),
               ),
               Icon(
                 Icons.keyboard_arrow_down_rounded,
-                color: disableColor,
+                color: (context.read<FilterCubit>().state[groupName]?.isEmpty ??
+                        true)
+                    ? disableColor
+                    : Colors.white,
               )
             ],
           ),

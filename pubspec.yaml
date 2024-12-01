@@ -15,9 +15,11 @@ dependencies:
   flutter_bloc: ^8.1.6
   google_fonts: 6.1.0
   page_transition: ^2.1.0
-  intl: ^0.18.0
+  intl: any
   collection: ^1.17.0
   calendar_date_picker2: ^1.1.7
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
