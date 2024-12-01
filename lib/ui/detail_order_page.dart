@@ -414,6 +414,8 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                           description: '',
                           price: 0,
                           discountPrice: 0,
+                          productCategory: "",
+                          status: "",
                         ),
                   ),
                 },
