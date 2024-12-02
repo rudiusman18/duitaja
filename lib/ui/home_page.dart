@@ -1,10 +1,19 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:duidku/cubit/home_cubit.dart';
 import 'package:duidku/shared/theme.dart';
+import 'package:duidku/shared/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     Widget profile() {
@@ -54,85 +63,111 @@ class HomePage extends StatelessWidget {
       );
     }
 
-    Widget reportCard() {
-      return Container(
-        margin: const EdgeInsets.symmetric(
-          horizontal: 35,
-        ),
-        padding: const EdgeInsets.symmetric(
-          vertical: 17,
-          horizontal: 20,
-        ),
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              spreadRadius: 5,
-              blurRadius: 7,
-              offset: const Offset(0, 3), // changes position of shadow
+    Widget reportCard({
+      required String title,
+      required String asset,
+      required String message,
+      required String subtitle,
+    }) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            // margin: const EdgeInsets.symmetric(
+            //   horizontal: 35,
+            // ),
+            padding: const EdgeInsets.symmetric(
+              vertical: 17,
+              horizontal: 20,
             ),
-          ],
-          borderRadius: BorderRadius.circular(6),
-          image: const DecorationImage(
-            image: AssetImage(
-              'assets/card-background.png',
-            ),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text("Penjualan Bulan Ini",
-                        style: inter.copyWith(
-                          fontSize: 16,
-                          color: Colors.white,
-                        )),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      "Rp 45,231.00",
-                      style: inter.copyWith(
-                        fontSize: 25,
-                        fontWeight: semiBold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      "+20% dari bulan lalu",
-                      style: inter.copyWith(
-                        fontSize: 13,
-                        fontWeight: medium,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: const Offset(0, 3), // changes position of shadow
+                ),
+              ],
+              borderRadius: BorderRadius.circular(6),
+              image: const DecorationImage(
+                image: AssetImage(
+                  'assets/card-background.png',
+                ),
+                fit: BoxFit.cover,
               ),
             ),
-            Image.asset(
-              "assets/calendar-check.png",
-              width: 24,
-              height: 24,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(title,
+                            style: inter.copyWith(
+                              fontSize: 16,
+                              color: Colors.white,
+                            )),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Text(
+                        message,
+                        style: inter.copyWith(
+                          fontSize: title.toLowerCase() == "sandiai" ? 14 : 25,
+                          fontWeight: title.toLowerCase() == "sandiai"
+                              ? regular
+                              : semiBold,
+                          color: Colors.white,
+                        ),
+                        softWrap: true,
+                      ),
+                      if (title.toLowerCase() != "sandiai") ...{
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            subtitle,
+                            style: inter.copyWith(
+                              fontSize: 13,
+                              fontWeight: medium,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      } else ...{
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            "Selengkapnya",
+                            style: inter.copyWith(
+                              fontSize: 10,
+                              color: Colors.white,
+                              decoration: TextDecoration.underline,
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      },
+                    ],
+                  ),
+                ),
+                Image.asset(
+                  asset,
+                  width: 24,
+                  height: 24,
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
@@ -284,130 +319,177 @@ class HomePage extends StatelessWidget {
       );
     }
 
-    return Scaffold(
-      backgroundColor: primaryColor,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.white.withAlpha(99),
-              primaryColor,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.centerRight,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              profile(),
-              const SizedBox(
-                height: 24,
+    return BlocBuilder<ReportCardIndexCubit, int>(
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: primaryColor,
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.white.withAlpha(99),
+                  primaryColor,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.centerRight,
               ),
-              reportCard(),
-              const SizedBox(
-                height: 16,
-              ),
-              DotsIndicator(
-                dotsCount: 3,
-                decorator: DotsDecorator(
-                  activeColor: cardColor2,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(
-                height: 21,
-              ),
-              Expanded(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(
-                        15,
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  profile(),
+                  const SizedBox(
+                    height: 24,
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 35,
+                    ),
+                    child: CarouselSlider(
+                      options: CarouselOptions(
+                        height: 150,
+                        viewportFraction: 1,
+                        autoPlay: true,
+                        onPageChanged: (index, reason) {
+                          context.read<ReportCardIndexCubit>().setIndex(index);
+                        },
+                      ),
+                      items: [
+                        reportCard(
+                          title: "SandiAI",
+                          message:
+                              "50 juta diperlukan untuk mengelola operasional dan pembayaran hutang di bulan depan.",
+                          subtitle: "+20% dari bulan lalu",
+                          asset: "assets/Magicpen.png",
+                        ),
+                        reportCard(
+                          title: "Penjualan bulan ini",
+                          message: formatCurrency(45231),
+                          subtitle: "+20% dari bulan lalu",
+                          asset: "assets/calendar-check.png",
+                        ),
+                        reportCard(
+                          title: "Penjualan hari ini",
+                          message: formatCurrency(45231),
+                          subtitle: "+20% dari bulan lalu",
+                          asset: "assets/Chart_alt_fill.png",
+                        ),
+                        reportCard(
+                          title: "Produk terlaris hari ini",
+                          message: "Nasi Goreng",
+                          subtitle: "150 Terjual",
+                          asset: "assets/subtract.png",
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  DotsIndicator(
+                    dotsCount: 4,
+                    position: context.read<ReportCardIndexCubit>().state,
+                    decorator: DotsDecorator(
+                      activeColor: cardColor2,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 21,
+                  ),
+                  Expanded(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(
+                            15,
+                          ),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(
+                            height: 11,
+                          ),
+                          Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 35,
+                            ),
+                            child: Center(
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        '/main-page/cashier-page',
+                                      );
+                                    },
+                                    child: generateMenuItem(
+                                      title: "Kasir",
+                                      image: "assets/cart.png",
+                                    ),
+                                  ),
+                                  generateMenuItem(
+                                    title: "E-Commerce",
+                                    image: "assets/chart.png",
+                                  ),
+                                  generateMenuItem(
+                                    title: "Stok Opname",
+                                    image: "assets/desk.png",
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 40,
+                          ),
+                          Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                            ),
+                            child: Text(
+                              "Riwayat Penjualan",
+                              style: inter.copyWith(
+                                fontWeight: medium,
+                                fontSize: 13,
+                                color: greyColor,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          Expanded(
+                            child: ListView(
+                              children: [
+                                for (var i = 0; i < 20; i++)
+                                  generateSalesHistoryItem(
+                                    buyerName: "Imam",
+                                    orderAmount: "4",
+                                    date: "15 November 2024",
+                                    time: "15:28PM",
+                                    status: "Lunas",
+                                    price: "Rp. 123.000",
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(
-                        height: 11,
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 35,
-                        ),
-                        child: Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/main-page/cashier-page',
-                                  );
-                                },
-                                child: generateMenuItem(
-                                  title: "Kasir",
-                                  image: "assets/cart.png",
-                                ),
-                              ),
-                              generateMenuItem(
-                                title: "E-Commerce",
-                                image: "assets/chart.png",
-                              ),
-                              generateMenuItem(
-                                title: "Stok Opname",
-                                image: "assets/desk.png",
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 40,
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                        ),
-                        child: Text(
-                          "Riwayat Penjualan",
-                          style: inter.copyWith(
-                            fontWeight: medium,
-                            fontSize: 13,
-                            color: greyColor,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      Expanded(
-                        child: ListView(
-                          children: [
-                            for (var i = 0; i < 20; i++)
-                              generateSalesHistoryItem(
-                                buyerName: "Imam",
-                                orderAmount: "4",
-                                date: "15 November 2024",
-                                time: "15:28PM",
-                                status: "Lunas",
-                                price: "Rp. 123.000",
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

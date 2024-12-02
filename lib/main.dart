@@ -1,5 +1,6 @@
 import 'package:duidku/cubit/cashier_cubit.dart';
 import 'package:duidku/cubit/filter_cubit.dart';
+import 'package:duidku/cubit/home_cubit.dart';
 import 'package:duidku/cubit/page_cubit.dart';
 import 'package:duidku/ui/cashier_page.dart';
 import 'package:duidku/ui/detail_order_page.dart';
@@ -41,6 +42,9 @@ class MainApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => PreviousPageCubit(),
+        ),
+        BlocProvider(
+          create: (context) => ReportCardIndexCubit(),
         ),
       ],
       child: MaterialApp(
