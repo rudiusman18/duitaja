@@ -1,12 +1,15 @@
 import 'package:duidku/cubit/filter_cubit.dart';
 import 'package:duidku/cubit/page_cubit.dart';
+import 'package:duidku/cubit/product_cubit.dart';
 import 'package:duidku/model/product_model.dart';
 import 'package:duidku/shared/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+// ignore: must_be_immutable
 class StockPage extends StatefulWidget {
-  const StockPage({super.key});
+  bool clearFilterCubit = false;
+  StockPage({super.key, required this.clearFilterCubit});
 
   @override
   State<StockPage> createState() => _StockPageState();
@@ -17,6 +20,11 @@ class _StockPageState extends State<StockPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.clearFilterCubit == true) {
+      final _ = context.read<FilterCubit>().setFilter({});
+      widget.clearFilterCubit = false;
+    }
+
     Widget searchSetup() {
       return Container(
         margin: const EdgeInsets.symmetric(
@@ -75,8 +83,8 @@ class _StockPageState extends State<StockPage> {
                 ),
                 child: GestureDetector(
                   onTap: () {
-                    context.read<PreviousPageCubit>().setPage(2);
-                    context.read<PageCubit>().setPage(2);
+                    context.read<PreviousPageCubit>().setPage(1);
+                    context.read<PageCubit>().setPage(1);
 
                     var filterList = context.read<FilterCubit>().state;
 
@@ -206,25 +214,25 @@ class _StockPageState extends State<StockPage> {
                 Expanded(
                   child: ListView(
                     children: [
-                      if (title.toLowerCase() == "penjualan") ...{
+                      if (title.toLowerCase() == "kategori") ...{
                         generateFilterContentItem(
                           groupName: title,
-                          name: "Semua Penjualan",
+                          name: "Semua Kategori",
                           context: context,
                         ),
                         generateFilterContentItem(
                           groupName: title,
-                          name: "Kasir",
+                          name: "Makanan",
                           context: context,
                         ),
                         generateFilterContentItem(
                           groupName: title,
-                          name: "Tokopedia",
+                          name: "Minuman",
                           context: context,
                         ),
                         generateFilterContentItem(
                           groupName: title,
-                          name: "TiktokShop",
+                          name: "Camilan",
                           context: context,
                         ),
                         generateFilterContentItem(
@@ -234,44 +242,28 @@ class _StockPageState extends State<StockPage> {
                         ),
                         generateFilterContentItem(
                           groupName: title,
-                          name: "GoFood",
-                          context: context,
-                        ),
-                      } else if (title.toLowerCase() == "status") ...{
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Semua Status",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Lunas",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Belum Lunas",
+                          name: "Promo",
                           context: context,
                         ),
                       } else ...{
                         generateFilterContentItem(
                           groupName: title,
-                          name: "Semua Tanggal",
+                          name: "Semua Kategori",
                           context: context,
                         ),
                         generateFilterContentItem(
                           groupName: title,
-                          name: "30 Hari Terakhir",
+                          name: "Aktif",
                           context: context,
                         ),
                         generateFilterContentItem(
                           groupName: title,
-                          name: "90 Hari Terakhir",
+                          name: "Non-Aktif",
                           context: context,
                         ),
                         generateFilterContentItem(
                           groupName: title,
-                          name: "Atur Tanggal",
+                          name: "Habis",
                           context: context,
                         ),
                       },
@@ -343,116 +335,122 @@ class _StockPageState extends State<StockPage> {
     Widget generateListProductItem({
       required ProductModel product,
     }) {
-      return Container(
-        padding: const EdgeInsets.symmetric(
-          vertical: 12,
-          horizontal: 20,
-        ),
-        decoration: BoxDecoration(
-            border: Border.all(
-          color: greyColor1,
-        )),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Image.network(
-                product.productURL ?? "",
-                width: 72,
-                height: 72,
-                fit: BoxFit.cover,
+      return GestureDetector(
+        onTap: () {
+          context.read<ProductCubit>().setProduct(product);
+          Navigator.pushNamed(context, '/stock-page/stock-detail-page');
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: 12,
+            horizontal: 20,
+          ),
+          decoration: BoxDecoration(
+              border: Border.all(
+            color: greyColor1,
+          )),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Image.network(
+                  product.productURL ?? "",
+                  width: 72,
+                  height: 72,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            const SizedBox(
-              width: 15,
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(
+                width: 15,
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        product.productCategory ?? "",
+                        style: inter.copyWith(
+                          fontWeight: semiBold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        product.productName ?? "",
+                        style: inter.copyWith(
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        children: [
+                          Text(
+                            "Stok: ",
+                            style: inter.copyWith(
+                              fontSize: 15,
+                            ),
+                          ),
+                          Text(
+                            "${product.stock}",
+                            style: inter.copyWith(
+                              fontSize: 15,
+                              fontWeight: semiBold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
                 children: [
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 11,
+                    ),
+                    decoration: BoxDecoration(
+                      color: (product.status ?? "").toLowerCase() != "aktif"
+                          ? Colors.red
+                          : greyColor1,
+                      borderRadius: BorderRadius.circular(
+                        999,
+                      ),
+                    ),
                     child: Text(
-                      product.productCategory ?? "",
+                      product.status ?? "",
                       style: inter.copyWith(
+                        fontSize: 15,
                         fontWeight: semiBold,
-                        fontSize: 15,
+                        color: (product.status ?? "").toLowerCase() != "aktif"
+                            ? Colors.white
+                            : primaryColor,
                       ),
                     ),
                   ),
                   const SizedBox(
-                    height: 8,
+                    height: 16,
                   ),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      product.productName ?? "",
-                      style: inter.copyWith(
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(
-                      children: [
-                        Text(
-                          "Stok: ",
-                          style: inter.copyWith(
-                            fontSize: 15,
-                          ),
-                        ),
-                        Text(
-                          "${product.stock}",
-                          style: inter.copyWith(
-                            fontSize: 15,
-                            fontWeight: semiBold,
-                          ),
-                        ),
-                      ],
-                    ),
+                  const Icon(
+                    Icons.chevron_right,
                   ),
                 ],
               ),
-            ),
-            Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 11,
-                  ),
-                  decoration: BoxDecoration(
-                    color: (product.status ?? "").toLowerCase() != "aktif"
-                        ? Colors.red
-                        : greyColor1,
-                    borderRadius: BorderRadius.circular(
-                      999,
-                    ),
-                  ),
-                  child: Text(
-                    product.status ?? "",
-                    style: inter.copyWith(
-                      fontSize: 15,
-                      fontWeight: semiBold,
-                      color: (product.status ?? "").toLowerCase() != "aktif"
-                          ? Colors.white
-                          : primaryColor,
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                const Icon(
-                  Icons.chevron_right,
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
@@ -479,27 +477,73 @@ class _StockPageState extends State<StockPage> {
           const SizedBox(
             height: 24,
           ),
-          Container(
-            margin: const EdgeInsets.symmetric(
-              horizontal: 20,
-            ),
-            width: double.infinity,
+          Align(
+            alignment: Alignment.centerLeft,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  generateFilterItem(
-                    groupName: "Kategori",
-                    title: "Kategori",
-                  ),
-                  const SizedBox(
-                    width: 24,
-                  ),
-                  generateFilterItem(
-                    groupName: "Status",
-                    title: "Status",
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                ),
+                child: Row(
+                  children: [
+                    if (context.read<FilterCubit>().state.isNotEmpty) ...{
+                      GestureDetector(
+                        onTap: () {
+                          var filterList = context.read<FilterCubit>().state;
+                          filterList.clear();
+                          context.read<FilterCubit>().setFilter(filterList);
+                          setState(() {});
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(
+                            6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: BorderRadius.circular(
+                              8,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 24,
+                      ),
+                    },
+                    generateFilterItem(
+                      groupName: "Kategori",
+                      title: (context
+                                  .read<FilterCubit>()
+                                  .state["Kategori"]
+                                  ?.isEmpty ??
+                              true)
+                          ? "Kategori"
+                          : "${context.read<FilterCubit>().state["Kategori"]}"
+                              .replaceAll("[", "")
+                              .replaceAll("]", ""),
+                    ),
+                    const SizedBox(
+                      width: 24,
+                    ),
+                    generateFilterItem(
+                      groupName: "Status",
+                      title: (context
+                                  .read<FilterCubit>()
+                                  .state["Status"]
+                                  ?.isEmpty ??
+                              true)
+                          ? "Status"
+                          : "${context.read<FilterCubit>().state["Status"]}"
+                              .replaceAll("[", "")
+                              .replaceAll("]", ""),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

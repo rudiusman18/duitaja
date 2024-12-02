@@ -2,10 +2,12 @@ import 'package:duidku/cubit/cashier_cubit.dart';
 import 'package:duidku/cubit/filter_cubit.dart';
 import 'package:duidku/cubit/home_cubit.dart';
 import 'package:duidku/cubit/page_cubit.dart';
+import 'package:duidku/cubit/product_cubit.dart';
 import 'package:duidku/ui/cashier_page.dart';
 import 'package:duidku/ui/detail_order_page.dart';
 import 'package:duidku/ui/login_page.dart';
 import 'package:duidku/ui/main_page.dart';
+import 'package:duidku/ui/stock_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -46,6 +48,9 @@ class MainApp extends StatelessWidget {
         BlocProvider(
           create: (context) => ReportCardIndexCubit(),
         ),
+         BlocProvider(
+          create: (context) => ProductCubit(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -75,6 +80,11 @@ class MainApp extends StatelessWidget {
             case '/main-page/cashier-page/detail-order-page':
               return PageTransition(
                 child: const DetailOrderPage(),
+                type: PageTransitionType.rightToLeft,
+              );
+            case '/stock-page/stock-detail-page':
+              return PageTransition(
+                child: const StockDetailPage(),
                 type: PageTransitionType.rightToLeft,
               );
             default:

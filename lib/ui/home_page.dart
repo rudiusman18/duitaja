@@ -347,6 +347,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     child: CarouselSlider(
                       options: CarouselOptions(
+                        initialPage: context.read<ReportCardIndexCubit>().state,
                         height: 150,
                         viewportFraction: 1,
                         autoPlay: true,

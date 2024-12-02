@@ -646,6 +646,7 @@ class _SalePageState extends State<SalePage> {
                           width: 24,
                         ),
                       },
+                      
                       generateFilterItem(
                         groupName: "Penjualan",
                         title: (context

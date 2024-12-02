@@ -23,7 +23,12 @@ class _MainPageState extends State<MainPage> {
         case 0:
           return const HomePage();
         case 1:
-          return const StockPage();
+          return StockPage(
+            clearFilterCubit: context.read<PageCubit>().state !=
+                    context.read<PreviousPageCubit>().state
+                ? true
+                : false,
+          );
         case 2:
           return SalePage(
             clearFilterCubit: context.read<PageCubit>().state !=

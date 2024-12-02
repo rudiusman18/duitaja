@@ -21,6 +21,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   carousel_slider: ^5.0.0
+  flutter_advanced_switch: ^3.1.0
 
 dev_dependencies:
   flutter_test:
