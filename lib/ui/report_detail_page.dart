@@ -1,8 +1,15 @@
 import 'package:duidku/shared/theme.dart';
 import 'package:flutter/material.dart';
 
-class ReportDetailPage extends StatelessWidget {
+class ReportDetailPage extends StatefulWidget {
   const ReportDetailPage({super.key});
+
+  @override
+  State<ReportDetailPage> createState() => _ReportDetailPageState();
+}
+
+class _ReportDetailPageState extends State<ReportDetailPage> {
+  int cardIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +198,7 @@ class ReportDetailPage extends StatelessWidget {
             height: 12,
           ),
           generateProductCard(
-            productName: "Mie Goreng",
+            productName: "Mie Goreng ${cardIndex + 1}",
             expiredDate: "29/11/2025",
             input: "100 pcs",
             output: "80 pcs",
@@ -205,18 +212,37 @@ class ReportDetailPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Icon(
-                Icons.chevron_left,
-                color: greyColor2,
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    if (cardIndex != 0) {
+                      cardIndex -= 1;
+                    }
+                  });
+                },
+                child: Icon(
+                  Icons.chevron_left,
+                  color: cardIndex == 0 ? greyColor1 : Colors.black,
+                ),
               ),
               Text(
-                "1/5",
+                "${cardIndex + 1}/5",
                 style: inter.copyWith(
                   fontWeight: medium,
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    if (cardIndex < 4) {
+                      cardIndex += 1;
+                    }
+                  });
+                },
+                child: Icon(
+                  Icons.chevron_right,
+                  color: cardIndex == 4 ? greyColor1 : Colors.black,
+                ),
               ),
             ],
           ),
