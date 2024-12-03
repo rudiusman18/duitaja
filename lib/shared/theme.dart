@@ -6,6 +6,7 @@ TextStyle inter = GoogleFonts.inter();
 
 // Color
 Color primaryColor = const Color(0xff460C8D);
+Color secondaryColor = const Color(0xffEADDFF);
 Color disableColor = const Color(0xff94A3B8);
 Color greyColor = const Color(0xff6B7280);
 Color greyColor1 = const Color(0xffDEDDDD);

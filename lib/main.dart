@@ -7,7 +7,9 @@ import 'package:duidku/ui/cashier_page.dart';
 import 'package:duidku/ui/detail_order_page.dart';
 import 'package:duidku/ui/login_page.dart';
 import 'package:duidku/ui/main_page.dart';
+import 'package:duidku/ui/report_detail_page.dart';
 import 'package:duidku/ui/stock_detail_page.dart';
+import 'package:duidku/ui/stock_opname_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,7 +50,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(
           create: (context) => ReportCardIndexCubit(),
         ),
-         BlocProvider(
+        BlocProvider(
           create: (context) => ProductCubit(),
         ),
       ],
@@ -58,7 +60,7 @@ class MainApp extends StatelessWidget {
         supportedLocales: const [
           Locale('id', ''),
         ],
-        title: "duitku",
+        title: "duitaja",
         home: const LoginPage(),
         onGenerateRoute: ((settings) {
           switch (settings.name) {
@@ -85,6 +87,16 @@ class MainApp extends StatelessWidget {
             case '/stock-page/stock-detail-page':
               return PageTransition(
                 child: const StockDetailPage(),
+                type: PageTransitionType.rightToLeft,
+              );
+            case '/main-page/stock-opname-page':
+              return PageTransition(
+                child: const StockOpnamePage(),
+                type: PageTransitionType.rightToLeft,
+              );
+            case '/main-page/stock-opname-page/report-detail-page':
+              return PageTransition(
+                child: const ReportDetailPage(),
                 type: PageTransitionType.rightToLeft,
               );
             default:

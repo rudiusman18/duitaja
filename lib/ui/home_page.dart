@@ -439,9 +439,15 @@ class _HomePageState extends State<HomePage> {
                                     title: "E-Commerce",
                                     image: "assets/chart.png",
                                   ),
-                                  generateMenuItem(
-                                    title: "Stok Opname",
-                                    image: "assets/desk.png",
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(context,
+                                          '/main-page/stock-opname-page');
+                                    },
+                                    child: generateMenuItem(
+                                      title: "Stok Opname",
+                                      image: "assets/desk.png",
+                                    ),
                                   ),
                                 ],
                               ),
