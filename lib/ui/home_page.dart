@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:duidku/cubit/filter_cubit.dart';
 import 'package:duidku/cubit/home_cubit.dart';
 import 'package:duidku/shared/theme.dart';
 import 'package:duidku/shared/utils.dart';
@@ -441,6 +442,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                   GestureDetector(
                                     onTap: () {
+                                      context.read<FilterCubit>().setFilter({});
                                       Navigator.pushNamed(context,
                                           '/main-page/stock-opname-page');
                                     },

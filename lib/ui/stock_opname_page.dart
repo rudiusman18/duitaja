@@ -1,7 +1,9 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:duidku/cubit/add_report_cubit.dart';
 import 'package:duidku/cubit/filter_cubit.dart';
 import 'package:duidku/cubit/page_cubit.dart';
 import 'package:duidku/shared/theme.dart';
+import 'package:duidku/ui/add_report_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,6 +16,10 @@ class StockOpnamePage extends StatefulWidget {
 
 class _StockOpnamePageState extends State<StockOpnamePage> {
   TextEditingController searchTextField = TextEditingController(text: "");
+
+  // Digunakan ketika membuat laporan stok opname
+  TextEditingController titleTextField = TextEditingController(text: "");
+  TextEditingController amountTextField = TextEditingController(text: "");
 
   String _getValueText(
     CalendarDatePicker2Type datePickerType,
@@ -204,8 +210,8 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
                 ),
                 child: GestureDetector(
                   onTap: () {
-                    context.read<PreviousPageCubit>().setPage(2);
-                    context.read<PageCubit>().setPage(2);
+                    context.read<PreviousPageCubit>().setPage(0);
+                    context.read<PageCubit>().setPage(0);
 
                     var filterList = context.read<FilterCubit>().state;
 
@@ -522,7 +528,160 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
                 child: searchSetup(),
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              20,
+                            ),
+                          ),
+                          content: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  titleTextField.text = "";
+                                  amountTextField.text = "";
+                                  Navigator.pop(context);
+                                },
+                                child: const Icon(
+                                  Icons.close,
+                                ),
+                              ),
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Judul",
+                                    style: inter.copyWith(fontWeight: medium),
+                                  ),
+                                  const SizedBox(
+                                    height: 8,
+                                  ),
+                                  TextFormField(
+                                    controller: titleTextField,
+                                    decoration: InputDecoration(
+                                      hintText: "Masukkan Judul",
+                                      border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        borderSide: BorderSide(
+                                            color: Colors.grey.shade300),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        borderSide: BorderSide(
+                                          color: primaryColor,
+                                          width: 2.0,
+                                        ),
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 25,
+                                  ),
+                                  Text(
+                                    "Jumlah Produk",
+                                    style: inter.copyWith(fontWeight: medium),
+                                  ),
+                                  const SizedBox(
+                                    height: 8,
+                                  ),
+                                  TextFormField(
+                                    controller: amountTextField,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                      hintText: "Masukkan Jumlah Produk",
+                                      border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        borderSide: BorderSide(
+                                            color: Colors.grey.shade300),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        borderSide: BorderSide(
+                                          color: primaryColor,
+                                          width: 2.0,
+                                        ),
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 45,
+                                  ),
+                                  Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    child: Align(
+                                      alignment: Alignment.center,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            width: 136,
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                if (titleTextField.text != "" &&
+                                                    amountTextField.text !=
+                                                        "") {
+                                                  Navigator.pop(context);
+                                                  context
+                                                      .read<AddReportCubit>()
+                                                      .initAddReport({
+                                                    "title":
+                                                        titleTextField.text,
+                                                    "amount":
+                                                        amountTextField.text,
+                                                  });
+
+                                                  titleTextField.text = "";
+                                                  amountTextField.text = "";
+                                                  Navigator.pushNamed(context,
+                                                      '/main-page/stock-opname-page/add-report-page');
+                                                }
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: primaryColor,
+                                              ),
+                                              child: Text(
+                                                "Lanjut",
+                                                style: inter.copyWith(
+                                                  fontWeight: medium,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      });
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
                 ),

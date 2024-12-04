@@ -10,9 +10,40 @@ class ReportDetailPage extends StatefulWidget {
 
 class _ReportDetailPageState extends State<ReportDetailPage> {
   int cardIndex = 0;
+  TextEditingController searchTextField = TextEditingController(text: "");
 
   @override
   Widget build(BuildContext context) {
+    Widget searchSetup() {
+      return TextFormField(
+        controller: searchTextField,
+        decoration: InputDecoration(
+          suffixIcon: Icon(
+            Icons.search,
+            color: greyColor600,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 12,
+            horizontal: 16,
+          ),
+          hintText: "Cari Produk...",
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(
+              10,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(
+              10,
+            ),
+            borderSide: BorderSide(
+              color: primaryColor,
+            ),
+          ),
+        ),
+      );
+    }
+
     Widget generateReportItem({
       required String title,
       required String value,
@@ -193,6 +224,38 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
           generateReportItem(
             title: "Total Produk: ",
             value: "5",
+          ),
+          const SizedBox(
+            height: 12,
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(
+              horizontal: 20,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: 164,
+                  ),
+                  child: searchSetup(),
+                ),
+                GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: greyColor1,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.lock_outline),
+                  ),
+                )
+              ],
+            ),
           ),
           const SizedBox(
             height: 12,

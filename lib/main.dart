@@ -1,8 +1,10 @@
+import 'package:duidku/cubit/add_report_cubit.dart';
 import 'package:duidku/cubit/cashier_cubit.dart';
 import 'package:duidku/cubit/filter_cubit.dart';
 import 'package:duidku/cubit/home_cubit.dart';
 import 'package:duidku/cubit/page_cubit.dart';
 import 'package:duidku/cubit/product_cubit.dart';
+import 'package:duidku/ui/add_report_page.dart';
 import 'package:duidku/ui/cashier_page.dart';
 import 'package:duidku/ui/detail_order_page.dart';
 import 'package:duidku/ui/login_page.dart';
@@ -53,6 +55,9 @@ class MainApp extends StatelessWidget {
         BlocProvider(
           create: (context) => ProductCubit(),
         ),
+        BlocProvider(
+          create: (context) => AddReportCubit(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -97,6 +102,11 @@ class MainApp extends StatelessWidget {
             case '/main-page/stock-opname-page/report-detail-page':
               return PageTransition(
                 child: const ReportDetailPage(),
+                type: PageTransitionType.rightToLeft,
+              );
+            case '/main-page/stock-opname-page/add-report-page':
+              return PageTransition(
+                child: const AddReportPage(),
                 type: PageTransitionType.rightToLeft,
               );
             default:
