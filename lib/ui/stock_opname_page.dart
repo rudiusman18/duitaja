@@ -52,6 +52,11 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
     return valueText;
   }
 
+  bool _isLastCharInteger(String value) {
+    String lastChar = value[value.length - 1];
+    return int.tryParse(lastChar) != null;
+  }
+
   Widget generateStockOpnameItem({
     required String judul,
     required String numberOfStock,
@@ -602,6 +607,20 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
                                   TextFormField(
                                     controller: amountTextField,
                                     keyboardType: TextInputType.number,
+                                    onChanged: (value) {
+                                      if (value.isNotEmpty &&
+                                          !_isLastCharInteger(value)) {
+                                        // Remove the last character if it's not an integer
+                                        amountTextField.text = value.substring(
+                                            0, value.length - 1);
+                                        amountTextField.selection =
+                                            TextSelection.fromPosition(
+                                          TextPosition(
+                                            offset: amountTextField.text.length,
+                                          ),
+                                        );
+                                      }
+                                    },
                                     decoration: InputDecoration(
                                       hintText: "Masukkan Jumlah Produk",
                                       border: OutlineInputBorder(
