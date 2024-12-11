@@ -12,31 +12,32 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     Widget profilePicture() {
-      return Container(
-        alignment: Alignment.bottomCenter,
-        width: 100,
-        height: 100,
-        decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.red,
-            border: Border.all(
-              color: primaryColor,
-            ),
-            image: const DecorationImage(
-              image: AssetImage(
-                'assets/default picture.png',
-              ),
-              fit: BoxFit.contain,
-            )),
-        child: Column(
+      return Center(
+        child: Stack(
+          alignment: Alignment.center,
           children: [
+            // Circular profile image
             Container(
               width: 100,
-              color: greyColor1,
-              child: Text(
-                "data",
-                style: inter.copyWith(
+              height: 100,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                      image: AssetImage('assets/default picture.png'))),
+            ),
+            // Camera icon overlay
+            Positioned(
+              bottom: 10,
+              child: Container(
+                decoration: BoxDecoration(
                   color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                padding: EdgeInsets.all(8),
+                child: Icon(
+                  Icons.camera_alt,
+                  size: 20,
+                  color: Colors.black,
                 ),
               ),
             ),
