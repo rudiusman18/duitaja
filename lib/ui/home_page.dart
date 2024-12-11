@@ -25,11 +25,16 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Row(
           children: [
-            ClipOval(
-              child: Image.asset(
-                "assets/default picture.png",
-                width: 50,
-                height: 50,
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/main-page/profile-page');
+              },
+              child: ClipOval(
+                child: Image.asset(
+                  "assets/default picture.png",
+                  width: 50,
+                  height: 50,
+                ),
               ),
             ),
             const SizedBox(

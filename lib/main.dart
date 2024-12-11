@@ -9,6 +9,7 @@ import 'package:duidku/ui/cashier_page.dart';
 import 'package:duidku/ui/detail_order_page.dart';
 import 'package:duidku/ui/login_page.dart';
 import 'package:duidku/ui/main_page.dart';
+import 'package:duidku/ui/profile_page.dart';
 import 'package:duidku/ui/report_detail_page.dart';
 import 'package:duidku/ui/stock_detail_page.dart';
 import 'package:duidku/ui/stock_opname_page.dart';
@@ -107,6 +108,11 @@ class MainApp extends StatelessWidget {
             case '/main-page/stock-opname-page/add-report-page':
               return PageTransition(
                 child: const AddReportPage(),
+                type: PageTransitionType.rightToLeft,
+              );
+            case '/main-page/profile-page':
+              return PageTransition(
+                child: const ProfilePage(),
                 type: PageTransitionType.rightToLeft,
               );
             default:
