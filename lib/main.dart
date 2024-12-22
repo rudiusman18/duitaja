@@ -9,7 +9,7 @@ import 'package:duidku/ui/cashier_page.dart';
 import 'package:duidku/ui/detail_order_page.dart';
 import 'package:duidku/ui/login_page.dart';
 import 'package:duidku/ui/main_page.dart';
-import 'package:duidku/ui/profile_page.dart';
+import 'package:duidku/ui/setting_page.dart';
 import 'package:duidku/ui/report_detail_page.dart';
 import 'package:duidku/ui/stock_detail_page.dart';
 import 'package:duidku/ui/stock_opname_page.dart';
@@ -112,7 +112,7 @@ class MainApp extends StatelessWidget {
               );
             case '/main-page/profile-page':
               return PageTransition(
-                child: const ProfilePage(),
+                child: const SettingPage(),
                 type: PageTransitionType.rightToLeft,
               );
             default:
