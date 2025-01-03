@@ -1,3 +1,5 @@
+// ignore_for_file: equal_elements_in_set
+
 import 'package:duidku/shared/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -11,8 +13,190 @@ class SettingPage extends StatefulWidget {
 class _SettingPageState extends State<SettingPage> {
   int selectedIndex = 0;
 
+  // Employee
+  TextEditingController employeeNameTextField = TextEditingController(text: "");
+  TextEditingController employeeIDTextField = TextEditingController(text: "");
+  TextEditingController passwordTextField = TextEditingController(text: "");
+
   @override
   Widget build(BuildContext context) {
+    // Employee
+    Widget generateTextField({
+      required TextEditingController controller,
+      required String hintText,
+      required bool isObscureText,
+    }) {
+      return TextFormField(
+        controller: controller,
+        obscureText: isObscureText,
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 12,
+            horizontal: 16,
+          ),
+          hintText: hintText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(
+              10,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(
+              10,
+            ),
+            borderSide: BorderSide(
+              color: primaryColor,
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future modalDialog() {
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                10,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "Tambah Pengguna",
+                        style: inter.copyWith(
+                          fontWeight: semiBold,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Icon(
+                        Icons.close,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 31,
+                ),
+                Text(
+                  "Nama",
+                  style: inter.copyWith(
+                    fontWeight: medium,
+                  ),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                generateTextField(
+                  controller: employeeNameTextField,
+                  hintText: "Masukkan Nama",
+                  isObscureText: true,
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  "ID Karyawan",
+                  style: inter.copyWith(
+                    fontWeight: medium,
+                  ),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: generateTextField(
+                        controller: employeeIDTextField,
+                        hintText: "Masukkan ID Karyawan",
+                        isObscureText: true,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            8,
+                          ),
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: Text(
+                        "Generate",
+                        style: inter,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  "Password",
+                  style: inter.copyWith(
+                    fontWeight: medium,
+                  ),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                generateTextField(
+                  controller: passwordTextField,
+                  hintText: "Masukkan Password",
+                  isObscureText: true,
+                ),
+                const SizedBox(
+                  height: 24,
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          8,
+                        ),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "Simpan",
+                      style: inter,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+    // End of Employee
+
     Widget profilePicture() {
       return Center(
         child: ClipOval(
@@ -200,17 +384,22 @@ class _SettingPageState extends State<SettingPage> {
                           fontWeight: semiBold,
                         ),
                       ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: primaryColor,
-                          borderRadius: BorderRadius.circular(
-                            5,
+                      GestureDetector(
+                        onTap: () {
+                          modalDialog();
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: BorderRadius.circular(
+                              5,
+                            ),
                           ),
-                        ),
-                        child: const Icon(
-                          Icons.add,
-                          color: Colors.white,
-                          size: 20,
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ],
@@ -246,6 +435,27 @@ class _SettingPageState extends State<SettingPage> {
                 children: const [
                   Employee(),
                 ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+              ),
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      8,
+                    ),
+                  ),
+                ),
+                onPressed: () {},
+                child: Text(
+                  "Simpan Data Karyawan",
+                  style: inter,
+                ),
               ),
             ),
           } else ...{
@@ -305,8 +515,161 @@ class _UserInfoState extends State<UserInfo> {
   Widget build(BuildContext context) {
     nameTextField.text = "Riza Rahman";
     emailTextField.text = "rizarahman23@gmail.com";
-    passwordTextField.text = "ini adalah percobaan password";
+    // passwordTextField.text = "ini adalah percobaan password";
     phoneNumberTextField.text = "081234567598";
+
+    Widget generateTextField({
+      required TextEditingController controller,
+      required String hintText,
+      required bool isObscureText,
+    }) {
+      return TextFormField(
+        controller: controller,
+        obscureText: isObscureText,
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 12,
+            horizontal: 16,
+          ),
+          hintText: hintText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(
+              10,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(
+              10,
+            ),
+            borderSide: BorderSide(
+              color: primaryColor,
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future modalDialog({
+      required String title,
+    }) {
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                10,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "Ganti $title",
+                        style: inter.copyWith(
+                          fontWeight: semiBold,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Icon(
+                        Icons.close,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 31,
+                ),
+                if (title.toLowerCase().contains("password")) ...{
+                  Text(
+                    "Password Lama",
+                    style: inter.copyWith(
+                      fontWeight: medium,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  generateTextField(
+                    controller: passwordTextField,
+                    hintText: "Masukkan Password Lama",
+                    isObscureText: true,
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  Text(
+                    "Password Lama",
+                    style: inter.copyWith(
+                      fontWeight: medium,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  generateTextField(
+                    controller: confirmPasswordTextField,
+                    hintText: "Masukkan Password Lama",
+                    isObscureText: true,
+                  ),
+                } else if (title.toLowerCase().contains("nomor")) ...{
+                  Text(
+                    "Nomor Baru",
+                    style: inter.copyWith(
+                      fontWeight: medium,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  generateTextField(
+                    controller: confirmPasswordTextField,
+                    hintText: "Masukkan Nomor Baru",
+                    isObscureText: true,
+                  ),
+                },
+                const SizedBox(
+                  height: 24,
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          8,
+                        ),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "Simpan",
+                      style: inter,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
 
     Widget generateuserInfoItem({
       required String title,
@@ -338,8 +701,13 @@ class _UserInfoState extends State<UserInfo> {
             ),
           ),
           isChangable
-              ? const Icon(
-                  Icons.edit,
+              ? GestureDetector(
+                  onTap: () {
+                    modalDialog(title: title);
+                  },
+                  child: const Icon(
+                    Icons.edit,
+                  ),
                 )
               : const SizedBox(),
         ],
@@ -376,7 +744,7 @@ class _UserInfoState extends State<UserInfo> {
           ),
           generateuserInfoItem(
             title: "Password",
-            value: passwordTextField.text,
+            value: "Ini adalah percobaan password",
             isPassword: true,
             isChangable: true,
           ),
@@ -471,9 +839,14 @@ class _BusinessInfoState extends State<BusinessInfo> {
   }
 }
 
-class Employee extends StatelessWidget {
+class Employee extends StatefulWidget {
   const Employee({super.key});
 
+  @override
+  State<Employee> createState() => _EmployeeState();
+}
+
+class _EmployeeState extends State<Employee> {
   @override
   Widget build(BuildContext context) {
     Widget generateEmployeeItem({
