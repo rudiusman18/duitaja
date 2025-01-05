@@ -1,7 +1,16 @@
 // ignore_for_file: equal_elements_in_set
 
+import 'dart:io';
+
+import 'package:camera/camera.dart';
 import 'package:duidku/shared/theme.dart';
+import 'package:duidku/shared/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -17,6 +26,21 @@ class _SettingPageState extends State<SettingPage> {
   TextEditingController employeeNameTextField = TextEditingController(text: "");
   TextEditingController employeeIDTextField = TextEditingController(text: "");
   TextEditingController passwordTextField = TextEditingController(text: "");
+  List<CameraDescription>? cameras;
+
+  // Image from temp directory
+  File? croppedFile;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    initCamera();
+    super.initState();
+  }
+
+  void initCamera() async {
+    cameras = await availableCameras();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -198,41 +222,58 @@ class _SettingPageState extends State<SettingPage> {
     // End of Employee
 
     Widget profilePicture() {
-      return Center(
-        child: ClipOval(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Circular profile image
-              Container(
-                width: 100,
-                height: 100,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: AssetImage(
-                      'assets/default picture.png',
+      return GestureDetector(
+        onTap: () async {
+          Navigator.push(
+              context,
+              PageTransition(
+                child: CameraPage(),
+                type: PageTransitionType.bottomToTop,
+              )).then((value) async {
+            final tempDir = await getTemporaryDirectory();
+            setState(() {
+              croppedFile = File('${tempDir.path}/cropped_image.png');
+            });
+          });
+        },
+        child: Center(
+          child: ClipOval(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Circular profile image
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: croppedFile != null
+                        ? DecorationImage(image: FileImage(croppedFile!))
+                        : const DecorationImage(
+                            image: AssetImage(
+                              'assets/default picture.png',
+                            ),
+                          ),
+                  ),
+                ),
+                // Camera icon overlay
+                Positioned(
+                  bottom: 0,
+                  child: Container(
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withAlpha(90),
+                    ),
+                    padding: const EdgeInsets.all(8),
+                    child: const Icon(
+                      Icons.camera_alt_outlined,
+                      size: 20,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-              ),
-              // Camera icon overlay
-              Positioned(
-                bottom: 0,
-                child: Container(
-                  width: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withAlpha(90),
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  child: const Icon(
-                    Icons.camera_alt_outlined,
-                    size: 20,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );
@@ -636,9 +677,9 @@ class _UserInfoState extends State<UserInfo> {
                     height: 8,
                   ),
                   generateTextField(
-                    controller: confirmPasswordTextField,
+                    controller: phoneNumberTextField,
                     hintText: "Masukkan Nomor Baru",
-                    isObscureText: true,
+                    isObscureText: false,
                   ),
                 },
                 const SizedBox(
@@ -1044,6 +1085,122 @@ class ActivityLog extends StatelessWidget {
             ),
           const SizedBox(
             height: 20,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// INI TENTANG KAMERA PERCOBAAN
+
+class CameraPage extends StatefulWidget {
+  @override
+  _CameraPageState createState() => _CameraPageState();
+}
+
+class _CameraPageState extends State<CameraPage> {
+  CameraController? _cameraController;
+  List<CameraDescription>? _cameras;
+  bool _isCameraInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    _cameras = await availableCameras();
+    _cameraController = CameraController(_cameras![0], ResolutionPreset.high);
+    await _cameraController!.initialize();
+    await _cameraController!.setFlashMode(FlashMode.off);
+
+    setState(() {
+      _isCameraInitialized = true;
+    });
+  }
+
+  @override
+  void dispose() {
+    _cameraController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _captureAndCropImage() async {
+    if (_cameraController != null) {
+      final image = await _cameraController!.takePicture();
+      final imageFile = File(image.path);
+
+      // Load the image using the image package
+      final originalImage = img.decodeImage(imageFile.readAsBytesSync())!;
+
+      // Get the dimensions for the crop
+      final width = originalImage.width;
+      final height = originalImage.height;
+
+      final double circleSize = 300.0; // Circle size from the UI
+      final double x = (width / 2) - (circleSize / 2);
+      final double y = (height / 2) - (circleSize / 2);
+
+      // Crop the image
+      final croppedImage = img.copyCrop(
+        originalImage,
+        x: x.toInt(),
+        y: y.toInt(),
+        width: circleSize.toInt(),
+        height: circleSize.toInt(),
+      );
+
+      // Save the cropped image
+      final tempDir = await getTemporaryDirectory();
+      final croppedFile = File('${tempDir.path}/cropped_image.png');
+
+      croppedFile.delete(recursive: true);
+
+      croppedFile.writeAsBytesSync(img.encodePng(croppedImage));
+
+      print('Cropped image saved at ${croppedFile.path}');
+
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          _isCameraInitialized
+              ? FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    height: MediaQuery.sizeOf(context).height,
+                    child: CameraPreview(_cameraController!),
+                  ),
+                )
+              : Center(child: CircularProgressIndicator()),
+          Center(
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.5),
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 50),
+              child: FloatingActionButton(
+                onPressed: _captureAndCropImage,
+                child: Icon(Icons.camera),
+              ),
+            ),
           ),
         ],
       ),
