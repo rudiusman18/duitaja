@@ -7,6 +7,7 @@ import 'package:duidku/shared/theme.dart';
 import 'package:duidku/shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image/image.dart' as img;
@@ -30,6 +31,8 @@ class _SettingPageState extends State<SettingPage> {
 
   // Image from temp directory
   File? croppedFile;
+
+  File? _selectedImage;
 
   @override
   void initState() {
@@ -219,22 +222,70 @@ class _SettingPageState extends State<SettingPage> {
         },
       );
     }
+
+    Future<void> _pickImage(ImageSource source) async {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: source);
+
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
+      } else {
+        print('No image selected.');
+      }
+    }
     // End of Employee
+
+    Future<void> _showImagePickerDialog(BuildContext context) async {
+      return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Select Image Source'),
+            content: Text('Choose an option to pick an image.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  _pickImage(ImageSource.camera);
+                  Navigator.of(context).pop();
+                },
+                child: Text('Camera'),
+              ),
+              TextButton(
+                onPressed: () {
+                  _pickImage(ImageSource.gallery);
+                  Navigator.of(context).pop();
+                },
+                child: Text('Gallery'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Cancel'),
+              ),
+            ],
+          );
+        },
+      );
+    }
 
     Widget profilePicture() {
       return GestureDetector(
         onTap: () async {
-          Navigator.push(
-              context,
-              PageTransition(
-                child: CameraPage(),
-                type: PageTransitionType.bottomToTop,
-              )).then((value) async {
-            final tempDir = await getTemporaryDirectory();
-            setState(() {
-              croppedFile = File('${tempDir.path}/cropped_image.png');
-            });
-          });
+          // Navigator.push(
+          //     context,
+          //     PageTransition(
+          //       child: CameraPage(),
+          //       type: PageTransitionType.bottomToTop,
+          //     )).then((value) async {
+          //   final tempDir = await getTemporaryDirectory();
+          //   setState(() {
+          //     croppedFile = File('${tempDir.path}/cropped_image.png');
+          //   });
+          // });
+          _showImagePickerDialog(context);
         },
         child: Center(
           child: ClipOval(
@@ -247,8 +298,8 @@ class _SettingPageState extends State<SettingPage> {
                   height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    image: croppedFile != null
-                        ? DecorationImage(image: FileImage(croppedFile!))
+                    image: _selectedImage != null
+                        ? DecorationImage(image: FileImage(_selectedImage!))
                         : const DecorationImage(
                             image: AssetImage(
                               'assets/default picture.png',
