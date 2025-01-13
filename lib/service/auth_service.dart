@@ -4,6 +4,7 @@ import 'package:duidku/model/login_model.dart';
 import 'package:duidku/model/profile_model.dart';
 import 'package:duidku/shared/utils.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   // Fungsi untuk melakukan post login
@@ -81,5 +82,26 @@ class AuthService {
       final data = jsonDecode(response.body);
       throw Exception(data['errors']);
     }
+  }
+
+// Fungsi yang digunakan untuk menyimpan data profile ke local
+  Future<void> saveProfileData({
+    required String email,
+    required String password,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("userAccount", "$email||$password");
+  }
+
+// Fungsi yang digunakan untuk mengambil data profile dari local
+  Future<String?> getProfileData() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString("userAccount");
+  }
+
+// Fungsi yang digunakan untuk menghapus data profile dari local
+  Future<void> removeProfileData() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove("userAccount");
   }
 }

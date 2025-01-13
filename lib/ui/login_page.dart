@@ -15,6 +15,12 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passwordTextField = TextEditingController(text: "");
 
   @override
+  void initState() {
+    context.read<AuthCubit>().autoLogin();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Widget generateTextFormField({
       required String title,

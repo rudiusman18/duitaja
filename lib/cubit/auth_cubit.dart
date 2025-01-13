@@ -21,6 +21,8 @@ class AuthCubit extends Cubit<AuthState> {
           await authService.postLogin(email: email, password: password);
       final profileData =
           await authService.getProfile(token: data.payload?.token ?? "");
+      final _ =
+          await authService.saveProfileData(email: email, password: password);
       emit(LoginSuccess(profileData));
     } catch (e) {
       emit(AuthFailure(e.toString()));
@@ -44,6 +46,30 @@ class AuthCubit extends Cubit<AuthState> {
         companyName: companyName,
       );
       emit(RegisterSuccess());
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  Future<void> autoLogin() async {
+    try {
+      final data = await authService.getProfileData();
+      if (data != null) {
+        final String email = data.split("||").first;
+        final String password = data.split("||").last;
+        login(email: email, password: password);
+      }
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      final data = await authService.getProfileData();
+      if (data != null) {
+        final _ = await authService.removeProfileData();
+      }
     } catch (e) {
       emit(AuthFailure(e.toString()));
     }

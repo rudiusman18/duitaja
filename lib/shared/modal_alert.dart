@@ -4,11 +4,15 @@ import 'package:flutter/material.dart';
 class ModalAlert extends StatelessWidget {
   final String title;
   final String message;
+  final String confirmationTItle;
+  final String cancelTitle;
   final Function() completion;
   const ModalAlert({
     super.key,
     required this.title,
     required this.message,
+    this.confirmationTItle = "Ya",
+    this.cancelTitle = "Tidak",
     required this.completion,
   });
 
@@ -45,7 +49,7 @@ class ModalAlert extends StatelessWidget {
                     Navigator.of(context).pop(); // Close the modal
                   },
                   child: Text(
-                    'Tidak',
+                    cancelTitle,
                     style: inter.copyWith(
                       fontWeight: medium,
                       color: primaryColor,
@@ -66,7 +70,7 @@ class ModalAlert extends StatelessWidget {
                     backgroundColor: primaryColor,
                   ),
                   child: Text(
-                    'Ya',
+                    confirmationTItle,
                     style: inter.copyWith(
                       fontWeight: medium,
                     ),

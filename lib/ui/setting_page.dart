@@ -855,6 +855,7 @@ class _UserInfoState extends State<UserInfo> {
                         title: "Warning",
                         message: "Anda yaking untuk keluar?",
                         completion: () {
+                          context.read<AuthCubit>().logout();
                           Navigator.pushNamedAndRemoveUntil(
                               context, "/", (route) => false);
                         });
@@ -929,7 +930,8 @@ class _BusinessInfoState extends State<BusinessInfo> {
           ),
           generateuserInfoItem(
             title: "Nama Usaha",
-            value: "Warung Pak Kris",
+            value:
+                "${context.read<AuthCubit>().profileModel.payload?.profile?.companyName}",
             isDropdown: false,
           ),
           const SizedBox(
