@@ -39,3 +39,6 @@ Future<bool> requestPermissions() async {
     return false;
   }
 }
+
+// Base URL yang digunakan untuk mengambil data
+var baseURL = "https://be-duitaja.cahayateknik.works/api/v1";

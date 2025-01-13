@@ -3,13 +3,12 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:duidku/cubit/auth_cubit.dart';
+import 'package:duidku/shared/modal_alert.dart';
 import 'package:duidku/shared/theme.dart';
-import 'package:duidku/shared/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:image_cropper/image_cropper.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:page_transition/page_transition.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 
@@ -274,17 +273,6 @@ class _SettingPageState extends State<SettingPage> {
     Widget profilePicture() {
       return GestureDetector(
         onTap: () async {
-          // Navigator.push(
-          //     context,
-          //     PageTransition(
-          //       child: CameraPage(),
-          //       type: PageTransitionType.bottomToTop,
-          //     )).then((value) async {
-          //   final tempDir = await getTemporaryDirectory();
-          //   setState(() {
-          //     croppedFile = File('${tempDir.path}/cropped_image.png');
-          //   });
-          // });
           _showImagePickerDialog(context);
         },
         child: Center(
@@ -605,10 +593,12 @@ class _UserInfoState extends State<UserInfo> {
 
   @override
   Widget build(BuildContext context) {
-    nameTextField.text = "Riza Rahman";
-    emailTextField.text = "rizarahman23@gmail.com";
-    // passwordTextField.text = "ini adalah percobaan password";
-    phoneNumberTextField.text = "081234567598";
+    nameTextField.text =
+        "${context.read<AuthCubit>().profileModel.payload?.profile?.name}";
+    emailTextField.text =
+        "${context.read<AuthCubit>().profileModel.payload?.profile?.email}";
+    phoneNumberTextField.text =
+        "${context.read<AuthCubit>().profileModel.payload?.profile?.phone}";
 
     Widget generateTextField({
       required TextEditingController controller,
@@ -848,6 +838,42 @@ class _UserInfoState extends State<UserInfo> {
             value: phoneNumberTextField.text,
             isPassword: false,
             isChangable: true,
+          ),
+          const SizedBox(
+            height: 32,
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              iconColor: Colors.red,
+              foregroundColor: Colors.red,
+            ),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return ModalAlert(
+                        title: "Warning",
+                        message: "Anda yaking untuk keluar?",
+                        completion: () {
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, "/", (route) => false);
+                        });
+                  });
+            },
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.logout,
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                Text(
+                  "Keluar",
+                  style: inter,
+                ),
+              ],
+            ),
           ),
         ],
       ),

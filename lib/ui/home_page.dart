@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:duidku/cubit/auth_cubit.dart';
 import 'package:duidku/cubit/filter_cubit.dart';
 import 'package:duidku/cubit/home_cubit.dart';
 import 'package:duidku/shared/theme.dart';
@@ -55,7 +56,7 @@ class _HomePageState extends State<HomePage> {
                   height: 8,
                 ),
                 Text(
-                  "Sandi Aristio",
+                  "${context.read<AuthCubit>().profileModel.payload?.profile?.name}",
                   style: inter.copyWith(
                     fontSize: 25,
                     fontWeight: semiBold,
