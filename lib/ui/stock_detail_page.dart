@@ -16,6 +16,7 @@ class StockDetailPage extends StatefulWidget {
 class _StockDetailPageState extends State<StockDetailPage> {
   TextEditingController descriptionTextField = TextEditingController(text: "");
 
+  // ignore: unused_field, non_constant_identifier_names
   bool _Checked = false;
   final _controller = ValueNotifier<bool>(false);
 

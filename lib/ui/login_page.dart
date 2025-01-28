@@ -153,61 +153,6 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(
               height: 36,
             ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Divider(
-                    thickness: 1,
-                    height: 1,
-                    color: disableColor,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    "atau",
-                    style: inter.copyWith(
-                      color: disableColor,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Divider(
-                    thickness: 1,
-                    height: 1,
-                    color: disableColor,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 35,
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                            side: BorderSide(
-                              color: disableColor,
-                            ))),
-                    onPressed: () {},
-                    child: Text(
-                      "Masuk dengan ID Karyawan",
-                      style: inter.copyWith(
-                        fontWeight: medium,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       );
