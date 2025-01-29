@@ -33,8 +33,8 @@ class _CashierPageState extends State<CashierPage> {
   void initState() {
     context.read<ProductMenuCubit>().sellableProduct(
         token: context.read<AuthCubit>().token ?? "",
-        page: "$menuProductPage",
-        limit: "1");
+        page: "", //"$menuProductPage",
+        limit: ""); //"1");
     menuProductScrollController.addListener(_onSCroll);
     super.initState();
   }
