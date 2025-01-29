@@ -20,14 +20,12 @@ class ProductMenuCubit extends Cubit<ProductMenuState> {
     try {
       final data = await cashierService.getSellableProduct(
           token: token, page: page, limit: limit);
-      print("data berhasil diambil dengan isi: $data");
       emit(ProductMenuSuccess(data));
     } catch (e) {
       if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
         emit(ProductMenuTokenExpired());
       } else {
         emit(ProductMenuFailure(e.toString()));
-        print("data gagal diambil dengan pesan: ${e.toString()}");
       }
     }
   }
