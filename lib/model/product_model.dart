@@ -1,3 +1,4 @@
+// Ini adalah model dummy
 class ProductModel {
   int? productId;
   String? productCategory;

@@ -10,6 +10,7 @@ class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(AuthInitial());
 
   ProfileModel get profileModel => state.profileModel;
+  String? get token => state.token;
 
   Future<void> login({
     required String email,
@@ -23,7 +24,7 @@ class AuthCubit extends Cubit<AuthState> {
           await authService.getProfile(token: data.payload?.token ?? "");
       final _ =
           await authService.saveProfileData(email: email, password: password);
-      emit(LoginSuccess(profileData));
+      emit(LoginSuccess(profileData, data.payload?.token));
     } catch (e) {
       emit(AuthFailure(e.toString()));
     }
