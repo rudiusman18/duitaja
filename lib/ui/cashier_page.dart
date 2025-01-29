@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:duidku/cubit/auth_cubit.dart';
 import 'package:duidku/cubit/cashier_cubit.dart';
 import 'package:duidku/cubit/product_menu_cubit.dart';
@@ -23,11 +24,31 @@ class _CashierPageState extends State<CashierPage> {
   ExpandableController expandableController =
       ExpandableController(initialExpanded: true);
 
+  SellableProductModel menuProduct = SellableProductModel();
+
+  int menuProductPage = 1;
+  final menuProductScrollController = ScrollController();
+
   @override
   void initState() {
     context.read<ProductMenuCubit>().sellableProduct(
-        token: context.read<AuthCubit>().token ?? "", page: "1", limit: "1");
+          token: context.read<AuthCubit>().token ?? "",
+          page: "", //"$menuProductPage",
+          limit: "", //"1"
+        );
+    menuProductScrollController.addListener(_onSCroll);
     super.initState();
+  }
+
+  _onSCroll() {
+    if (menuProductScrollController.position.pixels ==
+        menuProductScrollController.position.maxScrollExtent) {
+      print("onscroll dijalankan");
+      context.read<ProductMenuCubit>().sellableProduct(
+          token: context.read<AuthCubit>().token ?? "",
+          page: "${menuProductPage + 1}",
+          limit: "1");
+    }
   }
 
   @override
@@ -55,8 +76,6 @@ class _CashierPageState extends State<CashierPage> {
       // Calculate the total sum of prices across all items
       totalPrice = groupPriceSums.values.reduce((a, b) => a + b);
     }
-
-    SellableProductModel menuProduct = SellableProductModel();
 
     Widget searchSetup() {
       return Container(
@@ -390,10 +409,15 @@ class _CashierPageState extends State<CashierPage> {
                       height: 140,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
-                        image: DecorationImage(
-                          image: NetworkImage(
-                            product.productURL ?? "",
-                          ),
+                      ),
+                      child: CachedNetworkImage(
+                        imageUrl: product.productURL ?? "",
+                        placeholder: (context, url) => Center(
+                            child: CircularProgressIndicator(
+                          color: primaryColor,
+                        )),
+                        errorWidget: (context, url, error) => Image.asset(
+                          "assets/no-image.png",
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -526,12 +550,14 @@ class _CashierPageState extends State<CashierPage> {
                   height: 72,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(6),
-                    image: DecorationImage(
-                      image: NetworkImage(
-                        product.productURL ?? "",
-                      ),
-                      fit: BoxFit.cover,
-                    ),
+                  ),
+                  child: CachedNetworkImage(
+                    imageUrl: product.productURL ?? "",
+                    placeholder: (context, url) =>
+                        const Center(child: CircularProgressIndicator()),
+                    errorWidget: (context, url, error) =>
+                        Image.asset("assets/no-image.png", fit: BoxFit.cover),
+                    fit: BoxFit.cover,
                   ),
                 ),
                 const SizedBox(
@@ -628,171 +654,185 @@ class _CashierPageState extends State<CashierPage> {
       );
     }
 
-    return BlocConsumer<ProductMenuCubit, ProductMenuState>(
-      listener: (context, state) {
-        if (state is ProductMenuTokenExpired) {
-          context.read<AuthCubit>().logout();
-          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-        }
-        if (state is ProductMenuSuccess) {
-          menuProduct = context.read<ProductMenuCubit>().sellableProductModel;
-        }
-      },
+    return BlocBuilder<IndexCashierFilterCubit, int>(
       builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: primaryColor,
-            title: Text(
-              "Kasir",
-              style: inter.copyWith(
-                fontWeight: medium,
-                fontSize: 20,
+        return BlocConsumer<ProductMenuCubit, ProductMenuState>(
+          listener: (context, state) {
+            if (state is ProductMenuTokenExpired) {
+              context.read<AuthCubit>().logout();
+              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+            }
+            if (state is ProductMenuSuccess) {
+              menuProduct =
+                  context.read<ProductMenuCubit>().sellableProductModel;
+            }
+          },
+          builder: (context, state) {
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: primaryColor,
+                title: Text(
+                  "Kasir",
+                  style: inter.copyWith(
+                    fontWeight: medium,
+                    fontSize: 20,
+                  ),
+                ),
+                leading: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Icon(
+                    Icons.chevron_left,
+                    size: 24,
+                  ),
+                ),
+                centerTitle: true,
               ),
-            ),
-            leading: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: const Icon(
-                Icons.chevron_left,
-                size: 24,
-              ),
-            ),
-            centerTitle: true,
-          ),
-          body: Stack(
-            children: [
-              // Content
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              body: Stack(
                 children: [
-                  const SizedBox(
-                    height: 24,
-                  ),
-                  searchSetup(),
-                  const SizedBox(
-                    height: 36,
-                  ),
-                  filterSetup(),
-                  const SizedBox(
-                    height: 24,
-                  ),
-                  orderListSetup(),
-                  const SizedBox(
-                    height: 24,
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                    ),
-                    child: Text(
-                      "Menu",
-                      textAlign: TextAlign.center, // Center align the text
-                      style: inter.copyWith(
-                        fontSize: 16,
-                        fontWeight: medium,
+                  // Content
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(
+                        height: 24,
                       ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        for (var i = 0;
-                            i < (menuProduct.payload?.length ?? 0);
-                            i++)
-                          itemMenuListSetup(
-                            product: ProductModel(
-                              productId: i,
-                              productURL: "${menuProduct.payload?[i].image}",
-                              productName: "${menuProduct.payload?[i].name}",
-                              stock: menuProduct.payload?[i].currentQuantity,
-                              description: "Belum ada deskripsi",
-                              price: menuProduct.payload?[i].price,
-                              discountPrice: menuProduct.payload?[i].promo !=
-                                      null
-                                  ? ((menuProduct.payload?[i].price ?? 0) -
-                                      (menuProduct.payload?[i].promo?.amount ??
-                                          0))
-                                  : 0,
-                              productCategory:
-                                  "${menuProduct.payload?[i].category?.name}",
-                              status:
-                                  "${menuProduct.payload?[i].statusDisplay}",
-                            ),
+                      searchSetup(),
+                      const SizedBox(
+                        height: 36,
+                      ),
+                      filterSetup(),
+                      const SizedBox(
+                        height: 24,
+                      ),
+                      orderListSetup(),
+                      const SizedBox(
+                        height: 24,
+                      ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                        ),
+                        child: Text(
+                          "Menu",
+                          textAlign: TextAlign.center, // Center align the text
+                          style: inter.copyWith(
+                            fontSize: 16,
+                            fontWeight: medium,
                           ),
-                        groupedProduct.isNotEmpty
-                            ? const SizedBox(
-                                height: 100,
-                              )
-                            : const SizedBox(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              // Floating card
-              context.read<ProductCartCubit>().state.isEmpty
-                  ? const SizedBox()
-                  : Align(
-                      alignment: Alignment.bottomCenter,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context,
-                                  "/main-page/cashier-page/detail-order-page")
-                              .then((_) => setState(() {}));
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 36,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 15,
-                            horizontal: 33,
-                          ),
-                          decoration: BoxDecoration(
-                            color: primaryColor,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Row(
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          controller: menuProductScrollController,
+                          child: Column(
                             children: [
-                              Image.asset(
-                                "assets/subtract.png",
-                                width: 30,
-                                height: 30,
-                              ),
-                              const SizedBox(
-                                width: 16,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  "$totalCount Pesanan",
-                                  style: inter.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: medium,
-                                    fontSize: 16,
+                              for (var i = 0;
+                                  i < (menuProduct.payload?.length ?? 0);
+                                  i++)
+                                itemMenuListSetup(
+                                  product: ProductModel(
+                                    productId: i,
+                                    productURL:
+                                        "${menuProduct.payload?[i].image}",
+                                    productName:
+                                        "${menuProduct.payload?[i].name}",
+                                    stock:
+                                        menuProduct.payload?[i].currentQuantity,
+                                    description: "Belum ada deskripsi",
+                                    price: menuProduct.payload?[i].price,
+                                    discountPrice:
+                                        menuProduct.payload?[i].promo != null
+                                            ? ((menuProduct.payload?[i].price ??
+                                                    0) -
+                                                (menuProduct.payload?[i].promo
+                                                        ?.amount ??
+                                                    0))
+                                            : 0,
+                                    productCategory:
+                                        "${menuProduct.payload?[i].category?.name}",
+                                    status:
+                                        "${menuProduct.payload?[i].statusDisplay}",
                                   ),
                                 ),
-                              ),
-                              Text(
-                                formatCurrency(totalPrice),
-                                style: inter.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: semiBold,
-                                  fontSize: 15,
-                                ),
-                              ),
+                              groupedProduct.isNotEmpty
+                                  ? const SizedBox(
+                                      height: 100,
+                                    )
+                                  : const SizedBox(),
                             ],
                           ),
                         ),
                       ),
-                    ),
-            ],
-          ),
+                    ],
+                  ),
+
+                  // Floating card
+                  context.read<ProductCartCubit>().state.isEmpty
+                      ? const SizedBox()
+                      : Align(
+                          alignment: Alignment.bottomCenter,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(context,
+                                      "/main-page/cashier-page/detail-order-page")
+                                  .then((_) => setState(() {}));
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 36,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 15,
+                                horizontal: 33,
+                              ),
+                              decoration: BoxDecoration(
+                                color: primaryColor,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Row(
+                                children: [
+                                  Image.asset(
+                                    "assets/subtract.png",
+                                    width: 30,
+                                    height: 30,
+                                  ),
+                                  const SizedBox(
+                                    width: 16,
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      "$totalCount Pesanan",
+                                      style: inter.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: medium,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    formatCurrency(totalPrice),
+                                    style: inter.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: semiBold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                ],
+              ),
+            );
+          },
         );
       },
     );
