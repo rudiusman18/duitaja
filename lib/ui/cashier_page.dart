@@ -32,18 +32,17 @@ class _CashierPageState extends State<CashierPage> {
   @override
   void initState() {
     context.read<ProductMenuCubit>().sellableProduct(
-          token: context.read<AuthCubit>().token ?? "",
-          page: "", //"$menuProductPage",
-          limit: "", //"1"
-        );
+        token: context.read<AuthCubit>().token ?? "",
+        page: "$menuProductPage",
+        limit: "1");
     menuProductScrollController.addListener(_onSCroll);
     super.initState();
   }
 
   _onSCroll() {
+    print("object triggered");
     if (menuProductScrollController.position.pixels ==
         menuProductScrollController.position.maxScrollExtent) {
-      print("onscroll dijalankan");
       context.read<ProductMenuCubit>().sellableProduct(
           token: context.read<AuthCubit>().token ?? "",
           page: "${menuProductPage + 1}",
@@ -665,6 +664,12 @@ class _CashierPageState extends State<CashierPage> {
             if (state is ProductMenuSuccess) {
               menuProduct =
                   context.read<ProductMenuCubit>().sellableProductModel;
+              // menuProduct.payload?.addAll(context
+              //         .read<ProductMenuCubit>()
+              //         .sellableProductModel
+              //         .payload
+              //         ?.toList() ??
+              //     []);
             }
           },
           builder: (context, state) {
