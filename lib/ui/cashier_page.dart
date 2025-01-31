@@ -10,7 +10,6 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
-import 'package:http/http.dart';
 
 class CashierPage extends StatefulWidget {
   const CashierPage({super.key});
@@ -24,30 +23,17 @@ class _CashierPageState extends State<CashierPage> {
   ExpandableController expandableController =
       ExpandableController(initialExpanded: true);
 
-  SellableProductModel menuProduct = SellableProductModel();
+  SellableProductModel? menuProduct;
 
   int menuProductPage = 1;
-  final menuProductScrollController = ScrollController();
 
   @override
   void initState() {
     context.read<ProductMenuCubit>().sellableProduct(
         token: context.read<AuthCubit>().token ?? "",
-        page: "", //"$menuProductPage",
-        limit: ""); //"1");
-    menuProductScrollController.addListener(_onSCroll);
+        page: "$menuProductPage", //"$menuProductPage",
+        limit: "1"); //"1");
     super.initState();
-  }
-
-  _onSCroll() {
-    print("object triggered");
-    if (menuProductScrollController.position.pixels ==
-        menuProductScrollController.position.maxScrollExtent) {
-      context.read<ProductMenuCubit>().sellableProduct(
-          token: context.read<AuthCubit>().token ?? "",
-          page: "${menuProductPage + 1}",
-          limit: "1");
-    }
   }
 
   @override
@@ -662,14 +648,17 @@ class _CashierPageState extends State<CashierPage> {
               Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
             }
             if (state is ProductMenuSuccess) {
-              menuProduct =
-                  context.read<ProductMenuCubit>().sellableProductModel;
-              // menuProduct.payload?.addAll(context
-              //         .read<ProductMenuCubit>()
-              //         .sellableProductModel
-              //         .payload
-              //         ?.toList() ??
-              //     []);
+              if (menuProduct == null) {
+                menuProduct =
+                    context.read<ProductMenuCubit>().sellableProductModel;
+              } else {
+                menuProduct?.payload?.addAll(context
+                        .read<ProductMenuCubit>()
+                        .sellableProductModel
+                        .payload
+                        ?.toList() ??
+                    []);
+              }
             }
           },
           builder: (context, state) {
@@ -732,45 +721,62 @@ class _CashierPageState extends State<CashierPage> {
                         height: 16,
                       ),
                       Expanded(
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          controller: menuProductScrollController,
-                          child: Column(
-                            children: [
-                              for (var i = 0;
-                                  i < (menuProduct.payload?.length ?? 0);
-                                  i++)
-                                itemMenuListSetup(
-                                  product: ProductModel(
-                                    productId: i,
-                                    productURL:
-                                        "${menuProduct.payload?[i].image}",
-                                    productName:
-                                        "${menuProduct.payload?[i].name}",
-                                    stock:
-                                        menuProduct.payload?[i].currentQuantity,
-                                    description: "Belum ada deskripsi",
-                                    price: menuProduct.payload?[i].price,
-                                    discountPrice:
-                                        menuProduct.payload?[i].promo != null
-                                            ? ((menuProduct.payload?[i].price ??
-                                                    0) -
-                                                (menuProduct.payload?[i].promo
-                                                        ?.amount ??
-                                                    0))
-                                            : 0,
-                                    productCategory:
-                                        "${menuProduct.payload?[i].category?.name}",
-                                    status:
-                                        "${menuProduct.payload?[i].statusDisplay}",
+                        child: NotificationListener(
+                          onNotification: (ScrollEndNotification notification) {
+                            if (menuProductPage !=
+                                context
+                                    .read<ProductMenuCubit>()
+                                    .sellableProductModel
+                                    .meta
+                                    ?.totalPage) {
+                              menuProductPage += 1;
+                              context.read<ProductMenuCubit>().sellableProduct(
+                                  token: context.read<AuthCubit>().token ?? "",
+                                  page: "$menuProductPage",
+                                  limit: "1");
+                            }
+                            return true;
+                          },
+                          child: SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: Column(
+                              children: [
+                                for (var i = 0;
+                                    i < (menuProduct?.payload?.length ?? 0);
+                                    i++)
+                                  itemMenuListSetup(
+                                    product: ProductModel(
+                                      productId: i,
+                                      productURL:
+                                          "${menuProduct?.payload?[i].image}",
+                                      productName:
+                                          "${menuProduct?.payload?[i].name}",
+                                      stock: menuProduct!
+                                          .payload?[i].currentQuantity,
+                                      description: "Belum ada deskripsi",
+                                      price: menuProduct?.payload?[i].price,
+                                      discountPrice:
+                                          menuProduct?.payload?[i].promo != null
+                                              ? ((menuProduct!
+                                                          .payload?[i].price ??
+                                                      0) -
+                                                  (menuProduct?.payload?[i]
+                                                          .promo?.amount ??
+                                                      0))
+                                              : 0,
+                                      productCategory:
+                                          "${menuProduct?.payload?[i].category?.name}",
+                                      status:
+                                          "${menuProduct?.payload?[i].statusDisplay}",
+                                    ),
                                   ),
-                                ),
-                              groupedProduct.isNotEmpty
-                                  ? const SizedBox(
-                                      height: 100,
-                                    )
-                                  : const SizedBox(),
-                            ],
+                                groupedProduct.isNotEmpty
+                                    ? const SizedBox(
+                                        height: 100,
+                                      )
+                                    : const SizedBox(),
+                              ],
+                            ),
                           ),
                         ),
                       ),

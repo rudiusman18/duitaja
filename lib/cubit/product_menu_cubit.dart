@@ -18,9 +18,6 @@ class ProductMenuCubit extends Cubit<ProductMenuState> {
   }) async {
     emit(ProductMenuLoading());
     try {
-      // if (page == "1") {
-      //   emit(ProductMenuInitial());
-      // }
       final data = await cashierService.getSellableProduct(
           token: token, page: page, limit: limit);
       emit(ProductMenuSuccess(data));
