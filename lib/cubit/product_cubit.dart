@@ -5,7 +5,8 @@ class ProductCubit extends Cubit<ProductModel> {
   ProductCubit()
       : super(
           ProductModel(
-            productId: 0,
+            id: 0,
+            productId: "",
             productCategory: '',
             productURL: '',
             productName: '',

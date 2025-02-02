@@ -5,7 +5,6 @@ import 'package:duidku/cubit/home_cubit.dart';
 import 'package:duidku/cubit/auth_cubit.dart';
 import 'package:duidku/cubit/page_cubit.dart';
 import 'package:duidku/cubit/product_cubit.dart';
-import 'package:duidku/cubit/product_menu_cubit.dart';
 import 'package:duidku/ui/add_report_page.dart';
 import 'package:duidku/ui/cashier_page.dart';
 import 'package:duidku/ui/detail_order_page.dart';
@@ -67,6 +66,9 @@ class MainApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => ProductMenuCubit(),
+        ),
+        BlocProvider(
+          create: (context) => CashierCubit(),
         ),
       ],
       child: MaterialApp(

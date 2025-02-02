@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
+import 'package:duidku/cubit/auth_cubit.dart';
 import 'package:duidku/cubit/cashier_cubit.dart';
 import 'package:duidku/model/product_model.dart';
 import 'package:duidku/shared/modal_alert.dart';
@@ -20,14 +22,23 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
   TextEditingController noteTextField = TextEditingController(text: "");
 
   @override
+  void initState() {
+    context
+        .read<CashierCubit>()
+        .tax(token: context.read<AuthCubit>().token ?? "");
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final groupedProduct = groupBy(
-        context.read<ProductCartCubit>().state, (item) => item.productId);
+    final groupedProduct =
+        groupBy(context.read<ProductCartCubit>().state, (item) => item.id);
 
     Map<int?, int> counts = {};
     int totalCount = 0;
     Map<int?, int> groupPriceSums = {};
     int totalPrice = 0;
+    int totalTax = 0;
     if (groupedProduct.isNotEmpty) {
       counts = groupedProduct.map((id, group) => MapEntry(id, group.length));
       // Sum all counts
@@ -49,6 +60,17 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
 
       // Calculate the total sum of prices across all items
       totalPrice = groupPriceSums.values.reduce((a, b) => a + b);
+
+      totalTax = (double.parse("$totalPrice") *
+              ((context
+                          .read<CashierCubit>()
+                          .taxModel
+                          .payload
+                          ?.first
+                          .precentage ??
+                      0) /
+                  100))
+          .toInt();
     }
 
     Widget generateCustomerFormOrder({
@@ -141,15 +163,17 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
+                SizedBox(
                   width: 72,
                   height: 72,
-                  decoration: BoxDecoration(
+                  child: ClipRRect(
                     borderRadius: BorderRadius.circular(6),
-                    image: DecorationImage(
-                      image: NetworkImage(
-                        product.productURL ?? "",
-                      ),
+                    child: CachedNetworkImage(
+                      imageUrl: product.productURL ?? "",
+                      placeholder: (context, url) =>
+                          const Center(child: CircularProgressIndicator()),
+                      errorWidget: (context, url, error) =>
+                          Image.asset("assets/no-image.png", fit: BoxFit.cover),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -252,7 +276,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                       const SizedBox(
                         width: 14,
                       ),
-                      Text('${groupedProduct[product.productId]?.length}'),
+                      Text('${groupedProduct[product.id]?.length}'),
                       const SizedBox(
                         width: 14,
                       ),
@@ -321,12 +345,12 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
             Row(
               children: [
                 Text(
-                  "Pajak",
+                  "Pajak(${(context.read<CashierCubit>().taxModel.payload?.first.precentage ?? 0)}%)",
                   style: inter,
                 ),
                 Expanded(
                   child: Text(
-                    formatCurrency(7000),
+                    formatCurrency(totalTax),
                     style: inter,
                     textAlign: TextAlign.end,
                   ),
@@ -354,7 +378,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                 ),
                 Expanded(
                   child: Text(
-                    formatCurrency(totalPrice + 7000),
+                    formatCurrency(totalPrice + totalTax),
                     style: inter,
                     textAlign: TextAlign.end,
                   ),
@@ -366,180 +390,203 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: primaryColor,
-        title: Text(
-          "Detail Pesanan",
-          style: inter.copyWith(
-            fontWeight: medium,
-            fontSize: 20,
+    return BlocConsumer<CashierCubit, CashierState>(
+      listener: (context, state) {
+        if (state is CashierSuccess) {
+          totalTax = (double.parse("$totalPrice") *
+                  ((context
+                              .read<CashierCubit>()
+                              .taxModel
+                              .payload
+                              ?.first
+                              .precentage ??
+                          0) /
+                      100))
+              .toInt();
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: primaryColor,
+            title: Text(
+              "Detail Pesanan",
+              style: inter.copyWith(
+                fontWeight: medium,
+                fontSize: 20,
+              ),
+            ),
+            leading: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: const Icon(
+                Icons.chevron_left,
+                size: 24,
+              ),
+            ),
+            centerTitle: true,
           ),
-        ),
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: const Icon(
-            Icons.chevron_left,
-            size: 24,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          customerInfoSetup(),
-          const SizedBox(
-            height: 32,
-          ),
-          Expanded(
-            child: ListView(
-              children: [
-                Divider(
-                  color: filterGreyColor,
-                  height: 10,
-                  thickness: 10,
-                ),
-                for (var index = 0; index < groupedProduct.length; index++) ...{
-                  itemMenuListSetup(
-                    product: groupedProduct[groupedProduct.keys.toList()[index]]
-                            ?[0] ??
-                        ProductModel(
-                          productId: -1,
-                          productURL: "",
-                          productName: '',
-                          stock: 0,
-                          description: '',
-                          price: 0,
-                          discountPrice: 0,
-                          productCategory: "",
-                          status: "",
-                        ),
-                  ),
-                },
-                Divider(
-                  color: filterGreyColor,
-                  height: 5,
-                  thickness: 5,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                  ),
-                  child: TextFormField(
-                    maxLines: 4,
-                    controller: noteTextField,
-                    decoration: InputDecoration(
-                      hintText: "Catatan...",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              customerInfoSetup(),
+              const SizedBox(
+                height: 32,
+              ),
+              Expanded(
+                child: ListView(
+                  children: [
+                    Divider(
+                      color: filterGreyColor,
+                      height: 10,
+                      thickness: 10,
+                    ),
+                    for (var index = 0;
+                        index < groupedProduct.length;
+                        index++) ...{
+                      itemMenuListSetup(
+                        product:
+                            groupedProduct[groupedProduct.keys.toList()[index]]
+                                    ?[0] ??
+                                ProductModel(
+                                  id: -1,
+                                  productId: "",
+                                  productURL: "",
+                                  productName: '',
+                                  stock: 0,
+                                  description: '',
+                                  price: 0,
+                                  discountPrice: 0,
+                                  productCategory: "",
+                                  status: "",
+                                ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                        borderSide: BorderSide(
-                          color: primaryColor,
-                          width: 2.0,
-                        ),
+                    },
+                    Divider(
+                      color: filterGreyColor,
+                      height: 5,
+                      thickness: 5,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 20,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+                      child: TextFormField(
+                        maxLines: 4,
+                        controller: noteTextField,
+                        decoration: InputDecoration(
+                          hintText: "Catatan...",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(
+                              color: primaryColor,
+                              width: 2.0,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Divider(
+                      color: filterGreyColor,
+                      height: 10,
+                      thickness: 10,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    orderSummarySetup()
+                  ],
                 ),
-                const SizedBox(
-                  height: 20,
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 20,
                 ),
-                Divider(
-                  color: filterGreyColor,
-                  height: 10,
-                  thickness: 10,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                orderSummarySetup()
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          Container(
-            margin: const EdgeInsets.symmetric(
-              horizontal: 20,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Total :",
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Total :",
+                            style: inter.copyWith(
+                              fontSize: 15,
+                              fontWeight: semiBold,
+                            ),
+                          ),
+                          Text(
+                            formatCurrency(totalPrice + totalTax),
+                            style: inter,
+                          ),
+                        ],
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        side: BorderSide(color: primaryColor),
+                      ),
+                      child: Text(
+                        "Bayar nanti",
                         style: inter.copyWith(
-                          fontSize: 15,
-                          fontWeight: semiBold,
+                          color: primaryColor,
+                          fontWeight: medium,
                         ),
                       ),
-                      Text(
-                        formatCurrency(totalPrice + 7000),
+                    ),
+                    const SizedBox(
+                      width: 12,
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                      ),
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) => ModalAlert(
+                                  title: "",
+                                  message:
+                                      "Apakah anda telah menerima pembayaran?",
+                                  completion: () {},
+                                ));
+                      },
+                      child: Text(
+                        "Bayar Sekarang",
                         style: inter,
                       ),
-                    ],
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    side: BorderSide(color: primaryColor),
-                  ),
-                  child: Text(
-                    "Bayar nanti",
-                    style: inter.copyWith(
-                      color: primaryColor,
-                      fontWeight: medium,
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(
-                  width: 12,
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                  ),
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) => ModalAlert(
-                              title: "",
-                              message: "Apakah anda telah menerima pembayaran?",
-                              completion: () {},
-                            ));
-                  },
-                  child: Text(
-                    "Bayar Sekarang",
-                    style: inter,
-                  ),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+            ],
           ),
-          const SizedBox(
-            height: 30,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

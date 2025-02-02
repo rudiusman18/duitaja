@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:duidku/model/order_model.dart';
 import 'package:duidku/model/sellable_product_model.dart';
+import 'package:duidku/model/tax_model.dart';
 import 'package:duidku/shared/utils.dart';
 import 'package:http/http.dart' as http;
 
@@ -28,4 +30,30 @@ class CashierService {
           "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
+
+  Future<TaxModel> getAllTax({required String token}) async {
+    var url = Uri.parse("$baseURL/tax");
+
+    var header = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+
+    var response = await http.get(url, headers: header);
+
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      var data = jsonDecode(response.body);
+      final TaxModel taxModel = TaxModel.fromJson(data);
+      return taxModel;
+    } else {
+      var data = jsonDecode(response.body);
+      throw Exception(
+          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+    }
+  }
+
+  Future<void> postOrder({
+    required String token,
+    required OrderModel order,
+  }) async {}
 }

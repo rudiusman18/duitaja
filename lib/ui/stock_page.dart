@@ -556,7 +556,8 @@ class _StockPageState extends State<StockPage> {
                 for (var index = 0; index < 25; index++) ...{
                   generateListProductItem(
                     product: ProductModel(
-                      productId: index,
+                      id: index,
+                      productId: "",
                       productURL:
                           "https://i.pinimg.com/originals/73/5a/31/735a3179ff4baf792989573c363b2af9.jpg",
                       productName: "Mie Goreng $index",

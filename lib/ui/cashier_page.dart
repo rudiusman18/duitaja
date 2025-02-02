@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:duidku/cubit/auth_cubit.dart';
 import 'package:duidku/cubit/cashier_cubit.dart';
-import 'package:duidku/cubit/product_menu_cubit.dart';
 import 'package:duidku/model/product_model.dart';
 import 'package:duidku/model/sellable_product_model.dart';
 import 'package:duidku/shared/theme.dart';
@@ -38,8 +37,8 @@ class _CashierPageState extends State<CashierPage> {
 
   @override
   Widget build(BuildContext context) {
-    final groupedProduct = groupBy(
-        context.read<ProductCartCubit>().state, (item) => item.productId);
+    final groupedProduct =
+        groupBy(context.read<ProductCartCubit>().state, (item) => item.id);
 
     Map<int?, int> counts = {};
     int totalCount = 0;
@@ -389,21 +388,17 @@ class _CashierPageState extends State<CashierPage> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
+                    SizedBox(
                       width: 140,
                       height: 140,
-                      decoration: BoxDecoration(
+                      child: ClipRRect(
                         borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: CachedNetworkImage(
-                        imageUrl: product.productURL ?? "",
-                        placeholder: (context, url) => Center(
-                            child: CircularProgressIndicator(
-                          color: primaryColor,
-                        )),
-                        errorWidget: (context, url, error) => Image.asset(
-                          "assets/no-image.png",
-                          fit: BoxFit.cover,
+                        child: CachedNetworkImage(
+                          imageUrl: product.productURL ?? "",
+                          errorWidget: (context, url, error) => Image.asset(
+                            "assets/no-image.png",
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
@@ -530,19 +525,19 @@ class _CashierPageState extends State<CashierPage> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
+                SizedBox(
                   width: 72,
                   height: 72,
-                  decoration: BoxDecoration(
+                  child: ClipRRect(
                     borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: CachedNetworkImage(
-                    imageUrl: product.productURL ?? "",
-                    placeholder: (context, url) =>
-                        const Center(child: CircularProgressIndicator()),
-                    errorWidget: (context, url, error) =>
-                        Image.asset("assets/no-image.png", fit: BoxFit.cover),
-                    fit: BoxFit.cover,
+                    child: CachedNetworkImage(
+                      imageUrl: product.productURL ?? "",
+                      placeholder: (context, url) =>
+                          const Center(child: CircularProgressIndicator()),
+                      errorWidget: (context, url, error) =>
+                          Image.asset("assets/no-image.png", fit: BoxFit.cover),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 const SizedBox(
@@ -746,7 +741,9 @@ class _CashierPageState extends State<CashierPage> {
                                     i++)
                                   itemMenuListSetup(
                                     product: ProductModel(
-                                      productId: i,
+                                      id: i,
+                                      productId:
+                                          "${menuProduct?.payload?[i].id}",
                                       productURL:
                                           "${menuProduct?.payload?[i].image}",
                                       productName:
