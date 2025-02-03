@@ -444,7 +444,6 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
         }
 
         if (state is CashierOrderSuccess) {
-          print("Dilakukan reset");
           context.read<ProductCartCubit>().resetProduct();
         }
 
