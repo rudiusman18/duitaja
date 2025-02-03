@@ -77,6 +77,10 @@ class ProductCartCubit extends Cubit<List<ProductModel>> {
   void addProduct(List<ProductModel> products) {
     emit(products);
   }
+
+  void resetProduct() {
+    emit([]);
+  }
 }
 
 class ProductMenuCubit extends Cubit<ProductMenuState> {

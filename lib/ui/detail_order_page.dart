@@ -442,6 +442,27 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
           context.read<AuthCubit>().logout();
           Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
         }
+
+        if (state is CashierOrderSuccess) {
+          print("Dilakukan reset");
+          context.read<ProductCartCubit>().resetProduct();
+        }
+
+        if (state is CashierOrderFailure) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                state.error,
+                style: inter,
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(
+                seconds: 5,
+              ),
+            ),
+          );
+        }
       },
       builder: (context, state) {
         return Scaffold(
