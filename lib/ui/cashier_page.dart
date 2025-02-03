@@ -298,7 +298,9 @@ class _CashierPageState extends State<CashierPage> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: status.toLowerCase().contains("belum")
+                        ? Colors.red
+                        : Colors.green,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
@@ -564,7 +566,7 @@ class _CashierPageState extends State<CashierPage> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        "Seluruh stok berada didalam keranjang",
+                                        "Seluruh stok habis atau berada didalam keranjang",
                                         style: inter,
                                       ),
                                       backgroundColor: Colors.red,

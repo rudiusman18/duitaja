@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -38,6 +40,13 @@ Future<bool> requestPermissions() async {
   } else {
     return false;
   }
+}
+
+// Digunakan untuk melakukan generate invoice (6 angka random)
+int generateSixDigitNumber() {
+  Random random = Random();
+  return 100000 +
+      random.nextInt(900000); // Generates a number between 100000 and 999999
 }
 
 // Base URL yang digunakan untuk mengambil data

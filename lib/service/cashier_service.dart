@@ -93,7 +93,7 @@ class CashierService {
     var response = await http.post(
       url,
       headers: header,
-      body: orderModel.toJson(),
+      body: jsonEncode(orderModel.toJson()),
     );
 
     if (response.statusCode >= 200 && response.statusCode <= 299) {

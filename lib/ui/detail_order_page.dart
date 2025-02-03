@@ -22,7 +22,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
   TextEditingController phoneNumberTextField = TextEditingController(text: "");
   TextEditingController noteTextField = TextEditingController(text: "");
 
-  List<Purchaseds>? purchaseds;
+  List<Purchaseds>? purchaseds = [];
 
   @override
   void initState() {
@@ -149,13 +149,16 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
     }
 
     Widget itemMenuListSetup({required ProductModel product}) {
-      purchaseds?.add(Purchaseds(
-        id: product.productId,
-        qty: groupedProduct[product.id]?.length,
-        priceAll: product.discountPrice ?? product.price,
-        promoId: product.discountId,
-        promoAmount: (product.price ?? 0) - (product.discountPrice ?? 0),
-      ));
+      if ((purchaseds?.length ?? 0) < groupedProduct.length) {
+        purchaseds?.add(Purchaseds(
+          id: product.productId,
+          qty: groupedProduct[product.id]?.length,
+          priceAll: product.discountPrice ?? product.price,
+          promoId: product.discountId,
+          promoAmount: (product.price ?? 0) - (product.discountPrice ?? 0),
+        ));
+      }
+
       return Column(
         children: [
           Divider(
@@ -606,7 +609,29 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                                   message:
                                       "Apakah anda telah menerima pembayaran?",
                                   completion: () {
-                                    // context.read<CashierCubit>().order(token: context.read<AuthCubit>().token ?? "", orderModel: );
+                                    OrderModel orderModel = OrderModel(
+                                      customerName: customerNameTextField.text,
+                                      phoneNumber: phoneNumberTextField.text,
+                                      notes: noteTextField.text,
+                                      paymentMethod: "CASH",
+                                      status: true,
+                                      subTotal: totalPrice,
+                                      tax: totalTax,
+                                      taxId: context
+                                          .read<CashierCubit>()
+                                          .taxModel
+                                          .payload
+                                          ?.first
+                                          .id,
+                                      invoiceNumber:
+                                          "#${generateSixDigitNumber()}",
+                                      purchaseds: purchaseds,
+                                    );
+                                    context.read<CashierCubit>().order(
+                                        token:
+                                            context.read<AuthCubit>().token ??
+                                                "",
+                                        orderModel: orderModel);
                                   },
                                 ));
                       },
