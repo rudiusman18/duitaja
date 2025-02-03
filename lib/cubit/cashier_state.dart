@@ -14,6 +14,10 @@ final class CashierLoading extends CashierState {
   CashierLoading() : super(TaxModel());
 }
 
+final class CashierOrderLoading extends CashierState {
+  CashierOrderLoading() : super(TaxModel());
+}
+
 final class CashierSuccess extends CashierState {
   final TaxModel taxModel;
   const CashierSuccess(this.taxModel) : super(taxModel);

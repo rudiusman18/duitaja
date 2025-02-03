@@ -4,6 +4,7 @@ import 'package:duidku/cubit/auth_cubit.dart';
 import 'package:duidku/cubit/cashier_cubit.dart';
 import 'package:duidku/model/order_model.dart';
 import 'package:duidku/model/product_model.dart';
+import 'package:duidku/shared/loading.dart';
 import 'package:duidku/shared/modal_alert.dart';
 import 'package:duidku/shared/theme.dart';
 import 'package:duidku/shared/utils.dart';
@@ -153,7 +154,9 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
         purchaseds?.add(Purchaseds(
           id: product.productId,
           qty: groupedProduct[product.id]?.length,
-          priceAll: product.discountPrice ?? product.price,
+          priceAll: product.discountPrice == null || product.discountPrice == 0
+              ? product.price
+              : product.discountPrice,
           promoId: product.discountId,
           promoAmount: (product.price ?? 0) - (product.discountPrice ?? 0),
         ));
@@ -439,15 +442,19 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
         }
 
         if (state is CashierTokenExpired) {
+          Navigator.pop(context);
           context.read<AuthCubit>().logout();
           Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
         }
 
         if (state is CashierOrderSuccess) {
+          Navigator.pop(context);
           context.read<ProductCartCubit>().resetProduct();
+          Navigator.pop(context);
         }
 
         if (state is CashierOrderFailure) {
+          Navigator.pop(context);
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -461,6 +468,18 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
               ),
             ),
           );
+          context
+              .read<CashierCubit>()
+              .tax(token: context.read<AuthCubit>().token ?? "");
+        }
+
+        if (state is CashierOrderLoading) {
+          showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (context) {
+                return const Loading();
+              });
         }
       },
       builder: (context, state) {

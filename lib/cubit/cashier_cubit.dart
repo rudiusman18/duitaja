@@ -32,7 +32,7 @@ class CashierCubit extends Cubit<CashierState> {
 
   Future<void> order(
       {required String token, required OrderModel orderModel}) async {
-    emit(CashierLoading());
+    emit(CashierOrderLoading());
     try {
       final _ = await CashierService()
           .postOrder(token: token, orderModel: orderModel);
