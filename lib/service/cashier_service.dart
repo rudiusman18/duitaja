@@ -14,9 +14,10 @@ class CashierService {
     required String page,
     required String limit,
     required String categoryId,
+    String search = "",
   }) async {
     var url = Uri.parse(
-        "$baseURL/sellable?page=$page&limit=$limit&category_id=$categoryId");
+        "$baseURL/sellable?page=$page&limit=$limit&category_id=$categoryId&search=$search");
     var header = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
@@ -35,6 +36,7 @@ class CashierService {
     }
   }
 
+// Fungsi yang digunakan untuk mengambil semua data pajak
   Future<TaxModel> getAllTax({required String token}) async {
     var url = Uri.parse("$baseURL/tax");
 
@@ -56,6 +58,7 @@ class CashierService {
     }
   }
 
+// Digunakan untuk mengambil data kategori kasir
   Future<CashierCategoryModel> getAllCashierCategory(
       {required String token}) async {
     var url = Uri.parse("$baseURL/category?status=true");
@@ -76,8 +79,29 @@ class CashierService {
     }
   }
 
+  // Digunakan untuk mengirim data pesanan
   Future<void> postOrder({
     required String token,
-    required OrderModel order,
-  }) async {}
+    required OrderModel orderModel,
+  }) async {
+    var url = Uri.parse("$baseURL/invoice/create");
+    var header = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+
+    var response = await http.post(
+      url,
+      headers: header,
+      body: orderModel.toJson(),
+    );
+
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      var data = jsonDecode(response.body);
+      return data;
+    } else {
+      var data = jsonDecode(response.body);
+      throw Exception("${data['errors']}");
+    }
+  }
 }

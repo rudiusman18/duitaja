@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:duidku/model/cashier_category_model.dart';
+import 'package:duidku/model/order_model.dart';
 import 'package:duidku/model/tax_model.dart';
 import 'package:duidku/service/cashier_service.dart';
 import 'package:meta/meta.dart';
@@ -25,6 +26,22 @@ class CashierCubit extends Cubit<CashierState> {
         emit(CashierTokenExpired());
       } else {
         emit(CashierFailure(e.toString()));
+      }
+    }
+  }
+
+  Future<void> order(
+      {required String token, required OrderModel orderModel}) async {
+    emit(CashierLoading());
+    try {
+      final _ = await CashierService()
+          .postOrder(token: token, orderModel: orderModel);
+      emit(CashierOrderSuccess());
+    } catch (e) {
+      if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
+        emit(CashierTokenExpired());
+      } else {
+        emit(CashierOrderFailure(e.toString(), state.taxtModel));
       }
     }
   }
@@ -73,15 +90,16 @@ class ProductMenuCubit extends Cubit<ProductMenuState> {
     required String page,
     required String limit,
     required String categoryId,
+    String search = "",
   }) async {
     emit(ProductMenuLoading());
     try {
-
       final data = await cashierService.getSellableProduct(
         token: token,
         page: page,
         limit: limit,
         categoryId: categoryId,
+        search: search,
       );
       emit(ProductMenuSuccess(data));
     } catch (e) {

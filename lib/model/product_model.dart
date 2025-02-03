@@ -8,6 +8,7 @@ class ProductModel {
   int? stock;
   String? description;
   int? price;
+  String? discountId;
   int? discountPrice;
   String? status;
 
@@ -20,6 +21,7 @@ class ProductModel {
     required this.stock,
     required this.description,
     required this.price,
+    required this.discountId,
     required this.discountPrice,
     required this.status,
   });

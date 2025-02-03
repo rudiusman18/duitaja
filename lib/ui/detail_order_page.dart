@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
 import 'package:duidku/cubit/auth_cubit.dart';
 import 'package:duidku/cubit/cashier_cubit.dart';
+import 'package:duidku/model/order_model.dart';
 import 'package:duidku/model/product_model.dart';
 import 'package:duidku/shared/modal_alert.dart';
 import 'package:duidku/shared/theme.dart';
@@ -20,6 +21,8 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
   TextEditingController customerNameTextField = TextEditingController(text: "");
   TextEditingController phoneNumberTextField = TextEditingController(text: "");
   TextEditingController noteTextField = TextEditingController(text: "");
+
+  List<Purchaseds>? purchaseds;
 
   @override
   void initState() {
@@ -146,6 +149,13 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
     }
 
     Widget itemMenuListSetup({required ProductModel product}) {
+      purchaseds?.add(Purchaseds(
+        id: product.productId,
+        qty: groupedProduct[product.id]?.length,
+        priceAll: product.discountPrice ?? product.price,
+        promoId: product.discountId,
+        promoAmount: (product.price ?? 0) - (product.discountPrice ?? 0),
+      ));
       return Column(
         children: [
           Divider(
@@ -282,10 +292,30 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          var products = context.read<ProductCartCubit>().state;
-                          products.add(product);
-                          context.read<ProductCartCubit>().addProduct(products);
-                          setState(() {});
+                          if ((groupedProduct[product.id]?.length ?? 0) <
+                              (product.stock ?? 0)) {
+                            var products =
+                                context.read<ProductCartCubit>().state;
+                            products.add(product);
+                            context
+                                .read<ProductCartCubit>()
+                                .addProduct(products);
+                            setState(() {});
+                          } else {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  "Seluruh stok berada didalam keranjang",
+                                  style: inter,
+                                ),
+                                backgroundColor: Colors.red,
+                                duration: const Duration(
+                                  seconds: 5,
+                                ),
+                              ),
+                            );
+                          }
                         },
                         child: const Icon(
                           Icons.add,
@@ -404,6 +434,11 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                       100))
               .toInt();
         }
+
+        if (state is CashierTokenExpired) {
+          context.read<AuthCubit>().logout();
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+        }
       },
       builder: (context, state) {
         return Scaffold(
@@ -457,6 +492,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                                   stock: 0,
                                   description: '',
                                   price: 0,
+                                  discountId: "",
                                   discountPrice: 0,
                                   productCategory: "",
                                   status: "",
@@ -569,7 +605,9 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                                   title: "",
                                   message:
                                       "Apakah anda telah menerima pembayaran?",
-                                  completion: () {},
+                                  completion: () {
+                                    // context.read<CashierCubit>().order(token: context.read<AuthCubit>().token ?? "", orderModel: );
+                                  },
                                 ));
                       },
                       child: Text(

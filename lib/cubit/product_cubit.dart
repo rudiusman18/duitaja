@@ -13,6 +13,7 @@ class ProductCubit extends Cubit<ProductModel> {
             stock: -1,
             description: '',
             price: -1,
+            discountId: '',
             discountPrice: -1,
             status: '',
           ),

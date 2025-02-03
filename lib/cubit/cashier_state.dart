@@ -24,6 +24,16 @@ final class CashierFailure extends CashierState {
   CashierFailure(this.error) : super(TaxModel());
 }
 
+final class CashierOrderSuccess extends CashierState {
+  CashierOrderSuccess() : super(TaxModel());
+}
+
+final class CashierOrderFailure extends CashierState {
+  final String error;
+  final TaxModel taxModel;
+  const CashierOrderFailure(this.error, this.taxModel) : super(taxModel);
+}
+
 final class CashierTokenExpired extends CashierState {
   CashierTokenExpired() : super(TaxModel());
 }

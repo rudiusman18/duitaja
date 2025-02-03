@@ -566,6 +566,7 @@ class _StockPageState extends State<StockPage> {
                           "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet",
                       price: 123000,
                       discountPrice: index % 2 == 0 ? 8000 : 0,
+                      discountId: "",
                       productCategory: "Makanan",
                       status: index % 2 == 0
                           ? "Aktif"
