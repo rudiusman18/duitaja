@@ -55,3 +55,44 @@ final class ProductMenuFailure extends ProductMenuState {
 final class ProductMenuTokenExpired extends ProductMenuState {
   ProductMenuTokenExpired() : super(SellableProductModel());
 }
+
+@immutable
+class IndexCashierFilterState {
+  final int categoryIndex;
+  final CashierCategoryModel cashierCategoryModel;
+  const IndexCashierFilterState(this.categoryIndex, this.cashierCategoryModel);
+}
+
+final class IndexCashierFilterIndex extends IndexCashierFilterState {
+  final int index;
+  final CashierCategoryModel cashierCategoryModel;
+  const IndexCashierFilterIndex(this.index, this.cashierCategoryModel)
+      : super(index, cashierCategoryModel);
+}
+
+final class IndexCashierFilterInitial extends IndexCashierFilterState {
+  IndexCashierFilterInitial() : super(0, CashierCategoryModel());
+}
+
+final class IndexCashierFilterLoading extends IndexCashierFilterState {
+  final int index;
+  IndexCashierFilterLoading(this.index) : super(index, CashierCategoryModel());
+}
+
+final class IndexCashierFilterSuccess extends IndexCashierFilterState {
+  final int index;
+  final CashierCategoryModel categoryModel;
+  const IndexCashierFilterSuccess(this.index, this.categoryModel)
+      : super(index, categoryModel);
+}
+
+final class IndexCashierFilterFailure extends IndexCashierFilterState {
+  final int index;
+  final String error;
+  IndexCashierFilterFailure(this.index, this.error)
+      : super(index, CashierCategoryModel());
+}
+
+final class IndexCashierFilterTokenExpired extends IndexCashierFilterState {
+  IndexCashierFilterTokenExpired() : super(0, CashierCategoryModel());
+}

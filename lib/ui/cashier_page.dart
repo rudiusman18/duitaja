@@ -26,12 +26,22 @@ class _CashierPageState extends State<CashierPage> {
 
   int menuProductPage = 1;
 
+  bool isEmptyData = false;
+
   @override
   void initState() {
     context.read<ProductMenuCubit>().sellableProduct(
-        token: context.read<AuthCubit>().token ?? "",
-        page: "$menuProductPage", //"$menuProductPage",
-        limit: "1"); //"1");
+          token: context.read<AuthCubit>().token ?? "",
+          page: "$menuProductPage", //"$menuProductPage",
+          limit: "100",
+          categoryId: "",
+        ); //"1");
+
+    context.read<IndexCashierFilterCubit>().category(
+          token: context.read<AuthCubit>().token ?? "",
+        );
+
+    context.read<IndexCashierFilterCubit>().setIndex(-1);
     super.initState();
   }
 
@@ -138,11 +148,22 @@ class _CashierPageState extends State<CashierPage> {
               ),
               GestureDetector(
                 onTap: () {
-                  context.read<IndexCashierFilterCubit>().setIndex(0);
+                  menuProductPage = 1;
+                  menuProduct = null;
+                  context.read<IndexCashierFilterCubit>().setIndex(-1);
+                  context.read<ProductMenuCubit>().sellableProduct(
+                        token: context.read<AuthCubit>().token ?? "",
+                        page: "1",
+                        limit: "100",
+                        categoryId: "",
+                      );
                 },
                 child: itemFilter(
                   name: "Semua",
-                  isSelected: context.read<IndexCashierFilterCubit>().state == 0
+                  isSelected: context
+                              .read<IndexCashierFilterCubit>()
+                              .cashierCategoryIndex ==
+                          -1
                       ? true
                       : false,
                 ),
@@ -150,48 +171,42 @@ class _CashierPageState extends State<CashierPage> {
               const SizedBox(
                 width: 20,
               ),
-              GestureDetector(
-                onTap: () {
-                  context.read<IndexCashierFilterCubit>().setIndex(1);
-                },
-                child: itemFilter(
-                  name: "Kopi",
-                  isSelected: context.read<IndexCashierFilterCubit>().state == 1
-                      ? true
-                      : false,
+              for (int index = 0;
+                  index <
+                      (context
+                              .read<IndexCashierFilterCubit>()
+                              .cashierCategoryModel
+                              .payload
+                              ?.length ??
+                          0);
+                  index++) ...{
+                GestureDetector(
+                  onTap: () {
+                    menuProductPage = 1;
+                    menuProduct = null;
+                    context.read<IndexCashierFilterCubit>().setIndex(index);
+                    context.read<ProductMenuCubit>().sellableProduct(
+                        token: context.read<AuthCubit>().token ?? "",
+                        page: "1",
+                        limit: "100",
+                        categoryId:
+                            "${context.read<IndexCashierFilterCubit>().cashierCategoryModel.payload?[index].id}");
+                  },
+                  child: itemFilter(
+                    name:
+                        "${context.read<IndexCashierFilterCubit>().cashierCategoryModel.payload?[index].name}",
+                    isSelected: context
+                                .read<IndexCashierFilterCubit>()
+                                .cashierCategoryIndex ==
+                            index
+                        ? true
+                        : false,
+                  ),
                 ),
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              GestureDetector(
-                onTap: () {
-                  context.read<IndexCashierFilterCubit>().setIndex(2);
-                },
-                child: itemFilter(
-                  name: "Makanan",
-                  isSelected: context.read<IndexCashierFilterCubit>().state == 2
-                      ? true
-                      : false,
+                const SizedBox(
+                  width: 20,
                 ),
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              GestureDetector(
-                onTap: () {
-                  context.read<IndexCashierFilterCubit>().setIndex(3);
-                },
-                child: itemFilter(
-                  name: "Minuman",
-                  isSelected: context.read<IndexCashierFilterCubit>().state == 3
-                      ? true
-                      : false,
-                ),
-              ),
-              const SizedBox(
-                width: 20,
-              ),
+              },
             ],
           ),
         ),
@@ -634,7 +649,7 @@ class _CashierPageState extends State<CashierPage> {
       );
     }
 
-    return BlocBuilder<IndexCashierFilterCubit, int>(
+    return BlocBuilder<IndexCashierFilterCubit, IndexCashierFilterState>(
       builder: (context, state) {
         return BlocConsumer<ProductMenuCubit, ProductMenuState>(
           listener: (context, state) {
@@ -653,6 +668,12 @@ class _CashierPageState extends State<CashierPage> {
                         .payload
                         ?.toList() ??
                     []);
+              }
+
+              if (menuProduct?.payload == null) {
+                isEmptyData = true;
+              } else {
+                isEmptyData = false;
               }
             }
           },
@@ -716,66 +737,91 @@ class _CashierPageState extends State<CashierPage> {
                         height: 16,
                       ),
                       Expanded(
-                        child: NotificationListener(
-                          onNotification: (ScrollEndNotification notification) {
-                            if (menuProductPage !=
-                                context
-                                    .read<ProductMenuCubit>()
-                                    .sellableProductModel
-                                    .meta
-                                    ?.totalPage) {
-                              menuProductPage += 1;
-                              context.read<ProductMenuCubit>().sellableProduct(
-                                  token: context.read<AuthCubit>().token ?? "",
-                                  page: "$menuProductPage",
-                                  limit: "1");
-                            }
-                            return true;
-                          },
-                          child: SingleChildScrollView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            child: Column(
-                              children: [
-                                for (var i = 0;
-                                    i < (menuProduct?.payload?.length ?? 0);
-                                    i++)
-                                  itemMenuListSetup(
-                                    product: ProductModel(
-                                      id: i,
-                                      productId:
-                                          "${menuProduct?.payload?[i].id}",
-                                      productURL:
-                                          "${menuProduct?.payload?[i].image}",
-                                      productName:
-                                          "${menuProduct?.payload?[i].name}",
-                                      stock: menuProduct!
-                                          .payload?[i].currentQuantity,
-                                      description: "Belum ada deskripsi",
-                                      price: menuProduct?.payload?[i].price,
-                                      discountPrice:
-                                          menuProduct?.payload?[i].promo != null
-                                              ? ((menuProduct!
-                                                          .payload?[i].price ??
-                                                      0) -
-                                                  (menuProduct?.payload?[i]
-                                                          .promo?.amount ??
-                                                      0))
-                                              : 0,
-                                      productCategory:
-                                          "${menuProduct?.payload?[i].category?.name}",
-                                      status:
-                                          "${menuProduct?.payload?[i].statusDisplay}",
-                                    ),
+                        child: isEmptyData
+                            ? Center(
+                                child: Text(
+                                  "Data tidak ditemukan",
+                                  style: inter,
+                                ),
+                              )
+                            : NotificationListener(
+                                onNotification:
+                                    (ScrollEndNotification notification) {
+                                  if (menuProductPage !=
+                                      context
+                                          .read<ProductMenuCubit>()
+                                          .sellableProductModel
+                                          .meta
+                                          ?.totalPage) {
+                                    menuProductPage += 1;
+                                    context
+                                        .read<ProductMenuCubit>()
+                                        .sellableProduct(
+                                          token:
+                                              context.read<AuthCubit>().token ??
+                                                  "",
+                                          page: "$menuProductPage",
+                                          limit: "100",
+                                          categoryId: context
+                                                      .read<
+                                                          IndexCashierFilterCubit>()
+                                                      .cashierCategoryIndex ==
+                                                  -1
+                                              ? ""
+                                              : "${context.read<IndexCashierFilterCubit>().cashierCategoryModel.payload?[context.read<IndexCashierFilterCubit>().cashierCategoryIndex].id}",
+                                        );
+                                  }
+                                  return true;
+                                },
+                                child: SingleChildScrollView(
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
+                                  child: Column(
+                                    children: [
+                                      for (var i = 0;
+                                          i <
+                                              (menuProduct?.payload?.length ??
+                                                  0);
+                                          i++)
+                                        itemMenuListSetup(
+                                          product: ProductModel(
+                                            id: i,
+                                            productId:
+                                                "${menuProduct?.payload?[i].id}",
+                                            productURL:
+                                                "${menuProduct?.payload?[i].image}",
+                                            productName:
+                                                "${menuProduct?.payload?[i].name}",
+                                            stock: menuProduct!
+                                                .payload?[i].currentQuantity,
+                                            description: "Belum ada deskripsi",
+                                            price:
+                                                menuProduct?.payload?[i].price,
+                                            discountPrice: menuProduct
+                                                        ?.payload?[i].promo !=
+                                                    null
+                                                ? ((menuProduct!.payload?[i]
+                                                            .price ??
+                                                        0) -
+                                                    (menuProduct?.payload?[i]
+                                                            .promo?.amount ??
+                                                        0))
+                                                : 0,
+                                            productCategory:
+                                                "${menuProduct?.payload?[i].category?.name}",
+                                            status:
+                                                "${menuProduct?.payload?[i].statusDisplay}",
+                                          ),
+                                        ),
+                                      groupedProduct.isNotEmpty
+                                          ? const SizedBox(
+                                              height: 100,
+                                            )
+                                          : const SizedBox(),
+                                    ],
                                   ),
-                                groupedProduct.isNotEmpty
-                                    ? const SizedBox(
-                                        height: 100,
-                                      )
-                                    : const SizedBox(),
-                              ],
-                            ),
-                          ),
-                        ),
+                                ),
+                              ),
                       ),
                     ],
                   ),

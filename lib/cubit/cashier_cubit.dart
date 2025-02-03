@@ -1,11 +1,11 @@
 import 'package:bloc/bloc.dart';
+import 'package:duidku/model/cashier_category_model.dart';
 import 'package:duidku/model/tax_model.dart';
 import 'package:duidku/service/cashier_service.dart';
 import 'package:meta/meta.dart';
 import 'package:duidku/model/product_model.dart';
 
 import 'package:duidku/model/sellable_product_model.dart';
-import 'package:duidku/service/cashier_service.dart';
 
 part 'cashier_state.dart';
 
@@ -30,11 +30,27 @@ class CashierCubit extends Cubit<CashierState> {
   }
 }
 
-class IndexCashierFilterCubit extends Cubit<int> {
-  IndexCashierFilterCubit() : super(0);
+class IndexCashierFilterCubit extends Cubit<IndexCashierFilterState> {
+  IndexCashierFilterCubit() : super(IndexCashierFilterInitial());
+  CashierCategoryModel get cashierCategoryModel => state.cashierCategoryModel;
+  int get cashierCategoryIndex => state.categoryIndex;
 
   void setIndex(int index) {
-    emit(index);
+    emit(IndexCashierFilterIndex(index, state.cashierCategoryModel));
+  }
+
+  Future<void> category({required String token}) async {
+    emit(IndexCashierFilterLoading(state.categoryIndex));
+    try {
+      final data = await CashierService().getAllCashierCategory(token: token);
+      emit(IndexCashierFilterSuccess(state.categoryIndex, data));
+    } catch (e) {
+      if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
+        emit(IndexCashierFilterTokenExpired());
+      } else {
+        emit(IndexCashierFilterFailure(state.categoryIndex, e.toString()));
+      }
+    }
   }
 }
 
@@ -56,11 +72,17 @@ class ProductMenuCubit extends Cubit<ProductMenuState> {
     required String token,
     required String page,
     required String limit,
+    required String categoryId,
   }) async {
     emit(ProductMenuLoading());
     try {
+
       final data = await cashierService.getSellableProduct(
-          token: token, page: page, limit: limit);
+        token: token,
+        page: page,
+        limit: limit,
+        categoryId: categoryId,
+      );
       emit(ProductMenuSuccess(data));
     } catch (e) {
       if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
