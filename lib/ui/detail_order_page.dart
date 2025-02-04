@@ -149,7 +149,8 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
       );
     }
 
-    Widget itemMenuListSetup({required ProductModel product}) {
+    Widget itemMenuListSetup(
+        {required ProductModel product, required int index}) {
       if ((purchaseds?.length ?? 0) < groupedProduct.length) {
         purchaseds?.add(Purchaseds(
           id: product.productId,
@@ -278,6 +279,29 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                             context
                                 .read<ProductCartCubit>()
                                 .addProduct(products);
+
+                            if ((purchaseds?.length ?? 0) <
+                                groupedProduct.length) {
+                              purchaseds?.add(Purchaseds(
+                                id: product.productId,
+                                qty: groupedProduct[product.id]?.length,
+                                priceAll: product.discountPrice == null ||
+                                        product.discountPrice == 0
+                                    ? product.price
+                                    : product.discountPrice,
+                                promoId: product.discountId,
+                                promoAmount: (product.price ?? 0) -
+                                    (product.discountPrice ?? 0),
+                              ));
+                            }
+
+                            if ((purchaseds![index].qty ?? 0) != 0) {
+                              purchaseds![index].qty =
+                                  (purchaseds![index].qty ?? 0) - 1;
+                            } else {
+                              purchaseds?.removeAt(index);
+                            }
+
                             if (products.isEmpty) {
                               Navigator.pop(context);
                             }
@@ -306,6 +330,9 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                             context
                                 .read<ProductCartCubit>()
                                 .addProduct(products);
+
+                            purchaseds![index].qty =
+                                (purchaseds![index].qty ?? 0) + 1;
                             setState(() {});
                           } else {
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -539,6 +566,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                                   productCategory: "",
                                   status: "",
                                 ),
+                        index: index,
                       ),
                     },
                     Divider(
@@ -650,8 +678,13 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                                   completion: () {
                                     OrderModel orderModel = OrderModel(
                                       customerName: customerNameTextField.text,
-                                      phoneNumber: phoneNumberTextField.text,
-                                      notes: noteTextField.text,
+                                      phoneNumber:
+                                          phoneNumberTextField.text == ""
+                                              ? null
+                                              : phoneNumberTextField.text,
+                                      notes: noteTextField.text == ""
+                                          ? null
+                                          : noteTextField.text,
                                       paymentMethod: "CASH",
                                       status: true,
                                       subTotal: totalPrice,

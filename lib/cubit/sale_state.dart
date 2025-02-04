@@ -27,3 +27,31 @@ final class SaleFailure extends SaleState {
 final class SaleTokenExpired extends SaleState {
   SaleTokenExpired() : super(SaleHistoryModel());
 }
+
+@immutable
+final class DetailSaleState {
+  final DetailSaleHistoryModel detailSaleHistoryModel;
+  const DetailSaleState(this.detailSaleHistoryModel);
+}
+
+final class DetailSaleInitial extends DetailSaleState {
+  DetailSaleInitial() : super(DetailSaleHistoryModel());
+}
+
+final class DetailSaleLoading extends DetailSaleState {
+  DetailSaleLoading() : super(DetailSaleHistoryModel());
+}
+
+final class DetailSaleSuccess extends DetailSaleState {
+  final DetailSaleHistoryModel detailData;
+  const DetailSaleSuccess(this.detailData) : super(detailData);
+}
+
+final class DetailSaleFailure extends DetailSaleState {
+  final String error;
+  DetailSaleFailure(this.error) : super(DetailSaleHistoryModel());
+}
+
+final class DetailSaleTokenExpired extends DetailSaleState {
+  DetailSaleTokenExpired() : super(DetailSaleHistoryModel());
+}

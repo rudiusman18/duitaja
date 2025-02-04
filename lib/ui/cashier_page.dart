@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:duidku/cubit/auth_cubit.dart';
 import 'package:duidku/cubit/cashier_cubit.dart';
+import 'package:duidku/cubit/page_cubit.dart';
 import 'package:duidku/cubit/sale_cubit.dart';
 import 'package:duidku/model/product_model.dart';
 import 'package:duidku/model/sellable_product_model.dart';
+import 'package:duidku/shared/sale_detail_page.dart';
 import 'package:duidku/shared/theme.dart';
 import 'package:duidku/shared/utils.dart';
 import 'package:expandable/expandable.dart';
@@ -36,6 +38,8 @@ class _CashierPageState extends State<CashierPage> {
           page: "$menuProductPage",
           limit: "100",
           categoryId: "",
+          inStatus: "active",
+          search: menuSearchTextField.text,
         );
 
     context.read<SaleCubit>().allSalesHistory(
@@ -103,6 +107,7 @@ class _CashierPageState extends State<CashierPage> {
                             -1
                         ? ""
                         : "${context.read<IndexCashierFilterCubit>().cashierCategoryModel.payload?[context.read<IndexCashierFilterCubit>().cashierCategoryIndex].id}",
+                    inStatus: "active",
                     search: menuSearchTextField.text,
                   );
             }
@@ -121,6 +126,7 @@ class _CashierPageState extends State<CashierPage> {
                           -1
                       ? ""
                       : "${context.read<IndexCashierFilterCubit>().cashierCategoryModel.payload?[context.read<IndexCashierFilterCubit>().cashierCategoryIndex].id}",
+                  inStatus: "active",
                   search: menuSearchTextField.text,
                 );
           },
@@ -202,6 +208,8 @@ class _CashierPageState extends State<CashierPage> {
                         page: "1",
                         limit: "100",
                         categoryId: "",
+                        inStatus: "active",
+                        search: menuSearchTextField.text,
                       );
                 },
                 child: itemFilter(
@@ -232,11 +240,14 @@ class _CashierPageState extends State<CashierPage> {
                     menuProduct = null;
                     context.read<IndexCashierFilterCubit>().setIndex(index);
                     context.read<ProductMenuCubit>().sellableProduct(
-                        token: context.read<AuthCubit>().token ?? "",
-                        page: "1",
-                        limit: "100",
-                        categoryId:
-                            "${context.read<IndexCashierFilterCubit>().cashierCategoryModel.payload?[index].id}");
+                          token: context.read<AuthCubit>().token ?? "",
+                          page: "1",
+                          limit: "100",
+                          categoryId:
+                              "${context.read<IndexCashierFilterCubit>().cashierCategoryModel.payload?[index].id}",
+                          search: menuSearchTextField.text,
+                          inStatus: "active",
+                        );
                   },
                   child: itemFilter(
                     name:
@@ -260,87 +271,101 @@ class _CashierPageState extends State<CashierPage> {
     }
 
     Widget orderListItem({
+      required String payloadId,
       required String name,
       required String status,
       required String orderID,
       required String numberOfItems,
     }) {
-      return Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 9,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: greyColor1,
-            )),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: inter.copyWith(
-                    fontSize: 15,
-                    fontWeight: semiBold,
-                  ),
-                ),
-                const SizedBox(
-                  height: 9,
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: status.toLowerCase().contains("belum")
-                        ? Colors.red
-                        : Colors.green,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    status,
+      return GestureDetector(
+        onTap: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return SaleDetailPage(
+                  saleId: payloadId,
+                );
+              });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 9,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: greyColor1,
+              )),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
                     style: inter.copyWith(
-                      fontWeight: medium,
-                      fontSize: 12,
-                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: semiBold,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(
-              width: 21,
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  orderID,
-                  style: inter.copyWith(
-                    fontWeight: extraLight,
-                    fontSize: 12,
+                  const SizedBox(
+                    height: 9,
                   ),
-                ),
-                const SizedBox(
-                  height: 9,
-                ),
-                Text(
-                  numberOfItems,
-                  style: inter.copyWith(
-                    fontSize: 12,
-                    fontWeight: extraLight,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: status.toLowerCase().contains("belum")
+                          ? Colors.red
+                          : status.toLowerCase().contains("refund")
+                              ? Colors.blue
+                              : Colors.green,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      status,
+                      style: inter.copyWith(
+                        fontWeight: medium,
+                        fontSize: 12,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            )
-          ],
+                ],
+              ),
+              const SizedBox(
+                width: 21,
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    orderID,
+                    style: inter.copyWith(
+                      fontWeight: extraLight,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 9,
+                  ),
+                  Text(
+                    numberOfItems,
+                    style: inter.copyWith(
+                      fontSize: 12,
+                      fontWeight: extraLight,
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       );
     }
@@ -413,6 +438,8 @@ class _CashierPageState extends State<CashierPage> {
                             width: 23,
                           ),
                     orderListItem(
+                      payloadId:
+                          "${context.read<SaleCubit>().saleHistoryModel.payload?[i].id}",
                       name:
                           "${context.read<SaleCubit>().saleHistoryModel.payload?[i].customerName}",
                       status:
@@ -422,7 +449,23 @@ class _CashierPageState extends State<CashierPage> {
                       numberOfItems:
                           "${context.read<SaleCubit>().saleHistoryModel.payload?[i].countSale} Barang",
                     ),
-                  }
+                  },
+                  const SizedBox(
+                    width: 23,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.read<PageCubit>().setPage(2);
+                    },
+                    child: Text(
+                      "Lihat Lebih\nBanyak",
+                      style: inter.copyWith(
+                        color: Colors.lightBlue,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -860,6 +903,8 @@ class _CashierPageState extends State<CashierPage> {
                                                       -1
                                                   ? ""
                                                   : "${context.read<IndexCashierFilterCubit>().cashierCategoryModel.payload?[context.read<IndexCashierFilterCubit>().cashierCategoryIndex].id}",
+                                              search: menuSearchTextField.text,
+                                              inStatus: "active",
                                             );
                                       }
                                       return true;
@@ -936,6 +981,7 @@ class _CashierPageState extends State<CashierPage> {
                                   Navigator.pushNamed(context,
                                           "/main-page/cashier-page/detail-order-page")
                                       .then((_) {
+                                    setState(() {});
                                     menuProductPage = 1;
                                     menuProduct = null;
                                     context
@@ -947,6 +993,8 @@ class _CashierPageState extends State<CashierPage> {
                                           page: "$menuProductPage",
                                           limit: "100",
                                           categoryId: "",
+                                          inStatus: "active",
+                                          search: menuSearchTextField.text,
                                         );
 
                                     context.read<SaleCubit>().allSalesHistory(

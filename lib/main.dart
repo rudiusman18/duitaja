@@ -74,6 +74,9 @@ class MainApp extends StatelessWidget {
         BlocProvider(
           create: (context) => SaleCubit(),
         ),
+        BlocProvider(
+          create: (context) => DetailSaleCubit(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

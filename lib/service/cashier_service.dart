@@ -14,10 +14,11 @@ class CashierService {
     required String page,
     required String limit,
     required String categoryId,
-    String search = "",
+    required String inStatus,
+    required String search,
   }) async {
     var url = Uri.parse(
-        "$baseURL/sellable?page=$page&limit=$limit&category_id=$categoryId&search=$search");
+        "$baseURL/sellable?page=$page&limit=$limit&category_id=$categoryId&search=$search&in_status=$inStatus");
     var header = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
@@ -101,7 +102,7 @@ class CashierService {
       return data;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception("${data['errors']}");
+      throw Exception("${data['errors'] ?? data['message']}");
     }
   }
 }

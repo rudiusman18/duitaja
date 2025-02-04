@@ -94,7 +94,8 @@ class ProductMenuCubit extends Cubit<ProductMenuState> {
     required String page,
     required String limit,
     required String categoryId,
-    String search = "",
+    required String inStatus,
+    required String search,
   }) async {
     emit(ProductMenuLoading());
     try {
@@ -103,6 +104,7 @@ class ProductMenuCubit extends Cubit<ProductMenuState> {
         page: page,
         limit: limit,
         categoryId: categoryId,
+        inStatus: inStatus,
         search: search,
       );
       emit(ProductMenuSuccess(data));
