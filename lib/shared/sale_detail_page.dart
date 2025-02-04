@@ -125,8 +125,12 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
                         ),
                         generateInfoitem(
                           title: "No Hp: ",
-                          value:
-                              detailSaleHistoryModel.payload?.phoneNumber ?? "",
+                          value: (detailSaleHistoryModel.payload?.phoneNumber ??
+                                      "") ==
+                                  ""
+                              ? "-"
+                              : detailSaleHistoryModel.payload?.phoneNumber ??
+                                  "",
                         ),
                         const SizedBox(
                           height: 16,
@@ -229,6 +233,36 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
                           title: "Kembalian: ",
                           value: (formatCurrency(0)),
                         ),
+                        if ((detailSaleHistoryModel.payload?.status ?? "")
+                                .toLowerCase() ==
+                            "lunas") ...{
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                              ),
+                              onPressed: () {
+                                context
+                                    .read<RefundSaleCubit>()
+                                    .refundSalesHistory(
+                                      token:
+                                          context.read<AuthCubit>().token ?? "",
+                                      payloadId:
+                                          detailSaleHistoryModel.payload?.id ??
+                                              "",
+                                    );
+                              },
+                              child: Text(
+                                "Refund",
+                                style: inter,
+                              ),
+                            ),
+                          ),
+                        }
                       ],
                     ),
             );

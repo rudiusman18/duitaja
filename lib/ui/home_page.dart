@@ -3,6 +3,7 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:duidku/cubit/auth_cubit.dart';
 import 'package:duidku/cubit/filter_cubit.dart';
 import 'package:duidku/cubit/home_cubit.dart';
+import 'package:duidku/cubit/sale_cubit.dart';
 import 'package:duidku/shared/theme.dart';
 import 'package:duidku/shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    context.read<SaleCubit>().allSalesHistory(
+          token: context.read<AuthCubit>().token ?? "",
+          page: "1",
+          limit: "15",
+          status: "",
+          startDate: "",
+          endDate: "",
+        );
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget profile() {
@@ -292,7 +306,11 @@ class _HomePageState extends State<HomePage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: primaryColor,
+                        color: status.toLowerCase() == "lunas"
+                            ? Colors.green
+                            : status.toLowerCase() == "refund"
+                                ? Colors.blue
+                                : Colors.red,
                         borderRadius: BorderRadius.circular(
                           20,
                         ),
@@ -326,183 +344,211 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    return BlocBuilder<ReportCardIndexCubit, int>(
+    return BlocConsumer<SaleCubit, SaleState>(
+      listener: (context, state) {},
       builder: (context, state) {
-        return Scaffold(
-          backgroundColor: primaryColor,
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withAlpha(99),
-                  primaryColor,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  profile(),
-                  const SizedBox(
-                    height: 24,
+        return BlocBuilder<ReportCardIndexCubit, int>(
+          builder: (context, state) {
+            return Scaffold(
+              backgroundColor: primaryColor,
+              body: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.white.withAlpha(99),
+                      primaryColor,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.centerRight,
                   ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 35,
-                    ),
-                    child: CarouselSlider(
-                      options: CarouselOptions(
-                        initialPage: context.read<ReportCardIndexCubit>().state,
-                        height: 150,
-                        viewportFraction: 1,
-                        autoPlay: true,
-                        onPageChanged: (index, reason) {
-                          context.read<ReportCardIndexCubit>().setIndex(index);
-                        },
+                ),
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      profile(),
+                      const SizedBox(
+                        height: 24,
                       ),
-                      items: [
-                        reportCard(
-                          title: "SandiAI",
-                          message:
-                              "50 juta diperlukan untuk mengelola operasional dan pembayaran hutang di bulan depan.",
-                          subtitle: "+20% dari bulan lalu",
-                          asset: "assets/Magicpen.png",
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 35,
                         ),
-                        reportCard(
-                          title: "Penjualan bulan ini",
-                          message: formatCurrency(45231),
-                          subtitle: "+20% dari bulan lalu",
-                          asset: "assets/calendar-check.png",
-                        ),
-                        reportCard(
-                          title: "Penjualan hari ini",
-                          message: formatCurrency(45231),
-                          subtitle: "+20% dari bulan lalu",
-                          asset: "assets/Chart_alt_fill.png",
-                        ),
-                        reportCard(
-                          title: "Produk terlaris hari ini",
-                          message: "Nasi Goreng",
-                          subtitle: "150 Terjual",
-                          asset: "assets/subtract.png",
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  DotsIndicator(
-                    dotsCount: 4,
-                    position: context.read<ReportCardIndexCubit>().state,
-                    decorator: DotsDecorator(
-                      activeColor: cardColor2,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 21,
-                  ),
-                  Expanded(
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(
-                            15,
+                        child: CarouselSlider(
+                          options: CarouselOptions(
+                            initialPage:
+                                context.read<ReportCardIndexCubit>().state,
+                            height: 150,
+                            viewportFraction: 1,
+                            autoPlay: true,
+                            onPageChanged: (index, reason) {
+                              context
+                                  .read<ReportCardIndexCubit>()
+                                  .setIndex(index);
+                            },
                           ),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(
-                            height: 11,
-                          ),
-                          Container(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 35,
+                          items: [
+                            reportCard(
+                              title: "SandiAI",
+                              message:
+                                  "50 juta diperlukan untuk mengelola operasional dan pembayaran hutang di bulan depan.",
+                              subtitle: "+20% dari bulan lalu",
+                              asset: "assets/Magicpen.png",
                             ),
-                            child: Center(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        '/main-page/cashier-page',
-                                      );
-                                    },
-                                    child: generateMenuItem(
-                                      title: "Kasir",
-                                      image: "assets/cart.png",
-                                    ),
-                                  ),
-                                  generateMenuItem(
-                                    title: "E-Commerce",
-                                    image: "assets/chart.png",
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      context.read<FilterCubit>().setFilter({});
-                                      Navigator.pushNamed(context,
-                                          '/main-page/stock-opname-page');
-                                    },
-                                    child: generateMenuItem(
-                                      title: "Stok Opname",
-                                      image: "assets/desk.png",
-                                    ),
-                                  ),
-                                ],
+                            reportCard(
+                              title: "Penjualan bulan ini",
+                              message: formatCurrency(45231),
+                              subtitle: "+20% dari bulan lalu",
+                              asset: "assets/calendar-check.png",
+                            ),
+                            reportCard(
+                              title: "Penjualan hari ini",
+                              message: formatCurrency(45231),
+                              subtitle: "+20% dari bulan lalu",
+                              asset: "assets/Chart_alt_fill.png",
+                            ),
+                            reportCard(
+                              title: "Produk terlaris hari ini",
+                              message: "Nasi Goreng",
+                              subtitle: "150 Terjual",
+                              asset: "assets/subtract.png",
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      DotsIndicator(
+                        dotsCount: 4,
+                        position: context.read<ReportCardIndexCubit>().state,
+                        decorator: DotsDecorator(
+                          activeColor: cardColor2,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 21,
+                      ),
+                      Expanded(
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(
+                                15,
                               ),
                             ),
                           ),
-                          const SizedBox(
-                            height: 40,
-                          ),
-                          Container(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                            ),
-                            child: Text(
-                              "Riwayat Penjualan",
-                              style: inter.copyWith(
-                                fontWeight: medium,
-                                fontSize: 13,
-                                color: greyColor,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(
+                                height: 11,
                               ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 16,
-                          ),
-                          Expanded(
-                            child: ListView(
-                              children: [
-                                for (var i = 0; i < 20; i++)
-                                  generateSalesHistoryItem(
-                                    buyerName: "Imam",
-                                    orderAmount: "4",
-                                    date: "15 November 2024",
-                                    time: "15:28PM",
-                                    status: "Lunas",
-                                    price: "Rp. 123.000",
+                              Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 35,
+                                ),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.pushNamed(
+                                            context,
+                                            '/main-page/cashier-page',
+                                          );
+                                        },
+                                        child: generateMenuItem(
+                                          title: "Kasir",
+                                          image: "assets/cart.png",
+                                        ),
+                                      ),
+                                      generateMenuItem(
+                                        title: "E-Commerce",
+                                        image: "assets/chart.png",
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          context
+                                              .read<FilterCubit>()
+                                              .setFilter({});
+                                          Navigator.pushNamed(context,
+                                              '/main-page/stock-opname-page');
+                                        },
+                                        child: generateMenuItem(
+                                          title: "Stok Opname",
+                                          image: "assets/desk.png",
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                              ],
-                            ),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 40,
+                              ),
+                              Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                ),
+                                child: Text(
+                                  "Riwayat Penjualan",
+                                  style: inter.copyWith(
+                                    fontWeight: medium,
+                                    fontSize: 13,
+                                    color: greyColor,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              Expanded(
+                                child: ListView(
+                                  children: [
+                                    for (var i = 0;
+                                        i <
+                                            (context
+                                                    .read<SaleCubit>()
+                                                    .saleHistoryModel
+                                                    .payload
+                                                    ?.length ??
+                                                0);
+                                        i++)
+                                      generateSalesHistoryItem(
+                                        buyerName:
+                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].customerName}",
+                                        orderAmount:
+                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].countSale}",
+                                        date:
+                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].createdAt?.split(" ").first}",
+                                        time:
+                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].createdAt?.split(" ").last}",
+                                        status:
+                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].status}",
+                                        price: formatCurrency(context
+                                                .read<SaleCubit>()
+                                                .saleHistoryModel
+                                                .payload?[i]
+                                                .subTotal ??
+                                            0),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

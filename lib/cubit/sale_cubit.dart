@@ -48,7 +48,6 @@ class DetailSaleCubit extends Cubit<DetailSaleState> {
 
   Future<void> detailSalesHistory(
       {required String token, required String payloadId}) async {
-    print("Token yang digunakan adalah: $token");
     emit(DetailSaleLoading());
     try {
       final data = await SaleService()
@@ -59,6 +58,30 @@ class DetailSaleCubit extends Cubit<DetailSaleState> {
         emit(DetailSaleTokenExpired());
       } else {
         emit(DetailSaleFailure(e.toString()));
+      }
+    }
+  }
+}
+
+class RefundSaleCubit extends Cubit<RefundSaleState> {
+  RefundSaleCubit() : super(RefundSaleInitial());
+
+  Future<void> refundSalesHistory({
+    required String token,
+    required String payloadId,
+  }) async {
+    emit(RefundSaleLoading());
+    try {
+      final _ = await SaleService()
+          .putRefundSaleHistory(token: token, payloadId: payloadId);
+      print("sukses");
+      emit(RefundSaleSuccess());
+    } catch (e) {
+      print("gagal $e");
+      if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
+        emit(RefundSaleTokenExpired());
+      } else {
+        emit(RefundSaleFailure(e.toString()));
       }
     }
   }

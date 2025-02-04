@@ -55,3 +55,19 @@ final class DetailSaleFailure extends DetailSaleState {
 final class DetailSaleTokenExpired extends DetailSaleState {
   DetailSaleTokenExpired() : super(DetailSaleHistoryModel());
 }
+
+@immutable
+final class RefundSaleState {}
+
+final class RefundSaleInitial extends RefundSaleState {}
+
+final class RefundSaleLoading extends RefundSaleState {}
+
+final class RefundSaleSuccess extends RefundSaleState {}
+
+final class RefundSaleFailure extends RefundSaleState {
+  final String error;
+  RefundSaleFailure(this.error);
+}
+
+final class RefundSaleTokenExpired extends RefundSaleState {}

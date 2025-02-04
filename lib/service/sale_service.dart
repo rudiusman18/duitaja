@@ -55,4 +55,24 @@ class SaleService {
           "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
+
+  // Digunakan untuk melakukan refund data
+  Future<void> putRefundSaleHistory(
+      {required String token, required String payloadId}) async {
+    var url = Uri.parse("$baseURL/refund/$payloadId");
+    var header = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+    var response = await http.patch(url, headers: header);
+
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      final data = jsonDecode(response.body);
+      return data;
+    } else {
+      var data = jsonDecode(response.body);
+      throw Exception(
+          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+    }
+  }
 }
