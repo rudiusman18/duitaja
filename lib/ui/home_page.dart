@@ -4,6 +4,7 @@ import 'package:duidku/cubit/auth_cubit.dart';
 import 'package:duidku/cubit/filter_cubit.dart';
 import 'package:duidku/cubit/home_cubit.dart';
 import 'package:duidku/cubit/sale_cubit.dart';
+import 'package:duidku/shared/sale_detail_page.dart';
 import 'package:duidku/shared/theme.dart';
 import 'package:duidku/shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -229,6 +230,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     Widget generateSalesHistoryItem({
+      required String payloadId,
       required String buyerName,
       required String orderAmount,
       required String date,
@@ -236,111 +238,123 @@ class _HomePageState extends State<HomePage> {
       required String status,
       required String price,
     }) {
-      return Column(
-        children: [
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: greyColor1,
-          ),
-          const SizedBox(
-            height: 14,
-          ),
-          Container(
-            margin: const EdgeInsets.symmetric(
-              horizontal: 31,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          buyerName,
+      return GestureDetector(
+        onTap: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return SaleDetailPage(saleId: payloadId);
+              });
+        },
+        child: Container(
+          color: Colors.white,
+          child: Column(
+            children: [
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: greyColor1,
+              ),
+              const SizedBox(
+                height: 14,
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 31,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              buyerName,
+                              style: inter.copyWith(
+                                fontSize: 15,
+                                fontWeight: semiBold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 9,
+                          ),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              "$orderAmount Pesanan",
+                              style: inter.copyWith(
+                                fontSize: 13,
+                                fontWeight: medium,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 11,
+                          ),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              "$date|$time",
+                              style: inter.copyWith(
+                                fontSize: 10,
+                                fontWeight: medium,
+                                color: greyColor600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: status.toLowerCase() == "lunas"
+                                ? Colors.green
+                                : status.toLowerCase() == "refund"
+                                    ? Colors.blue
+                                    : Colors.red,
+                            borderRadius: BorderRadius.circular(
+                              20,
+                            ),
+                          ),
+                          child: Text(
+                            status,
+                            style: inter.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 9,
+                        ),
+                        Text(
+                          price,
                           style: inter.copyWith(
                             fontSize: 15,
                             fontWeight: semiBold,
                           ),
                         ),
-                      ),
-                      const SizedBox(
-                        height: 9,
-                      ),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          "$orderAmount Pesanan",
-                          style: inter.copyWith(
-                            fontSize: 13,
-                            fontWeight: medium,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 11,
-                      ),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          "$date|$time",
-                          style: inter.copyWith(
-                            fontSize: 10,
-                            fontWeight: medium,
-                            color: greyColor600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: status.toLowerCase() == "lunas"
-                            ? Colors.green
-                            : status.toLowerCase() == "refund"
-                                ? Colors.blue
-                                : Colors.red,
-                        borderRadius: BorderRadius.circular(
-                          20,
-                        ),
-                      ),
-                      child: Text(
-                        status,
-                        style: inter.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 9,
-                    ),
-                    Text(
-                      price,
-                      style: inter.copyWith(
-                        fontSize: 15,
-                        fontWeight: semiBold,
-                      ),
-                    ),
+                      ],
+                    )
                   ],
-                )
-              ],
-            ),
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+            ],
           ),
-          const SizedBox(
-            height: 20,
-          ),
-        ],
+        ),
       );
     }
 
@@ -519,6 +533,8 @@ class _HomePageState extends State<HomePage> {
                                                 0);
                                         i++)
                                       generateSalesHistoryItem(
+                                        payloadId:
+                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].id}",
                                         buyerName:
                                             "${context.read<SaleCubit>().saleHistoryModel.payload?[i].customerName}",
                                         orderAmount:
