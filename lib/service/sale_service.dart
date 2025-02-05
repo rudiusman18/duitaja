@@ -19,6 +19,9 @@ class SaleService {
   }) async {
     var url = Uri.parse(
         "$baseURL/invoice/sales/history?page=$page&limit=$limit&status=$status&start_date=$startDate&end_date=$endDate&search=$search&in_status=$inStatus");
+
+    print("isi url nya adalah dengan $token $url");
+
     var header = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
@@ -61,12 +64,12 @@ class SaleService {
   // Digunakan untuk melakukan refund data
   Future<void> putRefundSaleHistory(
       {required String token, required String payloadId}) async {
-    var url = Uri.parse("$baseURL/refund/$payloadId");
+    var url = Uri.parse("$baseURL/invoice/refund/$payloadId");
     var header = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
     };
-    var response = await http.patch(url, headers: header);
+    var response = await http.put(url, headers: header);
 
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       final data = jsonDecode(response.body);

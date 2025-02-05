@@ -287,7 +287,35 @@ class _CashierPageState extends State<CashierPage> {
                 return SaleDetailPage(
                   saleId: payloadId,
                 );
-              });
+              }).then((_) {
+            menuProductPage = 1;
+            menuProduct = null;
+            context.read<ProductMenuCubit>().sellableProduct(
+                  token: context.read<AuthCubit>().token ?? "",
+                  page: "$menuProductPage",
+                  limit: "100",
+                  categoryId: "",
+                  inStatus: "active",
+                  search: menuSearchTextField.text,
+                );
+
+            context.read<SaleCubit>().allSalesHistory(
+                  token: context.read<AuthCubit>().token ?? "",
+                  page: "1",
+                  limit: "15",
+                  status: "",
+                  startDate: "",
+                  endDate: "",
+                  search: "",
+                  inStatus: "",
+                );
+
+            context.read<IndexCashierFilterCubit>().category(
+                  token: context.read<AuthCubit>().token ?? "",
+                );
+
+            context.read<IndexCashierFilterCubit>().setIndex(-1);
+          });
         },
         child: Container(
           padding: const EdgeInsets.symmetric(

@@ -77,198 +77,243 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
       );
     }
 
-    return BlocBuilder<CashierCubit, CashierState>(
-      builder: (context, state) {
-        return BlocConsumer<DetailSaleCubit, DetailSaleState>(
-          listener: (context, state) {
-            if (state is DetailSaleTokenExpired) {
-              context.read<AuthCubit>().logout();
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-            }
+    return BlocListener<RefundSaleCubit, RefundSaleState>(
+      listener: (context, state) {
+        if (state is RefundSaleSuccess) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "Data berhasil diubah",
+                style: inter,
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(
+                seconds: 5,
+              ),
+            ),
+          );
+        }
+        if (state is RefundSaleFailure) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                state.error,
+                style: inter,
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(
+                seconds: 5,
+              ),
+            ),
+          );
+        }
+        if (state is RefundSaleTokenExpired) {
+          context.read<AuthCubit>().logout();
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+        }
+      },
+      child: BlocBuilder<CashierCubit, CashierState>(
+        builder: (context, state) {
+          return BlocConsumer<DetailSaleCubit, DetailSaleState>(
+            listener: (context, state) {
+              if (state is DetailSaleTokenExpired) {
+                context.read<AuthCubit>().logout();
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/', (route) => false);
+              }
 
-            if (state is DetailSaleSuccess) {
-              detailSaleHistoryModel = state.detailData;
-            }
-          },
-          builder: (context, state) {
-            return AlertDialog(
-              content: state is DetailSaleLoading
-                  ? Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Center(
-                          child: CircularProgressIndicator(
-                            color: primaryColor,
+              if (state is DetailSaleSuccess) {
+                detailSaleHistoryModel = state.detailData;
+              }
+            },
+            builder: (context, state) {
+              return AlertDialog(
+                content: state is DetailSaleLoading
+                    ? Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Center(
+                            child: CircularProgressIndicator(
+                              color: primaryColor,
+                            ),
                           ),
-                        ),
-                      ],
-                    )
-                  : Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        generateInfoitem(
-                          title: "ID Pesanan: ",
-                          value:
-                              "${detailSaleHistoryModel.payload?.invoiceNumber}",
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        generateInfoitem(
-                          title: "Nama Pelanggan: ",
-                          value: detailSaleHistoryModel.payload?.customerName ??
-                              "",
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        generateInfoitem(
-                          title: "No Hp: ",
-                          value: (detailSaleHistoryModel.payload?.phoneNumber ??
-                                      "") ==
-                                  ""
-                              ? "-"
-                              : detailSaleHistoryModel.payload?.phoneNumber ??
-                                  "",
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        generateInfoitem(
-                          title: "Tanggal: ",
-                          value:
-                              detailSaleHistoryModel.payload?.createdAt ?? "",
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        generateInfoitem(
-                          title: "Status: ",
-                          value: detailSaleHistoryModel.payload?.status ?? "",
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        generateInfoitem(
-                          title: "Detail Pesanan: ",
-                          value: "",
-                        ),
-                        for (var i = 0;
-                            i <
-                                (detailSaleHistoryModel
-                                        .payload?.invoiceItems?.length ??
-                                    0);
-                            i++) ...{
-                          generateInvoiceItem(
-                              invoiceItem: detailSaleHistoryModel
-                                  .payload?.invoiceItems?[i])
-                        },
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        generateInfoitem(
-                          title: "Catatan: ",
-                          value:
-                              (detailSaleHistoryModel.payload?.note ?? "-") ==
-                                      ""
-                                  ? "-"
-                                  : detailSaleHistoryModel.payload?.note ?? "-",
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        generateInfoitem(
-                          title: "Sub Total: ",
-                          value: formatCurrency(
-                              detailSaleHistoryModel.payload?.subTotal ?? 0),
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        generateInfoitem(
-                          title:
-                              "PPN (${context.read<CashierCubit>().taxModel.payload?.first.precentage}%): ",
-                          value: formatCurrency(
-                              detailSaleHistoryModel.payload?.tax ?? 0),
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        const Divider(
-                          color: Colors.black,
-                          height: 1,
-                          thickness: 2,
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        generateInfoitem(
-                          title: "TOTAL: ",
-                          value: (formatCurrency(
-                              (detailSaleHistoryModel.payload?.subTotal ?? 0) +
-                                  (detailSaleHistoryModel.payload?.tax ?? 0))),
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        const Divider(
-                          color: Colors.black,
-                          height: 1,
-                          thickness: 2,
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        generateInfoitem(
-                          title: "Pembayaran (Cash): ",
-                          value: (formatCurrency(
-                              (detailSaleHistoryModel.payload?.subTotal ?? 0) +
-                                  (detailSaleHistoryModel.payload?.tax ?? 0))),
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        generateInfoitem(
-                          title: "Kembalian: ",
-                          value: (formatCurrency(0)),
-                        ),
-                        if ((detailSaleHistoryModel.payload?.status ?? "")
-                                .toLowerCase() ==
-                            "lunas") ...{
+                        ],
+                      )
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          generateInfoitem(
+                            title: "ID Pesanan: ",
+                            value:
+                                "${detailSaleHistoryModel.payload?.invoiceNumber}",
+                          ),
                           const SizedBox(
                             height: 16,
                           ),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
-                              ),
-                              onPressed: () {
-                                context
-                                    .read<RefundSaleCubit>()
-                                    .refundSalesHistory(
-                                      token:
-                                          context.read<AuthCubit>().token ?? "",
-                                      payloadId:
-                                          detailSaleHistoryModel.payload?.id ??
-                                              "",
-                                    );
-                              },
-                              child: Text(
-                                "Refund",
-                                style: inter,
+                          generateInfoitem(
+                            title: "Nama Pelanggan: ",
+                            value:
+                                detailSaleHistoryModel.payload?.customerName ??
+                                    "",
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          generateInfoitem(
+                            title: "No Hp: ",
+                            value: (detailSaleHistoryModel
+                                            .payload?.phoneNumber ??
+                                        "") ==
+                                    ""
+                                ? "-"
+                                : detailSaleHistoryModel.payload?.phoneNumber ??
+                                    "",
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          generateInfoitem(
+                            title: "Tanggal: ",
+                            value:
+                                detailSaleHistoryModel.payload?.createdAt ?? "",
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          generateInfoitem(
+                            title: "Status: ",
+                            value: detailSaleHistoryModel.payload?.status ?? "",
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          generateInfoitem(
+                            title: "Detail Pesanan: ",
+                            value: "",
+                          ),
+                          for (var i = 0;
+                              i <
+                                  (detailSaleHistoryModel
+                                          .payload?.invoiceItems?.length ??
+                                      0);
+                              i++) ...{
+                            generateInvoiceItem(
+                                invoiceItem: detailSaleHistoryModel
+                                    .payload?.invoiceItems?[i])
+                          },
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          generateInfoitem(
+                            title: "Catatan: ",
+                            value: (detailSaleHistoryModel.payload?.note ??
+                                        "-") ==
+                                    ""
+                                ? "-"
+                                : detailSaleHistoryModel.payload?.note ?? "-",
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          generateInfoitem(
+                            title: "Sub Total: ",
+                            value: formatCurrency(
+                                detailSaleHistoryModel.payload?.subTotal ?? 0),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          generateInfoitem(
+                            title:
+                                "PPN (${context.read<CashierCubit>().taxModel.payload?.first.precentage}%): ",
+                            value: formatCurrency(
+                                detailSaleHistoryModel.payload?.tax ?? 0),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          const Divider(
+                            color: Colors.black,
+                            height: 1,
+                            thickness: 2,
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          generateInfoitem(
+                            title: "TOTAL: ",
+                            value: (formatCurrency((detailSaleHistoryModel
+                                        .payload?.subTotal ??
+                                    0) +
+                                (detailSaleHistoryModel.payload?.tax ?? 0))),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          const Divider(
+                            color: Colors.black,
+                            height: 1,
+                            thickness: 2,
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          generateInfoitem(
+                            title: "Pembayaran (Cash): ",
+                            value: (formatCurrency((detailSaleHistoryModel
+                                        .payload?.subTotal ??
+                                    0) +
+                                (detailSaleHistoryModel.payload?.tax ?? 0))),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          generateInfoitem(
+                            title: "Kembalian: ",
+                            value: (formatCurrency(0)),
+                          ),
+                          if ((detailSaleHistoryModel.payload?.status ?? "")
+                                  .toLowerCase() ==
+                              "lunas") ...{
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                ),
+                                onPressed: () {
+                                  context
+                                      .read<RefundSaleCubit>()
+                                      .refundSalesHistory(
+                                        token:
+                                            context.read<AuthCubit>().token ??
+                                                "",
+                                        payloadId: detailSaleHistoryModel
+                                                .payload?.id ??
+                                            "",
+                                      );
+                                },
+                                child: Text(
+                                  "Refund",
+                                  style: inter,
+                                ),
                               ),
                             ),
-                          ),
-                        }
-                      ],
-                    ),
-            );
-          },
-        );
-      },
+                          }
+                        ],
+                      ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
