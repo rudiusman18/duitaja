@@ -536,11 +536,6 @@ class _SalePageState extends State<SalePage> {
                       if (title.toLowerCase() == "penjualan") ...{
                         generateFilterContentItem(
                           groupName: title,
-                          name: "Semua Penjualan",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
                           name: "Kasir",
                           context: context,
                         ),
