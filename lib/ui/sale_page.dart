@@ -805,6 +805,10 @@ class _SalePageState extends State<SalePage> {
                     []);
           }
         }
+        if (state is SaleTokenExpired) {
+          context.read<AuthCubit>().logout();
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+        }
       },
       builder: (context, state) {
         return Scaffold(
