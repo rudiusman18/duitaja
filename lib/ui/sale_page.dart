@@ -1,9 +1,15 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:duidku/cubit/auth_cubit.dart';
 import 'package:duidku/cubit/filter_cubit.dart';
 import 'package:duidku/cubit/page_cubit.dart';
+import 'package:duidku/cubit/sale_cubit.dart';
+import 'package:duidku/model/sale_history_model.dart';
+import 'package:duidku/shared/sale_detail_page.dart';
 import 'package:duidku/shared/theme.dart';
+import 'package:duidku/shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 // ignore: must_be_immutable
 class SalePage extends StatefulWidget {
@@ -17,44 +23,31 @@ class SalePage extends StatefulWidget {
 class _SalePageState extends State<SalePage> {
   TextEditingController searchTextField = TextEditingController(text: "");
 
-  String _getValueText(
-    CalendarDatePicker2Type datePickerType,
-    List<DateTime?> values,
-  ) {
-    values =
-        values.map((e) => e != null ? DateUtils.dateOnly(e) : null).toList();
-    var valueText = (values.isNotEmpty ? values[0] : null)
-        .toString()
-        .replaceAll('00:00:00.000', '');
+  int saleProductPage = 1;
+  SaleHistoryModel? saleHistoryModel;
 
-    if (datePickerType == CalendarDatePicker2Type.multi) {
-      valueText = values.isNotEmpty
-          ? values
-              .map((v) => v.toString().replaceAll('00:00:00.000', ''))
-              .join(', ')
-          : 'null';
-    } else if (datePickerType == CalendarDatePicker2Type.range) {
-      if (values.isNotEmpty) {
-        final startDate = values[0].toString().replaceAll('00:00:00.000', '');
-        final endDate = values.length > 1
-            ? values[1].toString().replaceAll('00:00:00.000', '')
-            : 'null';
-        valueText = '$startDate to $endDate';
-      } else {
-        return 'null';
-      }
-    }
+  // ignore: no_leading_underscores_for_local_identifiers
+  List<DateTime?> _rangeDatePickerValueWithDefaultValue = [
+    DateTime.now(),
+  ];
 
-    return valueText;
+  @override
+  void initState() {
+    context.read<SaleCubit>().allSalesHistory(
+          token: context.read<AuthCubit>().token ?? "",
+          page: "$saleProductPage",
+          limit: "100",
+          status: '',
+          startDate: "",
+          endDate: "",
+          search: "",
+          inStatus: "",
+        );
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // ignore: no_leading_underscores_for_local_identifiers
-    List<DateTime?> _rangeDatePickerValueWithDefaultValue = [
-      DateTime.now(),
-    ];
-
     if (widget.clearFilterCubit == true) {
       final _ = context.read<FilterCubit>().setFilter({});
       widget.clearFilterCubit = false;
@@ -70,6 +63,80 @@ class _SalePageState extends State<SalePage> {
             Expanded(
               child: TextFormField(
                 controller: searchTextField,
+                textInputAction: TextInputAction.search,
+                onChanged: (value) {
+                  if (value == "") {
+                    saleHistoryModel = null;
+                    saleProductPage = 1;
+                    context.read<SaleCubit>().allSalesHistory(
+                          token: context.read<AuthCubit>().token ?? "",
+                          page: "$saleProductPage",
+                          limit: '100',
+                          status: '',
+                          startDate: '',
+                          endDate: '',
+                          search: searchTextField.text,
+                          inStatus: context
+                                      .read<FilterCubit>()
+                                      .state['Status']
+                                      ?.first
+                                      .toLowerCase() ==
+                                  "lunas"
+                              ? 'paid'
+                              : context
+                                          .read<FilterCubit>()
+                                          .state['Status']
+                                          ?.first
+                                          .toLowerCase() ==
+                                      'belum lunas'
+                                  ? 'unpaid'
+                                  : context
+                                              .read<FilterCubit>()
+                                              .state['Status']
+                                              ?.first
+                                              .toLowerCase() ==
+                                          'refund'
+                                      ? 'refund'
+                                      : '',
+                        );
+                  }
+                },
+                onEditingComplete: () {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  saleHistoryModel = null;
+                  saleProductPage = 1;
+                  context.read<SaleCubit>().allSalesHistory(
+                        token: context.read<AuthCubit>().token ?? "",
+                        page: "$saleProductPage",
+                        limit: '100',
+                        status: '',
+                        startDate: '',
+                        endDate: '',
+                        search: searchTextField.text,
+                        inStatus: context
+                                    .read<FilterCubit>()
+                                    .state['Status']
+                                    ?.first
+                                    .toLowerCase() ==
+                                "lunas"
+                            ? 'paid'
+                            : context
+                                        .read<FilterCubit>()
+                                        .state['Status']
+                                        ?.first
+                                        .toLowerCase() ==
+                                    'belum lunas'
+                                ? 'unpaid'
+                                : context
+                                            .read<FilterCubit>()
+                                            .state['Status']
+                                            ?.first
+                                            .toLowerCase() ==
+                                        'refund'
+                                    ? 'refund'
+                                    : '',
+                      );
+                },
                 decoration: InputDecoration(
                   suffixIcon: Icon(
                     Icons.search,
@@ -136,35 +203,93 @@ class _SalePageState extends State<SalePage> {
         disabledDayTextStyle:
             const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
       );
-      return SizedBox(
-        width: 375,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 10),
-            CalendarDatePicker2(
-              config: config,
-              value: _rangeDatePickerValueWithDefaultValue,
-              onValueChanged: (dates) =>
-                  setState(() => _rangeDatePickerValueWithDefaultValue = dates),
-            ),
-            const SizedBox(height: 10),
-            Row(
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter2) {
+          return SizedBox(
+            width: 375,
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Selection(s):  '),
-                const SizedBox(width: 10),
-                Text(
-                  _getValueText(
-                    config.calendarType,
-                    _rangeDatePickerValueWithDefaultValue,
+                const SizedBox(height: 10),
+                CalendarDatePicker2(
+                  config: config,
+                  value: _rangeDatePickerValueWithDefaultValue,
+                  onValueChanged: (dates) {
+                    stateSetter2(() {
+                      _rangeDatePickerValueWithDefaultValue = dates;
+                    });
+                  },
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  margin: const EdgeInsets.only(
+                    right: 10,
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        setState(() {});
+                        context.read<FilterCubit>().setFilter({
+                          'Tanggal': [
+                            '${DateFormat('dd-MM-yyyy').format(_rangeDatePickerValueWithDefaultValue.first ?? DateTime.now())} - ${DateFormat('dd-MM-yyyy').format(_rangeDatePickerValueWithDefaultValue.last ?? DateTime.now())}'
+                          ]
+                        });
+                        saleHistoryModel = null;
+                        saleProductPage = 1;
+                        context.read<SaleCubit>().allSalesHistory(
+                              token: context.read<AuthCubit>().token ?? "",
+                              page: "$saleProductPage",
+                              limit: '100',
+                              status: '',
+                              startDate: DateFormat('dd-MM-yyyy').format(
+                                  _rangeDatePickerValueWithDefaultValue.first ??
+                                      DateTime.now()),
+                              endDate: DateFormat('dd-MM-yyyy').format(
+                                  _rangeDatePickerValueWithDefaultValue.last ??
+                                      DateTime.now()),
+                              search: searchTextField.text,
+                              inStatus: context
+                                          .read<FilterCubit>()
+                                          .state['Status']
+                                          ?.first
+                                          .toLowerCase() ==
+                                      "lunas"
+                                  ? 'paid'
+                                  : context
+                                              .read<FilterCubit>()
+                                              .state['Status']
+                                              ?.first
+                                              .toLowerCase() ==
+                                          'belum lunas'
+                                      ? 'unpaid'
+                                      : context
+                                                  .read<FilterCubit>()
+                                                  .state['Status']
+                                                  ?.first
+                                                  .toLowerCase() ==
+                                              'refund'
+                                          ? 'refund'
+                                          : '',
+                            );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                      ),
+                      child: Text(
+                        "Simpan",
+                        style: inter,
+                      ),
+                    ),
                   ),
                 ),
+                const SizedBox(height: 10),
               ],
             ),
-            const SizedBox(height: 25),
-          ],
-        ),
+          );
+        },
       );
     }
 
@@ -204,10 +329,12 @@ class _SalePageState extends State<SalePage> {
                       filterList[groupName]!.remove(name);
                       if (filterList[groupName]!.isEmpty) {
                         filterList.remove(groupName);
+                        _rangeDatePickerValueWithDefaultValue = [
+                          DateTime.now()
+                        ];
                       }
                     } else {
-                      if (name.toLowerCase() != "semua tanggal" &&
-                          name.toLowerCase() != "30 hari terakhir" &&
+                      if (name.toLowerCase() != "30 hari terakhir" &&
                           name.toLowerCase() != "90 hari terakhir" &&
                           groupName.toLowerCase() == "tanggal") {
                         showModalBottomSheet(
@@ -222,13 +349,80 @@ class _SalePageState extends State<SalePage> {
                               return _buildRangeDatePickerWithValue();
                             });
                       } else {
+                        filterList.putIfAbsent(groupName, () => []).clear();
                         filterList.putIfAbsent(groupName, () => []).add(name);
                       }
                     }
-
-                    context.read<FilterCubit>().setFilter(filterList);
-                    setState(() {});
-                    stateSetter(() {});
+                    if (name.toLowerCase() != 'atur tanggal') {
+                      context.read<FilterCubit>().setFilter(filterList);
+                      setState(() {});
+                      stateSetter(() {});
+                      Navigator.pop(context);
+                      saleHistoryModel = null;
+                      saleProductPage = 1;
+                      context.read<SaleCubit>().allSalesHistory(
+                            token: context.read<AuthCubit>().token ?? "",
+                            page: "$saleProductPage",
+                            limit: '100',
+                            status: '',
+                            startDate:
+                                DateFormat('dd-MM-yyyy').format(DateTime.now()),
+                            endDate:
+                                context.read<FilterCubit>().state['Tanggal'] ==
+                                        null
+                                    ? ''
+                                    : (context
+                                            .read<FilterCubit>()
+                                            .state['Tanggal']!
+                                            .first
+                                            .toLowerCase()
+                                            .contains('30')
+                                        ? DateFormat('dd-MM-yyyy').format(
+                                            DateTime.now().subtract(
+                                              const Duration(
+                                                days: 30,
+                                              ),
+                                            ),
+                                          )
+                                        : context
+                                                .read<FilterCubit>()
+                                                .state['Tanggal']!
+                                                .first
+                                                .toLowerCase()
+                                                .contains('90')
+                                            ? DateFormat('dd-MM-yyyy').format(
+                                                DateTime.now().subtract(
+                                                  const Duration(
+                                                    days: 90,
+                                                  ),
+                                                ),
+                                              )
+                                            : ''),
+                            search: searchTextField.text,
+                            inStatus: context
+                                        .read<FilterCubit>()
+                                        .state['Status']
+                                        ?.first
+                                        .toLowerCase() ==
+                                    "lunas"
+                                ? 'paid'
+                                : context
+                                            .read<FilterCubit>()
+                                            .state['Status']
+                                            ?.first
+                                            .toLowerCase() ==
+                                        'belum lunas'
+                                    ? 'unpaid'
+                                    : context
+                                                .read<FilterCubit>()
+                                                .state['Status']
+                                                ?.first
+                                                .toLowerCase() ==
+                                            'refund'
+                                        ? 'refund'
+                                        : '',
+                          );
+                    }
                   },
                   child: Row(
                     children: [
@@ -373,11 +567,6 @@ class _SalePageState extends State<SalePage> {
                       } else if (title.toLowerCase() == "status") ...{
                         generateFilterContentItem(
                           groupName: title,
-                          name: "Semua Status",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
                           name: "Lunas",
                           context: context,
                         ),
@@ -386,12 +575,12 @@ class _SalePageState extends State<SalePage> {
                           name: "Belum Lunas",
                           context: context,
                         ),
-                      } else ...{
                         generateFilterContentItem(
                           groupName: title,
-                          name: "Semua Tanggal",
+                          name: "Refund",
                           context: context,
                         ),
+                      } else ...{
                         generateFilterContentItem(
                           groupName: title,
                           name: "30 Hari Terakhir",
@@ -404,7 +593,10 @@ class _SalePageState extends State<SalePage> {
                         ),
                         generateFilterContentItem(
                           groupName: title,
-                          name: "Atur Tanggal",
+                          name: _rangeDatePickerValueWithDefaultValue.length ==
+                                  1
+                              ? "Atur Tanggal"
+                              : "${DateFormat('dd-MM-yyyy').format(_rangeDatePickerValueWithDefaultValue.first ?? DateTime.now())} - ${DateFormat('dd-MM-yyyy').format(_rangeDatePickerValueWithDefaultValue.last ?? DateTime.now())}",
                           context: context,
                         ),
                       },
@@ -474,6 +666,7 @@ class _SalePageState extends State<SalePage> {
     }
 
     Widget generateSalesHistoryItem({
+      required String payloadId,
       required String buyerName,
       required String orderAmount,
       required String date,
@@ -481,240 +674,343 @@ class _SalePageState extends State<SalePage> {
       required String status,
       required String price,
     }) {
-      return Column(
-        children: [
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: greyColor1,
-          ),
-          const SizedBox(
-            height: 14,
-          ),
-          Container(
-            margin: const EdgeInsets.symmetric(
-              horizontal: 31,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          buyerName,
-                          style: inter.copyWith(
-                            fontSize: 15,
-                            fontWeight: semiBold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 9,
-                      ),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          "$orderAmount Pesanan",
-                          style: inter.copyWith(
-                            fontSize: 13,
-                            fontWeight: medium,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 11,
-                      ),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          "$date|$time",
-                          style: inter.copyWith(
-                            fontSize: 10,
-                            fontWeight: medium,
-                            color: greyColor600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+      return GestureDetector(
+        onTap: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return SaleDetailPage(saleId: payloadId);
+              });
+        },
+        child: Container(
+          color: Colors.white,
+          child: Column(
+            children: [
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: greyColor1,
+              ),
+              const SizedBox(
+                height: 14,
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 31,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        borderRadius: BorderRadius.circular(
-                          20,
-                        ),
-                      ),
-                      child: Text(
-                        status,
-                        style: inter.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 9,
-                    ),
-                    Text(
-                      price,
-                      style: inter.copyWith(
-                        fontSize: 15,
-                        fontWeight: semiBold,
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-        ],
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: primaryColor,
-        title: Text(
-          "Penjualan",
-          style: inter.copyWith(
-            fontWeight: medium,
-            fontSize: 20,
-          ),
-        ),
-        leading: const SizedBox(),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 24,
-            ),
-            searchSetup(),
-            const SizedBox(
-              height: 24,
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                  ),
-                  child: Row(
-                    children: [
-                      if (context.read<FilterCubit>().state.isNotEmpty) ...{
-                        GestureDetector(
-                          onTap: () {
-                            var filterList = context.read<FilterCubit>().state;
-                            filterList.clear();
-                            context.read<FilterCubit>().setFilter(filterList);
-                            setState(() {});
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(
-                              6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: primaryColor,
-                              borderRadius: BorderRadius.circular(
-                                8,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              buyerName,
+                              style: inter.copyWith(
+                                fontSize: 15,
+                                fontWeight: semiBold,
                               ),
                             ),
-                            child: const Icon(
-                              Icons.close,
+                          ),
+                          const SizedBox(
+                            height: 9,
+                          ),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              "$orderAmount Pesanan",
+                              style: inter.copyWith(
+                                fontSize: 13,
+                                fontWeight: medium,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 11,
+                          ),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              "$date|$time",
+                              style: inter.copyWith(
+                                fontSize: 10,
+                                fontWeight: medium,
+                                color: greyColor600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: status.toLowerCase() == "lunas"
+                                ? Colors.green
+                                : status.toLowerCase() == "refund"
+                                    ? Colors.blue
+                                    : Colors.red,
+                            borderRadius: BorderRadius.circular(
+                              20,
+                            ),
+                          ),
+                          child: Text(
+                            status,
+                            style: inter.copyWith(
                               color: Colors.white,
                             ),
                           ),
                         ),
                         const SizedBox(
-                          width: 24,
+                          height: 9,
                         ),
-                      },
-                      
-                      generateFilterItem(
-                        groupName: "Penjualan",
-                        title: (context
-                                    .read<FilterCubit>()
-                                    .state["Penjualan"]
-                                    ?.isEmpty ??
-                                true)
-                            ? "Penjualan"
-                            : "${context.read<FilterCubit>().state["Penjualan"]}"
-                                .replaceAll("[", "")
-                                .replaceAll("]", ""),
-                      ),
-                      const SizedBox(
-                        width: 24,
-                      ),
-                      generateFilterItem(
-                        groupName: "Status",
-                        title: (context
-                                    .read<FilterCubit>()
-                                    .state["Status"]
-                                    ?.isEmpty ??
-                                true)
-                            ? "Status"
-                            : "${context.read<FilterCubit>().state["Status"]}"
-                                .replaceAll("[", "")
-                                .replaceAll("]", ""),
-                      ),
-                      const SizedBox(
-                        width: 24,
-                      ),
-                      generateFilterItem(
-                        groupName: "Tanggal",
-                        title: (context
-                                    .read<FilterCubit>()
-                                    .state["Tanggal"]
-                                    ?.isEmpty ??
-                                true)
-                            ? "Tanggal"
-                            : "${context.read<FilterCubit>().state["Tanggal"]}"
-                                .replaceAll("[", "")
-                                .replaceAll("]", ""),
-                      ),
-                    ],
-                  ),
+                        Text(
+                          price,
+                          style: inter.copyWith(
+                            fontSize: 15,
+                            fontWeight: semiBold,
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 24,
-            ),
-            Expanded(
-              child: ListView(
-                children: [
-                  for (var i = 0; i < 20; i++)
-                    generateSalesHistoryItem(
-                      buyerName: "Imam",
-                      orderAmount: "4",
-                      date: "15 November 2024",
-                      time: "15:28PM",
-                      status: "Lunas",
-                      price: "Rp. 123.000",
-                    ),
-                ],
+              const SizedBox(
+                height: 20,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return BlocConsumer<SaleCubit, SaleState>(
+      listener: (context, state) {
+        if (state is SaleSuccess) {
+          if (saleHistoryModel == null) {
+            saleHistoryModel = context.read<SaleCubit>().saleHistoryModel;
+          } else {
+            saleHistoryModel?.payload?.addAll(
+                context.read<SaleCubit>().saleHistoryModel.payload?.toList() ??
+                    []);
+          }
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: primaryColor,
+            title: Text(
+              "Penjualan",
+              style: inter.copyWith(
+                fontWeight: medium,
+                fontSize: 20,
               ),
             ),
-          ],
-        ),
-      ),
+            leading: const SizedBox(),
+            centerTitle: true,
+          ),
+          body: SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 24,
+                ),
+                searchSetup(),
+                const SizedBox(
+                  height: 24,
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                      ),
+                      child: Row(
+                        children: [
+                          if (context.read<FilterCubit>().state.isNotEmpty) ...{
+                            GestureDetector(
+                              onTap: () {
+                                var filterList =
+                                    context.read<FilterCubit>().state;
+                                filterList.clear();
+                                context
+                                    .read<FilterCubit>()
+                                    .setFilter(filterList);
+                                setState(() {});
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(
+                                  6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: primaryColor,
+                                  borderRadius: BorderRadius.circular(
+                                    8,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 24,
+                            ),
+                          },
+                          generateFilterItem(
+                            groupName: "Penjualan",
+                            title: (context
+                                        .read<FilterCubit>()
+                                        .state["Penjualan"]
+                                        ?.isEmpty ??
+                                    true)
+                                ? "Penjualan"
+                                : "${context.read<FilterCubit>().state["Penjualan"]}"
+                                    .replaceAll("[", "")
+                                    .replaceAll("]", ""),
+                          ),
+                          const SizedBox(
+                            width: 24,
+                          ),
+                          generateFilterItem(
+                            groupName: "Status",
+                            title: (context
+                                        .read<FilterCubit>()
+                                        .state["Status"]
+                                        ?.isEmpty ??
+                                    true)
+                                ? "Status"
+                                : "${context.read<FilterCubit>().state["Status"]}"
+                                    .replaceAll("[", "")
+                                    .replaceAll("]", ""),
+                          ),
+                          const SizedBox(
+                            width: 24,
+                          ),
+                          generateFilterItem(
+                            groupName: "Tanggal",
+                            title: (context
+                                        .read<FilterCubit>()
+                                        .state["Tanggal"]
+                                        ?.isEmpty ??
+                                    true)
+                                ? "Tanggal"
+                                : "${context.read<FilterCubit>().state["Tanggal"]}"
+                                    .replaceAll("[", "")
+                                    .replaceAll("]", ""),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 24,
+                ),
+                Expanded(
+                  child: NotificationListener(
+                    onNotification: (ScrollEndNotification notification) {
+                      if (saleProductPage !=
+                          context
+                              .read<SaleCubit>()
+                              .saleHistoryModel
+                              .meta
+                              ?.totalPage) {
+                        saleProductPage += 1;
+                        context.read<SaleCubit>().allSalesHistory(
+                              token: context.read<AuthCubit>().token ?? "",
+                              page: "$saleProductPage",
+                              limit: '100',
+                              status: '',
+                              startDate: '',
+                              endDate: '',
+                              search: searchTextField.text,
+                              inStatus: context
+                                          .read<FilterCubit>()
+                                          .state['Status']
+                                          ?.first
+                                          .toLowerCase() ==
+                                      "lunas"
+                                  ? 'paid'
+                                  : context
+                                              .read<FilterCubit>()
+                                              .state['Status']
+                                              ?.first
+                                              .toLowerCase() ==
+                                          'belum lunas'
+                                      ? 'unpaid'
+                                      : context
+                                                  .read<FilterCubit>()
+                                                  .state['Status']
+                                                  ?.first
+                                                  .toLowerCase() ==
+                                              'refund'
+                                          ? 'refund'
+                                          : '',
+                            );
+                      }
+                      return true;
+                    },
+                    child: state is SaleLoading
+                        ? Center(
+                            child: CircularProgressIndicator(
+                              color: primaryColor,
+                            ),
+                          )
+                        : (saleHistoryModel?.payload?.isEmpty ?? true)
+                            ? Center(
+                                child: Text(
+                                  "Data tidak ditemukan",
+                                  style: inter,
+                                ),
+                              )
+                            : ListView(
+                                children: [
+                                  for (var i = 0;
+                                      i <
+                                          (saleHistoryModel?.payload?.length ??
+                                              0);
+                                      i++)
+                                    generateSalesHistoryItem(
+                                      payloadId:
+                                          "${saleHistoryModel?.payload?[i].id}",
+                                      buyerName:
+                                          "${saleHistoryModel?.payload?[i].customerName}",
+                                      orderAmount:
+                                          "${saleHistoryModel?.payload?[i].countSale}",
+                                      date:
+                                          "${saleHistoryModel?.payload?[i].createdAt?.split(" ").first}",
+                                      time:
+                                          "${saleHistoryModel?.payload?[i].createdAt?.split(" ").last}",
+                                      status:
+                                          "${saleHistoryModel?.payload?[i].status}",
+                                      price: formatCurrency(saleHistoryModel
+                                              ?.payload?[i].subTotal ??
+                                          0),
+                                    ),
+                                ],
+                              ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

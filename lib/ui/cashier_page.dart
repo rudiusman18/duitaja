@@ -49,6 +49,8 @@ class _CashierPageState extends State<CashierPage> {
           status: "",
           startDate: "",
           endDate: "",
+          search: "",
+          inStatus: "",
         );
 
     context.read<IndexCashierFilterCubit>().category(
@@ -1006,6 +1008,8 @@ class _CashierPageState extends State<CashierPage> {
                                           status: "",
                                           startDate: "",
                                           endDate: "",
+                                          search: "",
+                                          inStatus: "",
                                         );
 
                                     context

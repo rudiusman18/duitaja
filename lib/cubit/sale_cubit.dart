@@ -13,6 +13,10 @@ class SaleCubit extends Cubit<SaleState> {
 
   SaleHistoryModel get saleHistoryModel => state.saleHistoryModel;
 
+  Future<void> resetSalesHistory() async {
+    emit(SaleInitial());
+  }
+
   Future<void> allSalesHistory({
     required String token,
     required String page,
@@ -20,15 +24,21 @@ class SaleCubit extends Cubit<SaleState> {
     required String status,
     required String startDate,
     required String endDate,
+    required String search,
+    required String inStatus,
   }) async {
+    emit(SaleLoading());
     try {
       final data = await SaleService().getSaleHistory(
-          token: token,
-          page: page,
-          limit: limit,
-          status: status,
-          startDate: startDate,
-          endDate: endDate);
+        token: token,
+        page: page,
+        limit: limit,
+        status: status,
+        startDate: startDate,
+        endDate: endDate,
+        search: search,
+        inStatus: inStatus,
+      );
       emit(SaleSuccess(data));
     } catch (e) {
       if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
@@ -74,10 +84,8 @@ class RefundSaleCubit extends Cubit<RefundSaleState> {
     try {
       final _ = await SaleService()
           .putRefundSaleHistory(token: token, payloadId: payloadId);
-      print("sukses");
       emit(RefundSaleSuccess());
     } catch (e) {
-      print("gagal $e");
       if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
         emit(RefundSaleTokenExpired());
       } else {

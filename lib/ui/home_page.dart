@@ -27,6 +27,8 @@ class _HomePageState extends State<HomePage> {
           status: "",
           startDate: "",
           endDate: "",
+          search: "",
+          inStatus: "",
         );
     super.initState();
   }
@@ -359,7 +361,12 @@ class _HomePageState extends State<HomePage> {
     }
 
     return BlocConsumer<SaleCubit, SaleState>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is SaleTokenExpired) {
+          context.read<AuthCubit>().logout();
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+        }
+      },
       builder: (context, state) {
         return BlocBuilder<ReportCardIndexCubit, int>(
           builder: (context, state) {
@@ -521,38 +528,81 @@ class _HomePageState extends State<HomePage> {
                                 height: 16,
                               ),
                               Expanded(
-                                child: ListView(
-                                  children: [
-                                    for (var i = 0;
-                                        i <
-                                            (context
-                                                    .read<SaleCubit>()
-                                                    .saleHistoryModel
-                                                    .payload
-                                                    ?.length ??
-                                                0);
-                                        i++)
-                                      generateSalesHistoryItem(
-                                        payloadId:
-                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].id}",
-                                        buyerName:
-                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].customerName}",
-                                        orderAmount:
-                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].countSale}",
-                                        date:
-                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].createdAt?.split(" ").first}",
-                                        time:
-                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].createdAt?.split(" ").last}",
-                                        status:
-                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].status}",
-                                        price: formatCurrency(context
-                                                .read<SaleCubit>()
-                                                .saleHistoryModel
-                                                .payload?[i]
-                                                .subTotal ??
-                                            0),
-                                      ),
-                                  ],
+                                child: RefreshIndicator(
+                                  color: primaryColor,
+                                  onRefresh: () {
+                                    context
+                                        .read<SaleCubit>()
+                                        .resetSalesHistory();
+                                    return context
+                                        .read<SaleCubit>()
+                                        .allSalesHistory(
+                                            token: context
+                                                    .read<AuthCubit>()
+                                                    .token ??
+                                                "",
+                                            page: "1",
+                                            limit: "15",
+                                            status: "",
+                                            startDate: "",
+                                            endDate: "",
+                                            search: "",
+                                            inStatus: "");
+                                  },
+                                  child: state is SaleLoading
+                                      ? Center(
+                                          child: CircularProgressIndicator(
+                                            color: primaryColor,
+                                          ),
+                                        )
+                                      : (context
+                                                          .read<SaleCubit>()
+                                                          .saleHistoryModel
+                                                          .payload
+                                                          ?.isEmpty ??
+                                                      true) &&
+                                                  state is SaleSuccess ||
+                                              state is SaleFailure
+                                          ? Center(
+                                              child: Text(
+                                                "Data tidak ditemukan",
+                                                style: inter,
+                                              ),
+                                            )
+                                          : ListView(
+                                              children: [
+                                                for (var i = 0;
+                                                    i <
+                                                        (context
+                                                                .read<
+                                                                    SaleCubit>()
+                                                                .saleHistoryModel
+                                                                .payload
+                                                                ?.length ??
+                                                            0);
+                                                    i++)
+                                                  generateSalesHistoryItem(
+                                                    payloadId:
+                                                        "${context.read<SaleCubit>().saleHistoryModel.payload?[i].id}",
+                                                    buyerName:
+                                                        "${context.read<SaleCubit>().saleHistoryModel.payload?[i].customerName}",
+                                                    orderAmount:
+                                                        "${context.read<SaleCubit>().saleHistoryModel.payload?[i].countSale}",
+                                                    date:
+                                                        "${context.read<SaleCubit>().saleHistoryModel.payload?[i].createdAt?.split(" ").first}",
+                                                    time:
+                                                        "${context.read<SaleCubit>().saleHistoryModel.payload?[i].createdAt?.split(" ").last}",
+                                                    status:
+                                                        "${context.read<SaleCubit>().saleHistoryModel.payload?[i].status}",
+                                                    price: formatCurrency(context
+                                                            .read<SaleCubit>()
+                                                            .saleHistoryModel
+                                                            .payload?[i]
+                                                            .subTotal ??
+                                                        0),
+                                                  ),
+                                              ],
+                                            ),
                                 ),
                               ),
                             ],

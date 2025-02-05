@@ -14,9 +14,11 @@ class SaleService {
     required String status,
     required String startDate,
     required String endDate,
+    required String search,
+    required String inStatus,
   }) async {
     var url = Uri.parse(
-        "$baseURL/invoice/sales/history?page=$page&limit=$limit&status=$status&start_date=$startDate&end_date=$endDate");
+        "$baseURL/invoice/sales/history?page=$page&limit=$limit&status=$status&start_date=$startDate&end_date=$endDate&search=$search&in_status=$inStatus");
     var header = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
