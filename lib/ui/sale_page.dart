@@ -466,12 +466,15 @@ class _SalePageState extends State<SalePage> {
                       filterList[groupName]!.remove(name);
                       if (filterList[groupName]!.isEmpty) {
                         filterList.remove(groupName);
-                        setState(() {
-                          resetDate = true;
-                        });
-                        _rangeDatePickerValueWithDefaultValue = [
-                          DateTime.now()
-                        ];
+                        if (groupName == 'Tanggal') {
+                          setState(() {
+                            resetDate = true;
+
+                            _rangeDatePickerValueWithDefaultValue = [
+                              DateTime.now()
+                            ];
+                          });
+                        }
                       }
                     } else {
                       if (name.toLowerCase() != "30 hari terakhir" &&
@@ -491,9 +494,11 @@ class _SalePageState extends State<SalePage> {
                       } else {
                         filterList.putIfAbsent(groupName, () => []).clear();
                         filterList.putIfAbsent(groupName, () => []).add(name);
-                        _rangeDatePickerValueWithDefaultValue = [
-                          DateTime.now(),
-                        ];
+                        if (groupName == 'Tanggal') {
+                          _rangeDatePickerValueWithDefaultValue = [
+                            DateTime.now(),
+                          ];
+                        }
                       }
                     }
                     if (name.toLowerCase() != 'atur tanggal') {
