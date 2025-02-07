@@ -1,9 +1,9 @@
-import 'package:duidku/cubit/auth_cubit.dart';
-import 'package:duidku/cubit/cashier_cubit.dart';
-import 'package:duidku/cubit/sale_cubit.dart';
-import 'package:duidku/model/detail_sale_history_model.dart';
-import 'package:duidku/shared/theme.dart';
-import 'package:duidku/shared/utils.dart';
+import 'package:duitaja/cubit/auth_cubit.dart';
+import 'package:duitaja/cubit/cashier_cubit.dart';
+import 'package:duitaja/cubit/sale_cubit.dart';
+import 'package:duitaja/model/detail_sale_history_model.dart';
+import 'package:duitaja/shared/theme.dart';
+import 'package:duitaja/shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

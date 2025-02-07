@@ -1,12 +1,12 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dots_indicator/dots_indicator.dart';
-import 'package:duidku/cubit/auth_cubit.dart';
-import 'package:duidku/cubit/filter_cubit.dart';
-import 'package:duidku/cubit/home_cubit.dart';
-import 'package:duidku/cubit/sale_cubit.dart';
-import 'package:duidku/shared/sale_detail_page.dart';
-import 'package:duidku/shared/theme.dart';
-import 'package:duidku/shared/utils.dart';
+import 'package:duitaja/cubit/auth_cubit.dart';
+import 'package:duitaja/cubit/filter_cubit.dart';
+import 'package:duitaja/cubit/home_cubit.dart';
+import 'package:duitaja/cubit/sale_cubit.dart';
+import 'package:duitaja/shared/sale_detail_page.dart';
+import 'package:duitaja/shared/theme.dart';
+import 'package:duitaja/shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

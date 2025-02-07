@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:duidku/model/login_model.dart';
-import 'package:duidku/model/profile_model.dart';
-import 'package:duidku/shared/utils.dart';
+import 'package:duitaja/model/login_model.dart';
+import 'package:duitaja/model/profile_model.dart';
+import 'package:duitaja/shared/utils.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 

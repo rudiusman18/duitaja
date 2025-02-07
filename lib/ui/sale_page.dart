@@ -1,12 +1,12 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
-import 'package:duidku/cubit/auth_cubit.dart';
-import 'package:duidku/cubit/filter_cubit.dart';
-import 'package:duidku/cubit/page_cubit.dart';
-import 'package:duidku/cubit/sale_cubit.dart';
-import 'package:duidku/model/sale_history_model.dart';
-import 'package:duidku/shared/sale_detail_page.dart';
-import 'package:duidku/shared/theme.dart';
-import 'package:duidku/shared/utils.dart';
+import 'package:duitaja/cubit/auth_cubit.dart';
+import 'package:duitaja/cubit/filter_cubit.dart';
+import 'package:duitaja/cubit/page_cubit.dart';
+import 'package:duitaja/cubit/sale_cubit.dart';
+import 'package:duitaja/model/sale_history_model.dart';
+import 'package:duitaja/shared/sale_detail_page.dart';
+import 'package:duitaja/shared/theme.dart';
+import 'package:duitaja/shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -1062,6 +1062,9 @@ class _SalePageState extends State<SalePage> {
                           if (context.read<FilterCubit>().state.isNotEmpty) ...{
                             GestureDetector(
                               onTap: () {
+                                _rangeDatePickerValueWithDefaultValue = [
+                                  DateTime.now(),
+                                ];
                                 var filterList =
                                     context.read<FilterCubit>().state;
                                 filterList.clear();

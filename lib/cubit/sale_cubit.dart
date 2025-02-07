@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
-import 'package:duidku/model/detail_sale_history_model.dart';
-import 'package:duidku/model/sale_history_model.dart';
-import 'package:duidku/service/sale_service.dart';
+import 'package:duitaja/model/detail_sale_history_model.dart';
+import 'package:duitaja/model/sale_history_model.dart';
+import 'package:duitaja/service/sale_service.dart';
 import 'package:meta/meta.dart';
 
 part 'sale_state.dart';

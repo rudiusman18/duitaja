@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:duidku/model/cashier_category_model.dart';
-import 'package:duidku/model/order_model.dart';
-import 'package:duidku/model/sellable_product_model.dart';
-import 'package:duidku/model/tax_model.dart';
-import 'package:duidku/shared/utils.dart';
+import 'package:duitaja/model/cashier_category_model.dart';
+import 'package:duitaja/model/order_model.dart';
+import 'package:duitaja/model/sellable_product_model.dart';
+import 'package:duitaja/model/tax_model.dart';
+import 'package:duitaja/shared/utils.dart';
 import 'package:http/http.dart' as http;
 
 class CashierService {

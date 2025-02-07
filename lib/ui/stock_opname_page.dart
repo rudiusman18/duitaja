@@ -1,8 +1,8 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
-import 'package:duidku/cubit/add_report_cubit.dart';
-import 'package:duidku/cubit/filter_cubit.dart';
-import 'package:duidku/cubit/page_cubit.dart';
-import 'package:duidku/shared/theme.dart';
+import 'package:duitaja/cubit/add_report_cubit.dart';
+import 'package:duitaja/cubit/filter_cubit.dart';
+import 'package:duitaja/cubit/page_cubit.dart';
+import 'package:duitaja/shared/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

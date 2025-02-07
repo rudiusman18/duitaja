@@ -1,5 +1,5 @@
-import 'package:duidku/cubit/auth_cubit.dart';
-import 'package:duidku/shared/theme.dart';
+import 'package:duitaja/cubit/auth_cubit.dart';
+import 'package:duitaja/shared/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

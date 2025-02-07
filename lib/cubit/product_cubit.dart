@@ -1,4 +1,4 @@
-import 'package:duidku/model/product_model.dart';
+import 'package:duitaja/model/product_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ProductCubit extends Cubit<ProductModel> {

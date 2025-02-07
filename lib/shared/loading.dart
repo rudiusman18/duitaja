@@ -1,4 +1,4 @@
-import 'package:duidku/shared/theme.dart';
+import 'package:duitaja/shared/theme.dart';
 import 'package:flutter/material.dart';
 
 class Loading extends StatelessWidget {

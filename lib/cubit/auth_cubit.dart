@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
-import 'package:duidku/model/profile_model.dart';
-import 'package:duidku/service/auth_service.dart';
+import 'package:duitaja/model/profile_model.dart';
+import 'package:duitaja/service/auth_service.dart';
 
 part 'auth_state.dart';
 

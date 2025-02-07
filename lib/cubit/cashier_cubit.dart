@@ -1,12 +1,12 @@
 import 'package:bloc/bloc.dart';
-import 'package:duidku/model/cashier_category_model.dart';
-import 'package:duidku/model/order_model.dart';
-import 'package:duidku/model/tax_model.dart';
-import 'package:duidku/service/cashier_service.dart';
+import 'package:duitaja/model/cashier_category_model.dart';
+import 'package:duitaja/model/order_model.dart';
+import 'package:duitaja/model/tax_model.dart';
+import 'package:duitaja/service/cashier_service.dart';
 import 'package:meta/meta.dart';
-import 'package:duidku/model/product_model.dart';
+import 'package:duitaja/model/product_model.dart';
 
-import 'package:duidku/model/sellable_product_model.dart';
+import 'package:duitaja/model/sellable_product_model.dart';
 
 part 'cashier_state.dart';
 
