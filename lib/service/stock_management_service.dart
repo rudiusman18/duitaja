@@ -16,7 +16,6 @@ class StockManagementService {
     var url = Uri.parse(
         "$baseURL/sellable?page=$page&limit=$limit&category_id=$categoryId&in_status=$inStatus&search=$search");
 
-    print("URL yang diakses adalah $url dengan token $token");
     var header = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
@@ -32,6 +31,21 @@ class StockManagementService {
       var data = jsonDecode(response.body);
       throw Exception(
           "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+    }
+  }
+
+  Future<void> getDetailStockManagement({required String token, required String productId})async{
+    var url = Uri.parse("$baseURL/sellable/$productId");
+
+    var header = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+    var response = await http.get(url, headers: header);
+
+    if(response.statusCode >= 200 && response.statusCode <= 299){
+      var data = jsonDecode(response.body);
+      
     }
   }
 }
