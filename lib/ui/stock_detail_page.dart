@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:duitaja/cubit/product_cubit.dart';
 import 'package:duitaja/model/product_model.dart';
 import 'package:duitaja/shared/modal_alert.dart';
@@ -132,11 +133,14 @@ class _StockDetailPageState extends State<StockDetailPage> {
                       ),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(6),
-                        child: Image.network(
-                          state.productURL ?? "",
+                        child: CachedNetworkImage(
                           width: 100,
                           height: 100,
-                          fit: BoxFit.cover,
+                          imageUrl: state.productURL ?? "",
+                          errorWidget: (context, url, error) => Image.asset(
+                            "assets/no-image.png",
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       const SizedBox(
