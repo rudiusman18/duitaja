@@ -80,6 +80,7 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
     return BlocListener<RefundSaleCubit, RefundSaleState>(
       listener: (context, state) {
         if (state is RefundSaleSuccess) {
+          context.read<SaleCubit>().resetSalesHistory();
           Navigator.pop(context);
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
@@ -88,7 +89,7 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
                 "Data berhasil diubah",
                 style: inter,
               ),
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.green,
               duration: const Duration(
                 seconds: 5,
               ),

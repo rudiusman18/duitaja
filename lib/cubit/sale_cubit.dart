@@ -14,7 +14,7 @@ class SaleCubit extends Cubit<SaleState> {
   SaleHistoryModel get saleHistoryModel => state.saleHistoryModel;
 
   Future<void> resetSalesHistory() async {
-    emit(SaleInitial());
+    emit(SaleReset());
   }
 
   Future<void> allSalesHistory({

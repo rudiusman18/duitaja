@@ -830,77 +830,7 @@ class _SalePageState extends State<SalePage> {
               context: context,
               builder: (context) {
                 return SaleDetailPage(saleId: payloadId);
-              }).then((_) {
-            saleHistoryModel = null;
-            saleProductPage = 1;
-            context.read<SaleCubit>().allSalesHistory(
-                  token: context.read<AuthCubit>().token ?? "",
-                  page: "$saleProductPage",
-                  limit: '100',
-                  status: '',
-                  startDate: resetDate
-                      ? ''
-                      : context
-                                  .read<FilterCubit>()
-                                  .state['Tanggal']
-                                  ?.first
-                                  .toLowerCase() ==
-                              '30 hari terakhir'
-                          ? formattedDate30
-                          : context
-                                      .read<FilterCubit>()
-                                      .state['Tanggal']
-                                      ?.first
-                                      .toLowerCase() ==
-                                  '90 hari terakhir'
-                              ? formattedDate90
-                              : DateFormat('yyyy-MM-dd').format(
-                                  _rangeDatePickerValueWithDefaultValue.first ??
-                                      DateTime.now()),
-                  endDate: resetDate
-                      ? ''
-                      : context
-                                  .read<FilterCubit>()
-                                  .state['Tanggal']
-                                  ?.first
-                                  .toLowerCase() ==
-                              '30 hari terakhir'
-                          ? formattedDateNow
-                          : context
-                                      .read<FilterCubit>()
-                                      .state['Tanggal']
-                                      ?.first
-                                      .toLowerCase() ==
-                                  '90 hari terakhir'
-                              ? formattedDateNow
-                              : DateFormat('yyyy-MM-dd').format(
-                                  _rangeDatePickerValueWithDefaultValue.last ??
-                                      DateTime.now()),
-                  search: searchTextField.text,
-                  inStatus: context
-                              .read<FilterCubit>()
-                              .state['Status']
-                              ?.first
-                              .toLowerCase() ==
-                          "lunas"
-                      ? 'paid'
-                      : context
-                                  .read<FilterCubit>()
-                                  .state['Status']
-                                  ?.first
-                                  .toLowerCase() ==
-                              'belum lunas'
-                          ? 'unpaid'
-                          : context
-                                      .read<FilterCubit>()
-                                      .state['Status']
-                                      ?.first
-                                      .toLowerCase() ==
-                                  'refund'
-                              ? 'refund'
-                              : '',
-                );
-          });
+              });
         },
         child: Container(
           color: Colors.white,
@@ -1024,6 +954,77 @@ class _SalePageState extends State<SalePage> {
                 context.read<SaleCubit>().saleHistoryModel.payload?.toList() ??
                     []);
           }
+        }
+        if (state is SaleReset) {
+          saleHistoryModel = null;
+          saleProductPage = 1;
+          context.read<SaleCubit>().allSalesHistory(
+                token: context.read<AuthCubit>().token ?? "",
+                page: "$saleProductPage",
+                limit: '100',
+                status: '',
+                startDate: resetDate
+                    ? ''
+                    : context
+                                .read<FilterCubit>()
+                                .state['Tanggal']
+                                ?.first
+                                .toLowerCase() ==
+                            '30 hari terakhir'
+                        ? formattedDate30
+                        : context
+                                    .read<FilterCubit>()
+                                    .state['Tanggal']
+                                    ?.first
+                                    .toLowerCase() ==
+                                '90 hari terakhir'
+                            ? formattedDate90
+                            : DateFormat('yyyy-MM-dd').format(
+                                _rangeDatePickerValueWithDefaultValue.first ??
+                                    DateTime.now()),
+                endDate: resetDate
+                    ? ''
+                    : context
+                                .read<FilterCubit>()
+                                .state['Tanggal']
+                                ?.first
+                                .toLowerCase() ==
+                            '30 hari terakhir'
+                        ? formattedDateNow
+                        : context
+                                    .read<FilterCubit>()
+                                    .state['Tanggal']
+                                    ?.first
+                                    .toLowerCase() ==
+                                '90 hari terakhir'
+                            ? formattedDateNow
+                            : DateFormat('yyyy-MM-dd').format(
+                                _rangeDatePickerValueWithDefaultValue.last ??
+                                    DateTime.now()),
+                search: searchTextField.text,
+                inStatus: context
+                            .read<FilterCubit>()
+                            .state['Status']
+                            ?.first
+                            .toLowerCase() ==
+                        "lunas"
+                    ? 'paid'
+                    : context
+                                .read<FilterCubit>()
+                                .state['Status']
+                                ?.first
+                                .toLowerCase() ==
+                            'belum lunas'
+                        ? 'unpaid'
+                        : context
+                                    .read<FilterCubit>()
+                                    .state['Status']
+                                    ?.first
+                                    .toLowerCase() ==
+                                'refund'
+                            ? 'refund'
+                            : '',
+              );
         }
         if (state is SaleTokenExpired) {
           context.read<AuthCubit>().logout();

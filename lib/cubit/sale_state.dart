@@ -10,6 +10,10 @@ final class SaleInitial extends SaleState {
   SaleInitial() : super(SaleHistoryModel());
 }
 
+final class SaleReset extends SaleState {
+  SaleReset() : super(SaleHistoryModel());
+}
+
 final class SaleLoading extends SaleState {
   SaleLoading() : super(SaleHistoryModel());
 }

@@ -246,18 +246,7 @@ class _HomePageState extends State<HomePage> {
               context: context,
               builder: (context) {
                 return SaleDetailPage(saleId: payloadId);
-              }).then((_) {
-            context.read<SaleCubit>().allSalesHistory(
-                  token: context.read<AuthCubit>().token ?? "",
-                  page: "1",
-                  limit: "15",
-                  status: "",
-                  startDate: "",
-                  endDate: "",
-                  search: "",
-                  inStatus: "",
-                );
-          });
+              });
         },
         child: Container(
           color: Colors.white,
@@ -376,6 +365,18 @@ class _HomePageState extends State<HomePage> {
         if (state is SaleTokenExpired) {
           context.read<AuthCubit>().logout();
           Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+        }
+        if (state is SaleReset) {
+          context.read<SaleCubit>().allSalesHistory(
+                token: context.read<AuthCubit>().token ?? "",
+                page: "1",
+                limit: "15",
+                status: "",
+                startDate: "",
+                endDate: "",
+                search: "",
+                inStatus: "",
+              );
         }
       },
       builder: (context, state) {
