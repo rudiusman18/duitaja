@@ -1,7 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:duitaja/cubit/auth_cubit.dart';
+import 'package:duitaja/cubit/cashier_cubit.dart';
 import 'package:duitaja/cubit/filter_cubit.dart';
 import 'package:duitaja/cubit/page_cubit.dart';
 import 'package:duitaja/cubit/product_cubit.dart';
+import 'package:duitaja/cubit/stock_management_cubit.dart';
 import 'package:duitaja/model/product_model.dart';
+import 'package:duitaja/model/stock_management_model.dart';
 import 'package:duitaja/shared/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,6 +22,25 @@ class StockPage extends StatefulWidget {
 
 class _StockPageState extends State<StockPage> {
   TextEditingController searchTextField = TextEditingController(text: "");
+  StockManagementModel? stockManagementModel;
+  int stockPage = 1;
+  String? categoryId;
+
+  @override
+  void initState() {
+    context.read<StockManagementCubit>().stockManagementData(
+          token: context.read<AuthCubit>().token ?? "",
+          categoryId: '',
+          inStatus: '',
+          limit: '100',
+          page: '$stockPage',
+          search: '',
+        );
+    context.read<IndexCashierFilterCubit>().category(
+          token: context.read<AuthCubit>().token ?? "",
+        );
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +56,80 @@ class _StockPageState extends State<StockPage> {
         ),
         child: TextFormField(
           controller: searchTextField,
+          onChanged: (text) {
+            if (text == "") {
+              stockManagementModel = null;
+              stockPage = 1;
+              context.read<StockManagementCubit>().stockManagementData(
+                    token: context.read<AuthCubit>().token ?? "",
+                    categoryId: categoryId ?? '',
+                    inStatus: (context
+                                        .read<FilterCubit>()
+                                        .state['Status']
+                                        ?.first ??
+                                    '')
+                                .toLowerCase() ==
+                            'aktif'
+                        ? 'active'
+                        : (context.read<FilterCubit>().state['Status']?.first ??
+                                        '')
+                                    .toLowerCase() ==
+                                'non-aktif'
+                            ? 'inactive'
+                            : (context
+                                                .read<FilterCubit>()
+                                                .state['Status']
+                                                ?.first ??
+                                            '')
+                                        .toLowerCase() ==
+                                    'habis'
+                                ? 'empty'
+                                : '',
+                    limit: '100',
+                    page: '$stockPage',
+                    search: searchTextField.text,
+                  );
+              context.read<IndexCashierFilterCubit>().category(
+                    token: context.read<AuthCubit>().token ?? "",
+                  );
+            }
+          },
+          onEditingComplete: () {
+            stockManagementModel = null;
+            stockPage = 1;
+            context.read<StockManagementCubit>().stockManagementData(
+                  token: context.read<AuthCubit>().token ?? "",
+                  categoryId: categoryId ?? '',
+                  inStatus:
+                      (context.read<FilterCubit>().state['Status']?.first ?? '')
+                                  .toLowerCase() ==
+                              'aktif'
+                          ? 'active'
+                          : (context
+                                              .read<FilterCubit>()
+                                              .state['Status']
+                                              ?.first ??
+                                          '')
+                                      .toLowerCase() ==
+                                  'non-aktif'
+                              ? 'inactive'
+                              : (context
+                                                  .read<FilterCubit>()
+                                                  .state['Status']
+                                                  ?.first ??
+                                              '')
+                                          .toLowerCase() ==
+                                      'habis'
+                                  ? 'empty'
+                                  : '',
+                  limit: '100',
+                  page: '$stockPage',
+                  search: searchTextField.text,
+                );
+            context.read<IndexCashierFilterCubit>().category(
+                  token: context.read<AuthCubit>().token ?? "",
+                );
+          },
           decoration: InputDecoration(
             suffixIcon: Icon(
               Icons.search,
@@ -64,6 +162,7 @@ class _StockPageState extends State<StockPage> {
       required BuildContext context,
       required String groupName,
       required String name,
+      required String id,
     }) {
       return StatefulBuilder(
         builder: (context, stateSetter) {
@@ -83,6 +182,7 @@ class _StockPageState extends State<StockPage> {
                 ),
                 child: GestureDetector(
                   onTap: () {
+                    Navigator.pop(context);
                     context.read<PreviousPageCubit>().setPage(1);
                     context.read<PageCubit>().setPage(1);
 
@@ -96,12 +196,54 @@ class _StockPageState extends State<StockPage> {
                       filterList[groupName]!.remove(name);
                       if (filterList[groupName]!.isEmpty) {
                         filterList.remove(groupName);
+                        if (groupName.toLowerCase() == 'kategori') {
+                          categoryId = null;
+                        }
                       }
                     } else {
+                      filterList.putIfAbsent(groupName, () => []).clear();
                       filterList.putIfAbsent(groupName, () => []).add(name);
                     }
 
                     context.read<FilterCubit>().setFilter(filterList);
+                    if (groupName.toLowerCase() == 'kategori') {
+                      categoryId = id;
+                    }
+                    stockManagementModel = null;
+                    stockPage = 1;
+                    context.read<StockManagementCubit>().stockManagementData(
+                          token: context.read<AuthCubit>().token ?? "",
+                          categoryId: categoryId ?? '',
+                          inStatus: (context
+                                              .read<FilterCubit>()
+                                              .state['Status']
+                                              ?.first ??
+                                          '')
+                                      .toLowerCase() ==
+                                  'aktif'
+                              ? 'active'
+                              : (context
+                                                  .read<FilterCubit>()
+                                                  .state['Status']
+                                                  ?.first ??
+                                              '')
+                                          .toLowerCase() ==
+                                      'non-aktif'
+                                  ? 'inactive'
+                                  : (context
+                                                      .read<FilterCubit>()
+                                                      .state['Status']
+                                                      ?.first ??
+                                                  '')
+                                              .toLowerCase() ==
+                                          'habis'
+                                      ? 'empty'
+                                      : '',
+                          limit: '100',
+                          page: '$stockPage',
+                          search: searchTextField.text,
+                        );
+
                     setState(() {});
                     stateSetter(() {});
                   },
@@ -215,56 +357,49 @@ class _StockPageState extends State<StockPage> {
                   child: ListView(
                     children: [
                       if (title.toLowerCase() == "kategori") ...{
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Semua Kategori",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Makanan",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Minuman",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Camilan",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Shopee",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Promo",
-                          context: context,
-                        ),
+                        for (var index = 0;
+                            index <
+                                (context
+                                        .read<IndexCashierFilterCubit>()
+                                        .cashierCategoryModel
+                                        .payload
+                                        ?.length ??
+                                    0);
+                            index++) ...{
+                          generateFilterContentItem(
+                              groupName: title,
+                              name: context
+                                      .read<IndexCashierFilterCubit>()
+                                      .cashierCategoryModel
+                                      .payload?[index]
+                                      .name ??
+                                  "",
+                              context: context,
+                              id: context
+                                      .read<IndexCashierFilterCubit>()
+                                      .cashierCategoryModel
+                                      .payload?[index]
+                                      .id ??
+                                  ''),
+                        },
                       } else ...{
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Semua Kategori",
-                          context: context,
-                        ),
                         generateFilterContentItem(
                           groupName: title,
                           name: "Aktif",
                           context: context,
+                          id: '',
                         ),
                         generateFilterContentItem(
                           groupName: title,
                           name: "Non-Aktif",
                           context: context,
+                          id: '',
                         ),
                         generateFilterContentItem(
                           groupName: title,
                           name: "Habis",
                           context: context,
+                          id: '',
                         ),
                       },
                     ],
@@ -354,11 +489,14 @@ class _StockPageState extends State<StockPage> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(6),
-                child: Image.network(
-                  product.productURL ?? "",
+                child: CachedNetworkImage(
                   width: 72,
                   height: 72,
-                  fit: BoxFit.cover,
+                  imageUrl: product.productURL ?? "",
+                  errorWidget: (context, url, error) => Image.asset(
+                    "assets/no-image.png",
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const SizedBox(
@@ -455,132 +593,294 @@ class _StockPageState extends State<StockPage> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: primaryColor,
-        title: Text(
-          "Manajemen Stok",
-          style: inter.copyWith(
-            fontWeight: medium,
-            fontSize: 20,
-          ),
-        ),
-        leading: const SizedBox(),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          const SizedBox(
-            height: 24,
-          ),
-          searchSetup(),
-          const SizedBox(
-            height: 24,
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                child: Row(
-                  children: [
-                    if (context.read<FilterCubit>().state.isNotEmpty) ...{
-                      GestureDetector(
-                        onTap: () {
-                          var filterList = context.read<FilterCubit>().state;
-                          filterList.clear();
-                          context.read<FilterCubit>().setFilter(filterList);
-                          setState(() {});
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(
-                            6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: primaryColor,
-                            borderRadius: BorderRadius.circular(
-                              8,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.close,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 24,
-                      ),
-                    },
-                    generateFilterItem(
-                      groupName: "Kategori",
-                      title: (context
-                                  .read<FilterCubit>()
-                                  .state["Kategori"]
-                                  ?.isEmpty ??
-                              true)
-                          ? "Kategori"
-                          : "${context.read<FilterCubit>().state["Kategori"]}"
-                              .replaceAll("[", "")
-                              .replaceAll("]", ""),
-                    ),
-                    const SizedBox(
-                      width: 24,
-                    ),
-                    generateFilterItem(
-                      groupName: "Status",
-                      title: (context
-                                  .read<FilterCubit>()
-                                  .state["Status"]
-                                  ?.isEmpty ??
-                              true)
-                          ? "Status"
-                          : "${context.read<FilterCubit>().state["Status"]}"
-                              .replaceAll("[", "")
-                              .replaceAll("]", ""),
-                    ),
-                  ],
-                ),
+    return BlocConsumer<StockManagementCubit, StockManagementState>(
+      listener: (context, state) {
+        if (state is StockManagementTokenExpired) {
+          context.read<AuthCubit>().logout();
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+        }
+
+        if (state is StockManagementSuccess) {
+          if (stockManagementModel == null) {
+            stockManagementModel =
+                context.read<StockManagementCubit>().stockManagementModel;
+          } else {
+            stockManagementModel!.payload?.addAll(context
+                    .read<StockManagementCubit>()
+                    .stockManagementModel
+                    .payload
+                    ?.toList() ??
+                []);
+          }
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: primaryColor,
+            title: Text(
+              "Manajemen Stok",
+              style: inter.copyWith(
+                fontWeight: medium,
+                fontSize: 20,
               ),
             ),
+            leading: const SizedBox(),
+            centerTitle: true,
           ),
-          const SizedBox(
-            height: 24,
-          ),
-          Expanded(
-            child: ListView(
-              children: [
-                for (var index = 0; index < 25; index++) ...{
-                  generateListProductItem(
-                    product: ProductModel(
-                      id: index,
-                      productId: "",
-                      productURL:
-                          "https://i.pinimg.com/originals/73/5a/31/735a3179ff4baf792989573c363b2af9.jpg",
-                      productName: "Mie Goreng $index",
-                      stock: 5,
-                      description:
-                          "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet",
-                      price: 123000,
-                      discountPrice: index % 2 == 0 ? 8000 : 0,
-                      discountId: "",
-                      productCategory: "Makanan",
-                      status: index % 2 == 0
-                          ? "Aktif"
-                          : index == 5
-                              ? "Non-Aktif"
-                              : "Habis",
+          body: Column(
+            children: [
+              const SizedBox(
+                height: 24,
+              ),
+              searchSetup(),
+              const SizedBox(
+                height: 24,
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                    ),
+                    child: Row(
+                      children: [
+                        if (context.read<FilterCubit>().state.isNotEmpty) ...{
+                          GestureDetector(
+                            onTap: () {
+                              var filterList =
+                                  context.read<FilterCubit>().state;
+                              filterList.clear();
+                              context.read<FilterCubit>().setFilter(filterList);
+                              categoryId = null;
+                              stockManagementModel = null;
+                              stockPage = 1;
+                              context
+                                  .read<StockManagementCubit>()
+                                  .stockManagementData(
+                                    token:
+                                        context.read<AuthCubit>().token ?? "",
+                                    categoryId: '',
+                                    inStatus: (context
+                                                        .read<FilterCubit>()
+                                                        .state['Status']
+                                                        ?.first ??
+                                                    '')
+                                                .toLowerCase() ==
+                                            'aktif'
+                                        ? 'active'
+                                        : (context
+                                                            .read<FilterCubit>()
+                                                            .state['Status']
+                                                            ?.first ??
+                                                        '')
+                                                    .toLowerCase() ==
+                                                'non-aktif'
+                                            ? 'inactive'
+                                            : (context
+                                                                .read<
+                                                                    FilterCubit>()
+                                                                .state['Status']
+                                                                ?.first ??
+                                                            '')
+                                                        .toLowerCase() ==
+                                                    'habis'
+                                                ? 'empty'
+                                                : '',
+                                    limit: '100',
+                                    page: '$stockPage',
+                                    search: searchTextField.text,
+                                  );
+                              setState(() {});
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(
+                                6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: primaryColor,
+                                borderRadius: BorderRadius.circular(
+                                  8,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 24,
+                          ),
+                        },
+                        generateFilterItem(
+                          groupName: "Kategori",
+                          title: (context
+                                      .read<FilterCubit>()
+                                      .state["Kategori"]
+                                      ?.isEmpty ??
+                                  true)
+                              ? "Kategori"
+                              : "${context.read<FilterCubit>().state["Kategori"]}"
+                                  .replaceAll("[", "")
+                                  .replaceAll("]", ""),
+                        ),
+                        const SizedBox(
+                          width: 24,
+                        ),
+                        generateFilterItem(
+                          groupName: "Status",
+                          title: (context
+                                      .read<FilterCubit>()
+                                      .state["Status"]
+                                      ?.isEmpty ??
+                                  true)
+                              ? "Status"
+                              : "${context.read<FilterCubit>().state["Status"]}"
+                                  .replaceAll("[", "")
+                                  .replaceAll("]", ""),
+                        ),
+                      ],
                     ),
                   ),
-                }
-              ],
-            ),
+                ),
+              ),
+              const SizedBox(
+                height: 24,
+              ),
+              Expanded(
+                child: state is StockManagementLoading
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: primaryColor,
+                        ),
+                      )
+                    : state is StockManagementFailure ||
+                            (context
+                                    .read<StockManagementCubit>()
+                                    .stockManagementModel
+                                    .payload
+                                    ?.isEmpty ??
+                                true)
+                        ? Center(
+                            child: Text(
+                              'Data tidak ditemukan',
+                              style: inter,
+                            ),
+                          )
+                        : NotificationListener(
+                            onNotification:
+                                (ScrollEndNotification notification) {
+                              if (stockPage !=
+                                  context
+                                      .read<StockManagementCubit>()
+                                      .stockManagementModel
+                                      .meta
+                                      ?.totalPage) {
+                                stockPage += 1;
+                                stockManagementModel = null;
+                                stockPage = 1;
+                                context
+                                    .read<StockManagementCubit>()
+                                    .stockManagementData(
+                                      token:
+                                          context.read<AuthCubit>().token ?? "",
+                                      categoryId: categoryId ?? '',
+                                      inStatus: (context
+                                                          .read<FilterCubit>()
+                                                          .state['Status']
+                                                          ?.first ??
+                                                      '')
+                                                  .toLowerCase() ==
+                                              'aktif'
+                                          ? 'active'
+                                          : (context
+                                                              .read<
+                                                                  FilterCubit>()
+                                                              .state['Status']
+                                                              ?.first ??
+                                                          '')
+                                                      .toLowerCase() ==
+                                                  'non-aktif'
+                                              ? 'inactive'
+                                              : (context
+                                                                  .read<
+                                                                      FilterCubit>()
+                                                                  .state[
+                                                                      'Status']
+                                                                  ?.first ??
+                                                              '')
+                                                          .toLowerCase() ==
+                                                      'habis'
+                                                  ? 'empty'
+                                                  : '',
+                                      limit: '100',
+                                      page: '$stockPage',
+                                      search: searchTextField.text,
+                                    );
+                                context
+                                    .read<IndexCashierFilterCubit>()
+                                    .category(
+                                      token:
+                                          context.read<AuthCubit>().token ?? "",
+                                    );
+                              }
+
+                              return true;
+                            },
+                            child: ListView(
+                              children: [
+                                for (var index = 0;
+                                    index <
+                                        (stockManagementModel!
+                                                .payload?.length ??
+                                            0);
+                                    index++) ...{
+                                  generateListProductItem(
+                                    product: ProductModel(
+                                      id: index,
+                                      productId:
+                                          "${stockManagementModel!.payload?[index].id}",
+                                      productURL:
+                                          "${stockManagementModel!.payload?[index].image}",
+                                      productName:
+                                          "${stockManagementModel!.payload?[index].name}",
+                                      stock: stockManagementModel!
+                                          .payload?[index].currentQuantity,
+                                      description: "Belum ada deskripsi",
+                                      price: stockManagementModel!
+                                          .payload?[index].price,
+                                      discountPrice: stockManagementModel!
+                                                  .payload?[index].promo !=
+                                              null
+                                          ? ((stockManagementModel!
+                                                      .payload?[index].price ??
+                                                  0) -
+                                              (stockManagementModel!
+                                                      .payload?[index]
+                                                      .promo
+                                                      ?.amount ??
+                                                  0))
+                                          : 0,
+                                      discountId: stockManagementModel!
+                                          .payload?[index].promo?.id,
+                                      productCategory: stockManagementModel!
+                                          .payload?[index].category?.name,
+                                      status: stockManagementModel!
+                                          .payload?[index].statusDisplay,
+                                    ),
+                                  ),
+                                }
+                              ],
+                            ),
+                          ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
