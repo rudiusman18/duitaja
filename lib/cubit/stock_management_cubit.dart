@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
+import 'package:duitaja/model/detail_stock_management_model.dart';
 import 'package:duitaja/model/stock_management_model.dart';
 import 'package:duitaja/service/stock_management_service.dart';
+import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
 part 'stock_management_state.dart';
@@ -33,6 +35,28 @@ class StockManagementCubit extends Cubit<StockManagementState> {
         emit(StockManagementTokenExpired());
       } else {
         emit(StockManagementFailure(e.toString()));
+      }
+    }
+  }
+}
+
+class DetailStockManagementCubit extends Cubit<DetailStockManagementState> {
+  DetailStockManagementCubit() : super(DetailStockManagementInitial());
+  Future<void> detailStockManagementData(
+      {required String token, required String productId}) async {
+    emit(DetailStockManagementLoading());
+    try {
+      var data = await StockManagementService()
+          .getDetailStockManagement(token: token, productId: productId);
+      emit(DetailStockManagementSuccess(data));
+
+      print("data berhasil didapatkan $data");
+    } catch (e) {
+      print("data gagal diambil cok $e");
+      if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
+        emit(DetailStockManagementTokenExpired());
+      } else {
+        emit(DetailStockManagementFailure(e.toString()));
       }
     }
   }

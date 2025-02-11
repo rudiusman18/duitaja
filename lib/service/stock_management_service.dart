@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:duitaja/model/detail_stock_management_model.dart';
 import 'package:duitaja/model/stock_management_model.dart';
 import 'package:duitaja/shared/utils.dart';
 import 'package:http/http.dart' as http;
@@ -34,8 +35,9 @@ class StockManagementService {
     }
   }
 
-  Future<void> getDetailStockManagement({required String token, required String productId})async{
-    var url = Uri.parse("$baseURL/sellable/$productId");
+  Future<DetailStockManagementModel> getDetailStockManagement(
+      {required String token, required String productId}) async {
+    var url = Uri.parse("$baseURL/sellable/$productId/stock");
 
     var header = {
       'Authorization': 'Bearer $token',
@@ -43,9 +45,15 @@ class StockManagementService {
     };
     var response = await http.get(url, headers: header);
 
-    if(response.statusCode >= 200 && response.statusCode <= 299){
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
       var data = jsonDecode(response.body);
-      
+      final DetailStockManagementModel detailStockManagementModel =
+          DetailStockManagementModel.fromJson(data);
+      return detailStockManagementModel;
+    } else {
+      var data = jsonDecode(response.body);
+      throw Exception(
+          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
 }

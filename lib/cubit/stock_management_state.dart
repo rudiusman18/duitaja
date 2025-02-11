@@ -28,3 +28,23 @@ final class StockManagementFailure extends StockManagementState {
 final class StockManagementTokenExpired extends StockManagementState {
   StockManagementTokenExpired() : super(StockManagementModel());
 }
+
+@immutable
+final class DetailStockManagementState {}
+
+final class DetailStockManagementInitial extends DetailStockManagementState {}
+
+final class DetailStockManagementLoading extends DetailStockManagementState {}
+
+final class DetailStockManagementSuccess extends DetailStockManagementState {
+  final DetailStockManagementModel detailStockManagementModel;
+  DetailStockManagementSuccess(this.detailStockManagementModel);
+}
+
+final class DetailStockManagementFailure extends DetailStockManagementState {
+  final String error;
+  DetailStockManagementFailure(this.error);
+}
+
+final class DetailStockManagementTokenExpired
+    extends DetailStockManagementState {}

@@ -20,8 +20,6 @@ class SaleService {
     var url = Uri.parse(
         "$baseURL/invoice/sales/history?page=$page&limit=$limit&status=$status&start_date=$startDate&end_date=$endDate&search=$search&in_status=$inStatus");
 
-    print("isi url nya adalah dengan $token $url");
-
     var header = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',

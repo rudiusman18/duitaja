@@ -555,6 +555,7 @@ class _StockPageState extends State<StockPage> {
                 ),
               ),
               Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
