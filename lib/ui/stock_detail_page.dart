@@ -24,17 +24,11 @@ class _StockDetailPageState extends State<StockDetailPage> {
   TextEditingController descriptionTextField = TextEditingController(text: "");
 
   // ignore: unused_field, non_constant_identifier_names
-  bool _Checked = false;
   final _controller = ValueNotifier<bool>(false);
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(() {
-      setState(() {
-        _Checked = _controller.value;
-      });
-    });
 
     context.read<DetailStockManagementCubit>().detailStockManagementData(
         token: context.read<AuthCubit>().token ?? "",
@@ -95,6 +89,44 @@ class _StockDetailPageState extends State<StockDetailPage> {
 
         if (state is DetailStockManagementSuccess) {
           detailStockManagementModel = state.detailStockManagementModel;
+          _controller.value =
+              state.detailStockManagementModel.payload?.status ?? false;
+        }
+
+        if (state is DetailStockManagementUpdateSuccess) {
+          Navigator.pop(context);
+          context.read<StockManagementCubit>().stockManagementReset();
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "Data berhasil diubah",
+                style: inter,
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(
+                seconds: 5,
+              ),
+            ),
+          );
+        }
+
+        if (state is DetailStockManagementFailure) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                state.error,
+                style: inter,
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(
+                seconds: 5,
+              ),
+            ),
+          );
         }
       },
       builder: (context, state) {
@@ -199,30 +231,35 @@ class _StockDetailPageState extends State<StockDetailPage> {
                             action: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    context
-                                        .read<ProductCubit>()
-                                        .removeStock(state);
-                                    setState(() {});
-                                  },
-                                  child: Container(
-                                    width: 20,
-                                    height: 20,
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5),
-                                        border: Border.all(
-                                          color: primaryColor,
-                                        )),
-                                    child: FittedBox(
-                                        fit: BoxFit.contain,
-                                        child: Icon(
-                                          Icons.remove,
-                                          color: primaryColor,
-                                        )),
-                                  ),
-                                ),
+                                detailStockManagementModel
+                                            ?.payload?.hasReceipt ==
+                                        false
+                                    ? const SizedBox()
+                                    : GestureDetector(
+                                        onTap: () {
+                                          context
+                                              .read<ProductCubit>()
+                                              .removeStock(state);
+                                          setState(() {});
+                                        },
+                                        child: Container(
+                                          width: 20,
+                                          height: 20,
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              border: Border.all(
+                                                color: primaryColor,
+                                              )),
+                                          child: FittedBox(
+                                              fit: BoxFit.contain,
+                                              child: Icon(
+                                                Icons.remove,
+                                                color: primaryColor,
+                                              )),
+                                        ),
+                                      ),
                                 const SizedBox(
                                   width: 15,
                                 ),
@@ -233,29 +270,34 @@ class _StockDetailPageState extends State<StockDetailPage> {
                                 const SizedBox(
                                   width: 15,
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    context
-                                        .read<ProductCubit>()
-                                        .addStock(state);
-                                    setState(() {});
-                                  },
-                                  child: Container(
-                                    width: 20,
-                                    height: 20,
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                      color: primaryColor,
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    child: const FittedBox(
-                                        fit: BoxFit.contain,
-                                        child: Icon(
-                                          Icons.add,
-                                          color: Colors.white,
-                                        )),
-                                  ),
-                                ),
+                                detailStockManagementModel
+                                            ?.payload?.hasReceipt ==
+                                        false
+                                    ? const SizedBox()
+                                    : GestureDetector(
+                                        onTap: () {
+                                          context
+                                              .read<ProductCubit>()
+                                              .addStock(state);
+                                          setState(() {});
+                                        },
+                                        child: Container(
+                                          width: 20,
+                                          height: 20,
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: BoxDecoration(
+                                            color: primaryColor,
+                                            borderRadius:
+                                                BorderRadius.circular(5),
+                                          ),
+                                          child: const FittedBox(
+                                              fit: BoxFit.contain,
+                                              child: Icon(
+                                                Icons.add,
+                                                color: Colors.white,
+                                              )),
+                                        ),
+                                      ),
                               ],
                             ),
                           ),
@@ -274,9 +316,9 @@ class _StockDetailPageState extends State<StockDetailPage> {
                               color: greyColor2,
                             ),
                           ),
-                          const Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                          ),
+                          // const Icon(
+                          //   Icons.keyboard_arrow_down_rounded,
+                          // ),
                         ],
                       ),
                     ),
@@ -335,18 +377,35 @@ class _StockDetailPageState extends State<StockDetailPage> {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                backgroundColor: primaryColor,
-                                content: Text(
-                                  "data berhasil disimpan",
-                                  style: inter.copyWith(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            );
-                            Navigator.pop(context);
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return ModalAlert(
+                                      title: "",
+                                      message:
+                                          "Apakah anda yakin untuk menyimpan data ini?",
+                                      completion: () {
+                                        context
+                                            .read<DetailStockManagementCubit>()
+                                            .updateStockManagementData(
+                                              token: context
+                                                      .read<AuthCubit>()
+                                                      .token ??
+                                                  "",
+                                              productId:
+                                                  detailStockManagementModel
+                                                          ?.payload?.id ??
+                                                      "",
+                                              promoId:
+                                                  detailStockManagementModel
+                                                      ?.payload?.promoId,
+                                              description:
+                                                  descriptionTextField.text,
+                                              status: "${_controller.value}",
+                                              quantity: "${state.stock}",
+                                            );
+                                      });
+                                });
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: primaryColor,

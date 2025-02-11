@@ -56,4 +56,39 @@ class StockManagementService {
           "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
+
+  Future<void> putEditStock({
+    required String token,
+    required String productId,
+    required String? promoId,
+    required String? description,
+    required String status,
+    required String quantity,
+  }) async {
+    var url = Uri.parse("$baseURL/sellable/$productId/stock");
+    var header = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+
+    Map data = {
+      'promo_id': promoId,
+      'description': description,
+      'status': bool.parse(status),
+      'current_quantity': int.parse(quantity),
+    };
+
+    var body = jsonEncode(data);
+
+    var response = await http.put(url, headers: header, body: body);
+
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      var data = jsonDecode(response.body);
+      return data;
+    } else {
+      var data = jsonDecode(response.body);
+      throw Exception(
+          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+    }
+  }
 }

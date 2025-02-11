@@ -614,6 +614,22 @@ class _StockPageState extends State<StockPage> {
                 []);
           }
         }
+
+        if (state is StockManagementReset) {
+          stockManagementModel = null;
+          stockPage = 1;
+          context.read<StockManagementCubit>().stockManagementData(
+                token: context.read<AuthCubit>().token ?? "",
+                categoryId: '',
+                inStatus: '',
+                limit: '100',
+                page: '$stockPage',
+                search: '',
+              );
+          context.read<IndexCashierFilterCubit>().category(
+                token: context.read<AuthCubit>().token ?? "",
+              );
+        }
       },
       builder: (context, state) {
         return Scaffold(
@@ -782,7 +798,6 @@ class _StockPageState extends State<StockPage> {
                                       ?.totalPage) {
                                 stockPage += 1;
                                 stockManagementModel = null;
-                                stockPage = 1;
                                 context
                                     .read<StockManagementCubit>()
                                     .stockManagementData(

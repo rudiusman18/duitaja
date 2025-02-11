@@ -10,6 +10,10 @@ final class StockManagementInitial extends StockManagementState {
   StockManagementInitial() : super(StockManagementModel());
 }
 
+final class StockManagementReset extends StockManagementState{
+   StockManagementReset() : super(StockManagementModel());
+}
+
 final class StockManagementLoading extends StockManagementState {
   StockManagementLoading() : super(StockManagementModel());
 }
@@ -35,6 +39,9 @@ final class DetailStockManagementState {}
 final class DetailStockManagementInitial extends DetailStockManagementState {}
 
 final class DetailStockManagementLoading extends DetailStockManagementState {}
+
+final class DetailStockManagementUpdateSuccess
+    extends DetailStockManagementState {}
 
 final class DetailStockManagementSuccess extends DetailStockManagementState {
   final DetailStockManagementModel detailStockManagementModel;

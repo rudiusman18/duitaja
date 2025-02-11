@@ -1,10 +1,12 @@
 import 'package:duitaja/cubit/page_cubit.dart';
+import 'package:duitaja/cubit/stock_management_cubit.dart';
 import 'package:duitaja/shared/theme.dart';
 import 'package:duitaja/ui/stock_page.dart';
 import 'package:duitaja/ui/home_page.dart';
 import 'package:duitaja/ui/sale_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});

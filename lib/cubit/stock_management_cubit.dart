@@ -38,6 +38,10 @@ class StockManagementCubit extends Cubit<StockManagementState> {
       }
     }
   }
+
+  Future<void> stockManagementReset() async {
+    emit(StockManagementReset());
+  }
 }
 
 class DetailStockManagementCubit extends Cubit<DetailStockManagementState> {
@@ -49,10 +53,35 @@ class DetailStockManagementCubit extends Cubit<DetailStockManagementState> {
       var data = await StockManagementService()
           .getDetailStockManagement(token: token, productId: productId);
       emit(DetailStockManagementSuccess(data));
-
-      print("data berhasil didapatkan $data");
     } catch (e) {
-      print("data gagal diambil cok $e");
+      if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
+        emit(DetailStockManagementTokenExpired());
+      } else {
+        emit(DetailStockManagementFailure(e.toString()));
+      }
+    }
+  }
+
+  Future<void> updateStockManagementData({
+    required String token,
+    required String productId,
+    required String? promoId,
+    required String? description,
+    required String status,
+    required String quantity,
+  }) async {
+    emit(DetailStockManagementLoading());
+    try {
+      var _ = await StockManagementService().putEditStock(
+          token: token,
+          productId: productId,
+          promoId: promoId,
+          description: description,
+          status: status,
+          quantity: quantity);
+
+      emit(DetailStockManagementUpdateSuccess());
+    } catch (e) {
       if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
         emit(DetailStockManagementTokenExpired());
       } else {
