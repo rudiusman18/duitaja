@@ -310,7 +310,7 @@ class _StockDetailPageState extends State<StockDetailPage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            "${detailStockManagementModel?.payload?.promoId}",
+                            detailStockManagementModel?.payload?.promoId ?? "-",
                             style: inter.copyWith(
                               fontWeight: light,
                               color: greyColor2,
