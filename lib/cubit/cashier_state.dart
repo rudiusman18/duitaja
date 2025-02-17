@@ -3,7 +3,8 @@ part of 'cashier_cubit.dart';
 @immutable
 sealed class CashierState {
   final TaxModel taxtModel;
-  const CashierState(this.taxtModel);
+  final OrderModel? orderModel;
+  const CashierState(this.taxtModel, {this.orderModel});
 }
 
 class CashierInitial extends CashierState {
@@ -14,10 +15,6 @@ final class CashierLoading extends CashierState {
   CashierLoading() : super(TaxModel());
 }
 
-final class CashierOrderLoading extends CashierState {
-  CashierOrderLoading() : super(TaxModel());
-}
-
 final class CashierSuccess extends CashierState {
   final TaxModel taxModel;
   const CashierSuccess(this.taxModel) : super(taxModel);
@@ -26,6 +23,16 @@ final class CashierSuccess extends CashierState {
 final class CashierFailure extends CashierState {
   final String error;
   CashierFailure(this.error) : super(TaxModel());
+}
+
+final class CashierSaveOrder extends CashierState {
+  final OrderModel orderModelData;
+  CashierSaveOrder(this.orderModelData)
+      : super(orderModel: orderModelData, TaxModel());
+}
+
+final class CashierOrderLoading extends CashierState {
+  CashierOrderLoading() : super(TaxModel());
 }
 
 final class CashierOrderSuccess extends CashierState {

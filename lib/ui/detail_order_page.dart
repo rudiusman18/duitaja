@@ -647,7 +647,32 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        OrderModel orderModel = OrderModel(
+                          customerName: customerNameTextField.text,
+                          phoneNumber: phoneNumberTextField.text == ""
+                              ? null
+                              : phoneNumberTextField.text,
+                          notes: noteTextField.text == ""
+                              ? null
+                              : noteTextField.text,
+                          paymentMethod: "CASH",
+                          status: false,
+                          subTotal: totalPrice,
+                          tax: totalTax,
+                          taxId: context
+                              .read<CashierCubit>()
+                              .taxModel
+                              .payload
+                              ?.first
+                              .id,
+                          invoiceNumber: "#${generateSixDigitNumber()}",
+                          purchaseds: purchaseds,
+                        );
+                        context.read<CashierCubit>().order(
+                            token: context.read<AuthCubit>().token ?? "",
+                            orderModel: orderModel);
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
@@ -669,43 +694,33 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                         backgroundColor: primaryColor,
                       ),
                       onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (context) => ModalAlert(
-                                  title: "",
-                                  message:
-                                      "Apakah anda telah menerima pembayaran?",
-                                  completion: () {
-                                    OrderModel orderModel = OrderModel(
-                                      customerName: customerNameTextField.text,
-                                      phoneNumber:
-                                          phoneNumberTextField.text == ""
-                                              ? null
-                                              : phoneNumberTextField.text,
-                                      notes: noteTextField.text == ""
-                                          ? null
-                                          : noteTextField.text,
-                                      paymentMethod: "CASH",
-                                      status: true,
-                                      subTotal: totalPrice,
-                                      tax: totalTax,
-                                      taxId: context
-                                          .read<CashierCubit>()
-                                          .taxModel
-                                          .payload
-                                          ?.first
-                                          .id,
-                                      invoiceNumber:
-                                          "#${generateSixDigitNumber()}",
-                                      purchaseds: purchaseds,
-                                    );
-                                    context.read<CashierCubit>().order(
-                                        token:
-                                            context.read<AuthCubit>().token ??
-                                                "",
-                                        orderModel: orderModel);
-                                  },
-                                ));
+                        OrderModel orderModel = OrderModel(
+                          customerName: customerNameTextField.text,
+                          phoneNumber: phoneNumberTextField.text == ""
+                              ? null
+                              : phoneNumberTextField.text,
+                          notes: noteTextField.text == ""
+                              ? null
+                              : noteTextField.text,
+                          paymentMethod: "CASH",
+                          status: false,
+                          subTotal: totalPrice,
+                          tax: totalTax,
+                          taxId: context
+                              .read<CashierCubit>()
+                              .taxModel
+                              .payload
+                              ?.first
+                              .id,
+                          invoiceNumber: "#${generateSixDigitNumber()}",
+                          purchaseds: purchaseds,
+                        );
+                        context
+                            .read<CashierCubit>()
+                            .saveOrder(orderModel: orderModel);
+                        Navigator.pushNamed(context, '/main-page/payment-page')
+                            .then((value) => context.read<CashierCubit>().tax(
+                                token: context.read<AuthCubit>().token ?? ""));
                       },
                       child: Text(
                         "Bayar Sekarang",

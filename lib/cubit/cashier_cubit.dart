@@ -16,6 +16,8 @@ class CashierCubit extends Cubit<CashierState> {
 
   TaxModel get taxModel => state.taxtModel;
 
+  OrderModel get orderModel => state.orderModel ?? OrderModel();
+
   Future<void> tax({required String token}) async {
     emit(CashierLoading());
     try {
@@ -44,6 +46,11 @@ class CashierCubit extends Cubit<CashierState> {
         emit(CashierOrderFailure(e.toString(), state.taxtModel));
       }
     }
+  }
+
+// Digunakan untuk menyimpan data pemesanan untuk langsung ditambahkan nominal (bayar sekarang)
+  Future<void> saveOrder({required OrderModel orderModel}) async {
+    emit(CashierSaveOrder(orderModel));
   }
 }
 

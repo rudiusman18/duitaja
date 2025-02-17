@@ -895,6 +895,9 @@ class _SalePageState extends State<SalePage> {
                         ],
                       ),
                     ),
+                    const SizedBox(
+                      width: 20,
+                    ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [

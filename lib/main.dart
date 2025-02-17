@@ -12,6 +12,7 @@ import 'package:duitaja/ui/cashier_page.dart';
 import 'package:duitaja/ui/detail_order_page.dart';
 import 'package:duitaja/ui/login_page.dart';
 import 'package:duitaja/ui/main_page.dart';
+import 'package:duitaja/ui/payment_page.dart';
 import 'package:duitaja/ui/register_page.dart';
 import 'package:duitaja/ui/setting_page.dart';
 import 'package:duitaja/ui/report_detail_page.dart';
@@ -146,6 +147,11 @@ class MainApp extends StatelessWidget {
             case '/main-page/profile-page':
               return PageTransition(
                 child: const SettingPage(),
+                type: PageTransitionType.rightToLeft,
+              );
+            case '/main-page/payment-page':
+              return PageTransition(
+                child: const PaymentPage(),
                 type: PageTransitionType.rightToLeft,
               );
             default:

@@ -311,6 +311,9 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
+                    const SizedBox(
+                      width: 20,
+                    ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
