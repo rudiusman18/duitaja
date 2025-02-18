@@ -1,10 +1,14 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:duitaja/cubit/add_report_cubit.dart';
+import 'package:duitaja/cubit/auth_cubit.dart';
 import 'package:duitaja/cubit/filter_cubit.dart';
 import 'package:duitaja/cubit/page_cubit.dart';
+import 'package:duitaja/cubit/stock_opname_cubit.dart';
+import 'package:duitaja/model/stock_opname_model.dart';
 import 'package:duitaja/shared/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 class StockOpnamePage extends StatefulWidget {
   const StockOpnamePage({super.key});
@@ -14,6 +18,9 @@ class StockOpnamePage extends StatefulWidget {
 }
 
 class _StockOpnamePageState extends State<StockOpnamePage> {
+  StockOpnameModel? stockOpnameModel;
+  int stockOpnamePage = 1;
+
   TextEditingController searchTextField = TextEditingController(text: "");
 
   // Digunakan ketika membuat laporan stok opname
@@ -56,14 +63,31 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
     return int.tryParse(lastChar) != null;
   }
 
+  @override
+  void initState() {
+    context.read<StockOpnameCubit>().allStockOpnameData(
+        token: context.read<AuthCubit>().token ?? "",
+        page: '$stockOpnamePage',
+        limit: '100');
+    super.initState();
+  }
+
   Widget generateStockOpnameItem({
     required String judul,
     required String numberOfStock,
-    required String date,
-    required String time,
+    required String changerName,
+    required String createdAt,
+    required int index,
   }) {
+    DateTime dateTime = DateTime.parse(createdAt).toLocal();
+    // Extract date and time
+    String date = "${dateTime.year}-${dateTime.month}-${dateTime.day}";
+    String time = "${dateTime.hour}:${dateTime.minute}:${dateTime.second}";
     return GestureDetector(
       onTap: () {
+        context
+            .read<StockOpnameDetailCubit>()
+            .setStockOpnameData(stockOpnameData: (stockOpnameModel?.payload?[index])!);
         Navigator.pushNamed(
             context, '/main-page/stock-opname-page/report-detail-page');
       },
@@ -123,7 +147,7 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
               width: 8,
             ),
             Text(
-              "Sandi",
+              changerName,
               style: inter,
             ),
           ],
@@ -500,309 +524,374 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: primaryColor,
-        title: Text(
-          "Stok Opname",
-          style: inter.copyWith(
-            fontWeight: medium,
-            fontSize: 20,
-          ),
-        ),
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: const Icon(
-            Icons.chevron_left,
-            size: 24,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          const SizedBox(
-            height: 24,
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: searchSetup(),
+    return BlocConsumer<StockOpnameCubit, StockOpnameState>(
+      listener: (context, state) {
+        if (state is StockOpnameTokenExpired) {
+          context.read<AuthCubit>().logout();
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+        }
+
+        if (state is StockOpnameSuccess) {
+          if (stockOpnameModel == null) {
+            stockOpnameModel = state.stockOpnameData;
+          } else {
+            stockOpnameModel?.payload
+                ?.addAll(state.stockOpnameData.payload?.toList() ?? []);
+          }
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: primaryColor,
+            title: Text(
+              "Stok Opname",
+              style: inter.copyWith(
+                fontWeight: medium,
+                fontSize: 20,
               ),
-              ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                      barrierDismissible: false,
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              20,
-                            ),
-                          ),
-                          content: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  titleTextField.text = "";
-                                  amountTextField.text = "";
-                                  Navigator.pop(context);
-                                },
-                                child: const Icon(
-                                  Icons.close,
+            ),
+            leading: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: const Icon(
+                Icons.chevron_left,
+                size: 24,
+              ),
+            ),
+            centerTitle: true,
+          ),
+          body: Column(
+            children: [
+              const SizedBox(
+                height: 24,
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: searchSetup(),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                          barrierDismissible: false,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  20,
                                 ),
                               ),
-                              Column(
+                              content: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
                                 mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "Judul",
-                                    style: inter.copyWith(fontWeight: medium),
-                                  ),
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
-                                  TextFormField(
-                                    controller: titleTextField,
-                                    decoration: InputDecoration(
-                                      hintText: "Masukkan Judul",
-                                      border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        borderSide: BorderSide(
-                                            color: Colors.grey.shade300),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        borderSide: BorderSide(
-                                          color: primaryColor,
-                                          width: 2.0,
-                                        ),
-                                      ),
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 12,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 25,
-                                  ),
-                                  Text(
-                                    "Jumlah Produk",
-                                    style: inter.copyWith(fontWeight: medium),
-                                  ),
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
-                                  TextFormField(
-                                    controller: amountTextField,
-                                    keyboardType: TextInputType.number,
-                                    onChanged: (value) {
-                                      if (value.isNotEmpty &&
-                                          !_isLastCharInteger(value)) {
-                                        // Remove the last character if it's not an integer
-                                        amountTextField.text = value.substring(
-                                            0, value.length - 1);
-                                        amountTextField.selection =
-                                            TextSelection.fromPosition(
-                                          TextPosition(
-                                            offset: amountTextField.text.length,
-                                          ),
-                                        );
-                                      }
+                                  GestureDetector(
+                                    onTap: () {
+                                      titleTextField.text = "";
+                                      amountTextField.text = "";
+                                      Navigator.pop(context);
                                     },
-                                    decoration: InputDecoration(
-                                      hintText: "Masukkan Jumlah Produk",
-                                      border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        borderSide: BorderSide(
-                                            color: Colors.grey.shade300),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        borderSide: BorderSide(
-                                          color: primaryColor,
-                                          width: 2.0,
-                                        ),
-                                      ),
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 12,
-                                      ),
+                                    child: const Icon(
+                                      Icons.close,
                                     ),
                                   ),
-                                  const SizedBox(
-                                    height: 45,
-                                  ),
-                                  Container(
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                    ),
-                                    child: Align(
-                                      alignment: Alignment.center,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          SizedBox(
-                                            width: 136,
-                                            child: ElevatedButton(
-                                              onPressed: () {
-                                                if (titleTextField.text != "" &&
-                                                    amountTextField.text !=
-                                                        "") {
-                                                  Navigator.pop(context);
-                                                  context
-                                                      .read<AddReportCubit>()
-                                                      .initAddReport({
-                                                    "title":
-                                                        titleTextField.text,
-                                                    "amount":
-                                                        amountTextField.text,
-                                                  });
-
-                                                  titleTextField.text = "";
-                                                  amountTextField.text = "";
-                                                  Navigator.pushNamed(context,
-                                                      '/main-page/stock-opname-page/add-report-page');
-                                                }
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: primaryColor,
-                                              ),
-                                              child: Text(
-                                                "Lanjut",
-                                                style: inter.copyWith(
-                                                  fontWeight: medium,
-                                                ),
-                                              ),
+                                  Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Judul",
+                                        style:
+                                            inter.copyWith(fontWeight: medium),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      TextFormField(
+                                        controller: titleTextField,
+                                        decoration: InputDecoration(
+                                          hintText: "Masukkan Judul",
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                            borderSide: BorderSide(
+                                                color: Colors.grey.shade300),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                            borderSide: BorderSide(
+                                              color: primaryColor,
+                                              width: 2.0,
                                             ),
                                           ),
-                                        ],
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 12,
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      const SizedBox(
+                                        height: 25,
+                                      ),
+                                      Text(
+                                        "Jumlah Produk",
+                                        style:
+                                            inter.copyWith(fontWeight: medium),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      TextFormField(
+                                        controller: amountTextField,
+                                        keyboardType: TextInputType.number,
+                                        onChanged: (value) {
+                                          if (value.isNotEmpty &&
+                                              !_isLastCharInteger(value)) {
+                                            // Remove the last character if it's not an integer
+                                            amountTextField.text = value
+                                                .substring(0, value.length - 1);
+                                            amountTextField.selection =
+                                                TextSelection.fromPosition(
+                                              TextPosition(
+                                                offset:
+                                                    amountTextField.text.length,
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        decoration: InputDecoration(
+                                          hintText: "Masukkan Jumlah Produk",
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                            borderSide: BorderSide(
+                                                color: Colors.grey.shade300),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                            borderSide: BorderSide(
+                                              color: primaryColor,
+                                              width: 2.0,
+                                            ),
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 12,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 45,
+                                      ),
+                                      Container(
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                        ),
+                                        child: Align(
+                                          alignment: Alignment.center,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              SizedBox(
+                                                width: 136,
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    if (titleTextField.text !=
+                                                            "" &&
+                                                        amountTextField.text !=
+                                                            "") {
+                                                      Navigator.pop(context);
+                                                      context
+                                                          .read<
+                                                              AddReportCubit>()
+                                                          .initAddReport({
+                                                        "title":
+                                                            titleTextField.text,
+                                                        "amount":
+                                                            amountTextField
+                                                                .text,
+                                                      });
+
+                                                      titleTextField.text = "";
+                                                      amountTextField.text = "";
+                                                      Navigator.pushNamed(
+                                                          context,
+                                                          '/main-page/stock-opname-page/add-report-page');
+                                                    }
+                                                  },
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        primaryColor,
+                                                  ),
+                                                  child: Text(
+                                                    "Lanjut",
+                                                    style: inter.copyWith(
+                                                      fontWeight: medium,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        );
-                      });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                ),
-                child: Text(
-                  "Buat",
-                  style: inter.copyWith(
-                    fontWeight: medium,
+                            );
+                          });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                    ),
+                    child: Text(
+                      "Buat",
+                      style: inter.copyWith(
+                        fontWeight: medium,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                ],
               ),
               const SizedBox(
-                width: 20,
+                height: 24,
               ),
-            ],
-          ),
-          const SizedBox(
-            height: 24,
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                child: Row(
-                  children: [
-                    if (context.read<FilterCubit>().state.isNotEmpty) ...{
-                      GestureDetector(
-                        onTap: () {
-                          var filterList = context.read<FilterCubit>().state;
-                          filterList.clear();
-                          context.read<FilterCubit>().setFilter(filterList);
-                          setState(() {});
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(
-                            6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: primaryColor,
-                            borderRadius: BorderRadius.circular(
-                              8,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                    ),
+                    child: Row(
+                      children: [
+                        if (context.read<FilterCubit>().state.isNotEmpty) ...{
+                          GestureDetector(
+                            onTap: () {
+                              var filterList =
+                                  context.read<FilterCubit>().state;
+                              filterList.clear();
+                              context.read<FilterCubit>().setFilter(filterList);
+                              setState(() {});
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(
+                                6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: primaryColor,
+                                borderRadius: BorderRadius.circular(
+                                  8,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                          child: const Icon(
-                            Icons.close,
-                            color: Colors.white,
+                          const SizedBox(
+                            width: 24,
                           ),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 24,
-                      ),
-                    },
-                    generateFilterItem(
-                      groupName: "Nama",
-                      title:
-                          (context.read<FilterCubit>().state["Nama"]?.isEmpty ??
+                        },
+                        generateFilterItem(
+                          groupName: "Nama",
+                          title: (context
+                                      .read<FilterCubit>()
+                                      .state["Nama"]
+                                      ?.isEmpty ??
                                   true)
                               ? "Nama"
                               : "${context.read<FilterCubit>().state["Nama"]}"
                                   .replaceAll("[", "")
                                   .replaceAll("]", ""),
+                        ),
+                        const SizedBox(
+                          width: 24,
+                        ),
+                        generateFilterItem(
+                          groupName: "Tanggal",
+                          title: (context
+                                      .read<FilterCubit>()
+                                      .state["Tanggal"]
+                                      ?.isEmpty ??
+                                  true)
+                              ? "Tanggal"
+                              : "${context.read<FilterCubit>().state["Tanggal"]}"
+                                  .replaceAll("[", "")
+                                  .replaceAll("]", ""),
+                        ),
+                      ],
                     ),
-                    const SizedBox(
-                      width: 24,
-                    ),
-                    generateFilterItem(
-                      groupName: "Tanggal",
-                      title: (context
-                                  .read<FilterCubit>()
-                                  .state["Tanggal"]
-                                  ?.isEmpty ??
-                              true)
-                          ? "Tanggal"
-                          : "${context.read<FilterCubit>().state["Tanggal"]}"
-                              .replaceAll("[", "")
-                              .replaceAll("]", ""),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(
-            height: 24,
-          ),
-          Expanded(
-              child: ListView(
-            children: [
-              for (var index = 0; index < 20; index++)
-                generateStockOpnameItem(
-                  judul: "Stok Opname November",
-                  numberOfStock: "5",
-                  date: "15 November 2024",
-                  time: "15:28PM",
-                ),
+              const SizedBox(
+                height: 24,
+              ),
+              Expanded(
+                  child: NotificationListener(
+                onNotification: (ScrollEndNotification notification) {
+                  if (stockOpnamePage <
+                      (stockOpnameModel?.meta?.totalPage ?? 0)) {
+                    stockOpnamePage += 1;
+                    context.read<StockOpnameCubit>().allStockOpnameData(
+                        token: context.read<AuthCubit>().token ?? "",
+                        page: '$stockOpnamePage',
+                        limit: '100');
+                  }
+                  return true;
+                },
+                child: state is StockOpnameLoading
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: primaryColor,
+                        ),
+                      )
+                    : state is StockOpnameFailure || stockOpnameModel == null
+                        ? Center(
+                            child: Text(
+                              "Data tidak ditemukan",
+                              style: inter,
+                            ),
+                          )
+                        : ListView(
+                            children: [
+                              for (var index = 0;
+                                  index <
+                                      (stockOpnameModel?.payload?.length ?? 0);
+                                  index++)
+                                generateStockOpnameItem(
+                                  index: index,
+                                  judul:
+                                      "${stockOpnameModel?.payload?[index].title}",
+                                  numberOfStock: "tidak ada stok",
+                                  createdAt:
+                                      "${stockOpnameModel?.payload?[index].createdAt}",
+                                  changerName:
+                                      "${stockOpnameModel?.payload?[index].changerName}",
+                                ),
+                            ],
+                          ),
+              )),
             ],
-          )),
-        ],
-      ),
+          ),
+        );
+      },
     );
   }
 }

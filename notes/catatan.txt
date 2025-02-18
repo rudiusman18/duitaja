@@ -1,0 +1,10 @@
+Stock Opname
+ 
+ Halaman detail laporan
+ - Belum ada key kadaluarsa, masuk, keluar, dan stok asli
+ - API belum bisa search
+ - maksud icon kunci itu buat apa?
+ - Tombol ekspor ini harapannya gimana? ekspor dalam bentuk pdf kah? kalo iya templatenya gimana? 
+
+ Halaman buat laporan
+ - 

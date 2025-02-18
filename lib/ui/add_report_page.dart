@@ -1,4 +1,5 @@
 import 'package:duitaja/cubit/add_report_cubit.dart';
+import 'package:duitaja/cubit/auth_cubit.dart';
 import 'package:duitaja/shared/modal_alert.dart';
 import 'package:duitaja/shared/theme.dart';
 import 'package:flutter/material.dart';
@@ -106,10 +107,25 @@ class _AddReportPageState extends State<AddReportPage> {
             ),
             generateProductCardItem(
               title: "Produk :",
-              value: Text(
-                productName,
-                style: inter,
-                textAlign: TextAlign.end,
+              value: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    productName,
+                    style: inter.copyWith(
+                      color: productName.toLowerCase() == "pilih produk"
+                          ? greyColor2
+                          : Colors.black,
+                    ),
+                    textAlign: TextAlign.end,
+                  ),
+                  Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: productName.toLowerCase() == "pilih produk"
+                        ? greyColor2
+                        : Colors.black,
+                  )
+                ],
               ),
             ),
             const SizedBox(
@@ -119,7 +135,11 @@ class _AddReportPageState extends State<AddReportPage> {
               title: "kadaluarsa :",
               value: Text(
                 expiredDate,
-                style: inter,
+                style: inter.copyWith(
+                  color: expiredDate.toLowerCase() == "dd/mm/yyyy"
+                      ? greyColor2
+                      : Colors.black,
+                ),
                 textAlign: TextAlign.end,
               ),
             ),
@@ -337,7 +357,8 @@ class _AddReportPageState extends State<AddReportPage> {
             generateReportItem(
               title: "Nama: ",
               value: Text(
-                "Sandi",
+                context.read<AuthCubit>().profileModel.payload?.profile?.name ??
+                    "",
                 style: inter.copyWith(
                   fontWeight: semiBold,
                 ),
@@ -499,8 +520,8 @@ class _AddReportPageState extends State<AddReportPage> {
               height: 12,
             ),
             generateProductCard(
-              productName: "Mie Goreng ${cardIndex + 1}",
-              expiredDate: "29/11/2025",
+              productName: "Pilih Produk",
+              expiredDate: "DD/MM/YYYY",
               input: "-",
               output: "-",
               systemStock: "-",
