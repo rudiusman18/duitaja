@@ -7,4 +7,4 @@ Stock Opname
  - Tombol ekspor ini harapannya gimana? ekspor dalam bentuk pdf kah? kalo iya templatenya gimana? 
 
  Halaman buat laporan
- - 
+ - tombol kunci buat apa? 
