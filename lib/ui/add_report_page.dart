@@ -1,5 +1,10 @@
+// ignore_for_file: library_prefixes
+
 import 'package:duitaja/cubit/add_report_cubit.dart';
 import 'package:duitaja/cubit/auth_cubit.dart';
+import 'package:duitaja/cubit/stock_opname_cubit.dart';
+import 'package:duitaja/model/stock_opname_available_items_model.dart'
+    as availableItem;
 import 'package:duitaja/shared/modal_alert.dart';
 import 'package:duitaja/shared/theme.dart';
 import 'package:flutter/material.dart';
@@ -14,10 +19,11 @@ class AddReportPage extends StatefulWidget {
 
 class _AddReportPageState extends State<AddReportPage> {
   int cardIndex = 0;
-  int numberOfStockProduct =
-      0; // Ini sifatnya sementara (hanya untuk menunjukkan ada perubahan)
   bool isLocked = false;
   TextEditingController searchTextField = TextEditingController(text: "");
+
+  List<availableItem.Payload>? productItems;
+  List<int>? realStocks;
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +31,140 @@ class _AddReportPageState extends State<AddReportPage> {
 
     if (cardIndex + 1 >
         int.parse(context.read<AddReportCubit>().state['amount'])) {
-      cardIndex = int.parse(context.read<AddReportCubit>().state['amount']) - 1;
+      cardIndex -= 1;
+      productItems?.removeAt(cardIndex);
+      int.parse(context.read<AddReportCubit>().state['amount']) - 1;
     }
+
+    for (var index = 0;
+        index < int.parse(context.read<AddReportCubit>().state['amount']);
+        index++) {
+      if (productItems?.isEmpty ?? true) {
+        productItems = [availableItem.Payload()];
+        realStocks = [0];
+      } else {
+        if (((productItems?.length ?? 0) - 1) < cardIndex) {
+          productItems?.add(availableItem.Payload());
+          realStocks?.add(0);
+        }
+      }
+    }
+
+    print("product item diisi: ${productItems?.length}");
+
+    // ignore: no_leading_underscores_for_local_identifiers
+    void _showBottomSheet(BuildContext context) {
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        isScrollControlled:
+            true, // To make the sheet adjustable for larger content
+        builder: (context) {
+          availableItem.StockOpnameAvailableItemModel?
+              stockOpnameAvailableItemModel;
+          context
+              .read<StockOpnameAvailableItemCubit>()
+              .allAvailableItem(token: context.read<AuthCubit>().token ?? "");
+
+          return BlocConsumer<StockOpnameAvailableItemCubit,
+              StockOpnameAvailableItemState>(
+            listener: (context, state) {
+              if (state is StockOpnameAvailableItemSuccess) {
+                stockOpnameAvailableItemModel =
+                    state.stockOpnameAvailableItemModel;
+              }
+
+              if (state is StockOpnameAvailableItemTokenExpired) {
+                context.read<AuthCubit>().logout();
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/', (route) => false);
+              }
+            },
+            builder: (context, state) {
+              return SizedBox(
+                height: MediaQuery.sizeOf(context).height * 0.4,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(
+                      height: 12,
+                    ),
+                    Container(
+                      width: 150,
+                      height: 5,
+                      margin: const EdgeInsets.only(bottom: 13),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                        ),
+                        child: ListView(
+                          children: [
+                            for (var index = 0;
+                                index <
+                                    (stockOpnameAvailableItemModel
+                                            ?.payload?.length ??
+                                        0);
+                                index++) ...{
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    productItems?[cardIndex] =
+                                        stockOpnameAvailableItemModel
+                                                ?.payload?[index] ??
+                                            availableItem.Payload();
+                                    Navigator.pop(context);
+                                  });
+                                },
+                                child: Container(
+                                  color: Colors.white,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                            stockOpnameAvailableItemModel
+                                                    ?.payload?[index].name ??
+                                                ""),
+                                      ),
+                                      const Icon(
+                                        Icons.chevron_right,
+                                        color: Colors.black,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Divider(
+                                height: 1,
+                                color: greyColor2,
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                            }
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
+
     Widget generateReportItem({
       required String title,
       required Widget value,
@@ -107,25 +245,30 @@ class _AddReportPageState extends State<AddReportPage> {
             ),
             generateProductCardItem(
               title: "Produk :",
-              value: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    productName,
-                    style: inter.copyWith(
+              value: GestureDetector(
+                onTap: () {
+                  _showBottomSheet(context);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      productName,
+                      style: inter.copyWith(
+                        color: productName.toLowerCase() == "pilih produk"
+                            ? greyColor2
+                            : Colors.black,
+                      ),
+                      textAlign: TextAlign.end,
+                    ),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
                       color: productName.toLowerCase() == "pilih produk"
                           ? greyColor2
                           : Colors.black,
-                    ),
-                    textAlign: TextAlign.end,
-                  ),
-                  Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: productName.toLowerCase() == "pilih produk"
-                        ? greyColor2
-                        : Colors.black,
-                  )
-                ],
+                    )
+                  ],
+                ),
               ),
             ),
             const SizedBox(
@@ -187,8 +330,8 @@ class _AddReportPageState extends State<AddReportPage> {
                   GestureDetector(
                     onTap: () {
                       setState(() {
-                        if (numberOfStockProduct != 0) {
-                          numberOfStockProduct -= 1;
+                        if (realStocks?[cardIndex] != 0) {
+                          realStocks?[cardIndex] -= 1;
                         }
                       });
                     },
@@ -213,7 +356,7 @@ class _AddReportPageState extends State<AddReportPage> {
                     width: 15,
                   ),
                   Text(
-                    "$numberOfStockProduct",
+                    "${realStocks?[cardIndex]}",
                     style: inter,
                   ),
                   const SizedBox(
@@ -222,7 +365,7 @@ class _AddReportPageState extends State<AddReportPage> {
                   GestureDetector(
                     onTap: () {
                       setState(() {
-                        numberOfStockProduct += 1;
+                        realStocks?[cardIndex] += 1;
                       });
                     },
                     child: Container(
@@ -519,15 +662,28 @@ class _AddReportPageState extends State<AddReportPage> {
             const SizedBox(
               height: 12,
             ),
-            generateProductCard(
-              productName: "Pilih Produk",
-              expiredDate: "DD/MM/YYYY",
-              input: "-",
-              output: "-",
-              systemStock: "-",
-              realStock: "-",
-              differenceStock: "${-numberOfStockProduct}",
-            ),
+            if (productItems?[cardIndex].name == null) ...{
+              generateProductCard(
+                productName: "Pilih Produk",
+                expiredDate: "DD/MM/YYYY",
+                input: "-",
+                output: "-",
+                systemStock: "-",
+                realStock: "-",
+                differenceStock: "${-(realStocks?[cardIndex] ?? 0)}",
+              ),
+            } else ...{
+              generateProductCard(
+                productName: "${productItems?[cardIndex].name}",
+                expiredDate: "${productItems?[cardIndex].expiredDate}",
+                input: "-",
+                output: "-",
+                systemStock: "${productItems?[cardIndex].quantity}",
+                realStock: "-",
+                differenceStock:
+                    "${(productItems?[cardIndex].quantity ?? 0) - (realStocks?[cardIndex] ?? 0)}",
+              ),
+            },
             const SizedBox(
               height: 16,
             ),

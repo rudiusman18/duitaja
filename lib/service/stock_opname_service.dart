@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:duitaja/model/detail_stock_opname_model.dart';
+import 'package:duitaja/model/stock_opname_available_items_model.dart';
 import 'package:duitaja/model/stock_opname_model.dart';
 import 'package:duitaja/shared/utils.dart';
 import 'package:http/http.dart' as http;
@@ -47,6 +48,27 @@ class StockOpnameService {
       final DetailStockOpnameModel detailStockOpnameModel =
           DetailStockOpnameModel.fromJson(data);
       return detailStockOpnameModel;
+    } else {
+      var data = jsonDecode(response.body);
+      throw Exception(
+          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+    }
+  }
+
+  Future<StockOpnameAvailableItemModel> getAllAvailableStockItem(
+      {required String token}) async {
+    var url = Uri.parse("$baseURL/stock-opname/available-stock");
+    var header = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+
+    var response = await http.get(url, headers: header);
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      var data = jsonDecode(response.body);
+      final StockOpnameAvailableItemModel stockOpnameAvailableItemModel =
+          StockOpnameAvailableItemModel.fromJson(data);
+      return stockOpnameAvailableItemModel;
     } else {
       var data = jsonDecode(response.body);
       throw Exception(

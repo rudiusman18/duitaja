@@ -44,3 +44,27 @@ final class StockOpnameDetailFailure extends StockOpnameDetailState {
 }
 
 final class StockOpnameDetailTokenExpired extends StockOpnameDetailState {}
+
+@immutable
+sealed class StockOpnameAvailableItemState {}
+
+final class StockOpnameAvailableItemInitial
+    extends StockOpnameAvailableItemState {}
+
+final class StockOpnameAvailableItemLoading
+    extends StockOpnameAvailableItemState {}
+
+final class StockOpnameAvailableItemSuccess
+    extends StockOpnameAvailableItemState {
+  final StockOpnameAvailableItemModel stockOpnameAvailableItemModel;
+  StockOpnameAvailableItemSuccess(this.stockOpnameAvailableItemModel);
+}
+
+final class StockOpnameAvailableItemFailure
+    extends StockOpnameAvailableItemState {
+  final String error;
+  StockOpnameAvailableItemFailure(this.error);
+}
+
+final class StockOpnameAvailableItemTokenExpired
+    extends StockOpnameAvailableItemState {}

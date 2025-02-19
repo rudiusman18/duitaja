@@ -95,6 +95,9 @@ class MainApp extends StatelessWidget {
         BlocProvider(
           create: (context) => StockOpnameDetailCubit(),
         ),
+        BlocProvider(
+          create: (context) => StockOpnameAvailableItemCubit(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
