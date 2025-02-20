@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:duitaja/model/detail_stock_opname_model.dart';
-import 'package:duitaja/model/stock_opname_available_items_model.dart';
+import 'package:duitaja/model/stock_opname_available_items_model.dart'
+    as availableItem;
 import 'package:duitaja/model/stock_opname_model.dart' as stock;
 import 'package:duitaja/service/stock_opname_service.dart';
 import 'package:flutter/rendering.dart';
@@ -47,6 +48,30 @@ class StockOpnameDetailCubit extends Cubit<StockOpnameDetailState> {
       var data = await StockOpnameService()
           .getDetailStockOpname(token: token, stockOpnameID: stockOpnameID);
       emit(StockOpnameDetailSuccess(data));
+    } catch (e) {
+      if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
+        emit(StockOpnameDetailTokenExpired());
+      } else {
+        emit(StockOpnameDetailFailure(e.toString()));
+      }
+    }
+  }
+
+  Future<void> addReportStockOpname({
+    required String token,
+    required String title,
+    required List<availableItem.Payload> productDatas,
+    required List<int> realStocks,
+  }) async {
+    emit(StockOpnameDetailLoading());
+    try {
+      var _ = await StockOpnameService().postReport(
+        token: token,
+        title: title,
+        productDatas: productDatas,
+        realStocks: realStocks,
+      );
+      emit(StockOpnameDetailSuccess(DetailStockOpnameModel()));
     } catch (e) {
       if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
         emit(StockOpnameDetailTokenExpired());

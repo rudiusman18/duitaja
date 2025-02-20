@@ -56,7 +56,8 @@ final class StockOpnameAvailableItemLoading
 
 final class StockOpnameAvailableItemSuccess
     extends StockOpnameAvailableItemState {
-  final StockOpnameAvailableItemModel stockOpnameAvailableItemModel;
+  final availableItem.StockOpnameAvailableItemModel
+      stockOpnameAvailableItemModel;
   StockOpnameAvailableItemSuccess(this.stockOpnameAvailableItemModel);
 }
 

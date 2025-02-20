@@ -5,6 +5,7 @@ import 'package:duitaja/cubit/auth_cubit.dart';
 import 'package:duitaja/cubit/stock_opname_cubit.dart';
 import 'package:duitaja/model/stock_opname_available_items_model.dart'
     as availableItem;
+import 'package:duitaja/shared/loading.dart';
 import 'package:duitaja/shared/modal_alert.dart';
 import 'package:duitaja/shared/theme.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class _AddReportPageState extends State<AddReportPage> {
     if (cardIndex + 1 >
         int.parse(context.read<AddReportCubit>().state['amount'])) {
       cardIndex -= 1;
+      realStocks?.removeAt(cardIndex);
       productItems?.removeAt(cardIndex);
       int.parse(context.read<AddReportCubit>().state['amount']) - 1;
     }
@@ -41,16 +43,14 @@ class _AddReportPageState extends State<AddReportPage> {
         index++) {
       if (productItems?.isEmpty ?? true) {
         productItems = [availableItem.Payload()];
-        realStocks = [0];
+        realStocks = [-1];
       } else {
         if (((productItems?.length ?? 0) - 1) < cardIndex) {
           productItems?.add(availableItem.Payload());
-          realStocks?.add(0);
+          realStocks?.add(-1);
         }
       }
     }
-
-    print("product item diisi: ${productItems?.length}");
 
     // ignore: no_leading_underscores_for_local_identifiers
     void _showBottomSheet(BuildContext context) {
@@ -324,68 +324,78 @@ class _AddReportPageState extends State<AddReportPage> {
             ),
             generateProductCardItem(
               title: "Stok Asli :",
-              value: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        if (realStocks?[cardIndex] != 0) {
-                          realStocks?[cardIndex] -= 1;
-                        }
-                      });
-                    },
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: primaryColor,
-                          )),
-                      child: FittedBox(
-                          fit: BoxFit.contain,
-                          child: Icon(
-                            Icons.remove,
-                            color: primaryColor,
-                          )),
+              value: productItems?[cardIndex].name == null
+                  ? Text(
+                      "${realStocks?[cardIndex] == -1 ? 0 : realStocks?[cardIndex]}",
+                      style: inter,
+                      textAlign: TextAlign.end,
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              if ((realStocks?[cardIndex] ?? 0) > 0) {
+                                realStocks?[cardIndex] -= 1;
+                              }
+                            });
+                          },
+                          child: Container(
+                            width: 20,
+                            height: 20,
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                border: Border.all(
+                                  color: primaryColor,
+                                )),
+                            child: FittedBox(
+                                fit: BoxFit.contain,
+                                child: Icon(
+                                  Icons.remove,
+                                  color: primaryColor,
+                                )),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 15,
+                        ),
+                        Text(
+                          "${realStocks?[cardIndex] == -1 ? 0 : realStocks?[cardIndex]}",
+                          style: inter,
+                        ),
+                        const SizedBox(
+                          width: 15,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              if (realStocks?[cardIndex] == -1) {
+                                realStocks?[cardIndex] += 2;
+                              } else {
+                                realStocks?[cardIndex] += 1;
+                              }
+                            });
+                          },
+                          child: Container(
+                            width: 20,
+                            height: 20,
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: const FittedBox(
+                                fit: BoxFit.contain,
+                                child: Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                )),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(
-                    width: 15,
-                  ),
-                  Text(
-                    "${realStocks?[cardIndex]}",
-                    style: inter,
-                  ),
-                  const SizedBox(
-                    width: 15,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        realStocks?[cardIndex] += 1;
-                      });
-                    },
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: const FittedBox(
-                          fit: BoxFit.contain,
-                          child: Icon(
-                            Icons.add,
-                            color: Colors.white,
-                          )),
-                    ),
-                  ),
-                ],
-              ),
             ),
             const SizedBox(
               height: 17,
@@ -439,365 +449,437 @@ class _AddReportPageState extends State<AddReportPage> {
       );
     }
 
-    return WillPopScope(
-      onWillPop: () async {
-        showDialog(
-          context: context,
-          builder: (context) => ModalAlert(
-            title: "",
-            message:
-                "Apakah Anda yakin ingin keluar? Perubahan yang belum disimpan akan hilang.",
-            completion: () {
-              Navigator.pop(context);
-            },
-          ),
-        );
-        return true;
+    return BlocListener<StockOpnameDetailCubit, StockOpnameDetailState>(
+      listener: (context, state) {
+        if (state is StockOpnameDetailSuccess) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: primaryColor,
+              content: Text(
+                "data berhasil disimpan",
+                style: inter.copyWith(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          );
+          Navigator.pop(context);
+        }
+
+        if (state is StockOpnameDetailLoading) {
+          showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: ((context) {
+                return const Loading();
+              }));
+        }
+
+        if (state is StockOpnameDetailFailure) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: primaryColor,
+              content: Text(
+                state.error,
+                style: inter.copyWith(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (state is StockOpnameDetailTokenExpired) {
+          Navigator.pop(context);
+          context.read<AuthCubit>().logout();
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+        }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: primaryColor,
-          title: Text(
-            "Buat Laporan",
-            style: inter.copyWith(
-              fontWeight: medium,
-              fontSize: 20,
+      child: WillPopScope(
+        onWillPop: () async {
+          showDialog(
+            context: context,
+            builder: (context) => ModalAlert(
+              title: "",
+              message:
+                  "Apakah Anda yakin ingin keluar? Perubahan yang belum disimpan akan hilang.",
+              completion: () {
+                Navigator.pop(context);
+              },
             ),
+          );
+          return true;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: primaryColor,
+            title: Text(
+              "Buat Laporan",
+              style: inter.copyWith(
+                fontWeight: medium,
+                fontSize: 20,
+              ),
+            ),
+            leading: GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => ModalAlert(
+                    title: "",
+                    message:
+                        "Apakah Anda yakin ingin keluar? Perubahan yang belum disimpan akan hilang.",
+                    completion: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                );
+              },
+              child: const Icon(
+                Icons.chevron_left,
+                size: 24,
+              ),
+            ),
+            centerTitle: true,
           ),
-          leading: GestureDetector(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) => ModalAlert(
-                  title: "",
-                  message:
-                      "Apakah Anda yakin ingin keluar? Perubahan yang belum disimpan akan hilang.",
-                  completion: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              );
-            },
-            child: const Icon(
-              Icons.chevron_left,
-              size: 24,
-            ),
-          ),
-          centerTitle: true,
-        ),
-        body: ListView(
-          children: [
-            generateReportItem(
-              title: "Judul: ",
-              value: Text(
-                "${context.read<AddReportCubit>().state['title']}",
-                style: inter.copyWith(
-                  fontWeight: semiBold,
-                ),
-                textAlign: TextAlign.end,
-              ),
-            ),
-            generateReportItem(
-              title: "Nama: ",
-              value: Text(
-                context.read<AuthCubit>().profileModel.payload?.profile?.name ??
-                    "",
-                style: inter.copyWith(
-                  fontWeight: semiBold,
-                ),
-                textAlign: TextAlign.end,
-              ),
-            ),
-            generateReportItem(
-              title: "Tanggal: ",
-              value: Text(
-                "15 November 2024",
-                style: inter.copyWith(
-                  fontWeight: semiBold,
-                ),
-                textAlign: TextAlign.end,
-              ),
-            ),
-            generateReportItem(
-              title: "Total Produk: ",
-              value: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      context
-                          .read<AddReportCubit>()
-                          .decreaseStock(context.read<AddReportCubit>().state);
-                      setState(() {});
-                    },
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: primaryColor,
-                          )),
-                      child: FittedBox(
-                          fit: BoxFit.contain,
-                          child: Icon(
-                            Icons.remove,
-                            color: primaryColor,
-                          )),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 15,
-                  ),
-                  Text(
-                    "${context.read<AddReportCubit>().state['amount']}",
-                    style: inter,
-                  ),
-                  const SizedBox(
-                    width: 15,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      context
-                          .read<AddReportCubit>()
-                          .increaseStock(context.read<AddReportCubit>().state);
-                      setState(() {});
-                    },
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: const FittedBox(
-                          fit: BoxFit.contain,
-                          child: Icon(
-                            Icons.add,
-                            color: Colors.white,
-                          )),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
-              child: Row(
-                children: [
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: 164,
-                    ),
-                    child: searchSetup(),
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => ModalAlert(
-                          title: "",
-                          message:
-                              "Apakah anda ingin ${isLocked ? "membuka kunci" : "mengunci"} produk “Mie Goreng $cardIndex”?",
-                          completion: () {
-                            setState(() {
-                              isLocked = !isLocked;
-                            });
-                          },
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: greyColor1,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child:
-                          Icon(isLocked ? Icons.lock_outline : Icons.lock_open),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 18,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => ModalAlert(
-                          title: "",
-                          message:
-                              "Apakah anda ingin membuang produk “Mie Goreng $cardIndex” dari Stok Opname?",
-                          completion: () {},
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: greyColor1,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.delete_outline_rounded,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            if (productItems?[cardIndex].name == null) ...{
-              generateProductCard(
-                productName: "Pilih Produk",
-                expiredDate: "DD/MM/YYYY",
-                input: "-",
-                output: "-",
-                systemStock: "-",
-                realStock: "-",
-                differenceStock: "${-(realStocks?[cardIndex] ?? 0)}",
-              ),
-            } else ...{
-              generateProductCard(
-                productName: "${productItems?[cardIndex].name}",
-                expiredDate: "${productItems?[cardIndex].expiredDate}",
-                input: "-",
-                output: "-",
-                systemStock: "${productItems?[cardIndex].quantity}",
-                realStock: "-",
-                differenceStock:
-                    "${(productItems?[cardIndex].quantity ?? 0) - (realStocks?[cardIndex] ?? 0)}",
-              ),
-            },
-            const SizedBox(
-              height: 16,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      if (cardIndex != 0) {
-                        cardIndex -= 1;
-                      }
-                    });
-                  },
-                  child: Icon(
-                    Icons.chevron_left,
-                    color: cardIndex == 0 ? greyColor1 : Colors.black,
-                  ),
-                ),
-                Text(
-                  "${cardIndex + 1}/${context.read<AddReportCubit>().state['amount']}",
+          body: ListView(
+            children: [
+              generateReportItem(
+                title: "Judul: ",
+                value: Text(
+                  "${context.read<AddReportCubit>().state['title']}",
                   style: inter.copyWith(
-                    fontWeight: medium,
+                    fontWeight: semiBold,
                   ),
+                  textAlign: TextAlign.end,
                 ),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      if (cardIndex + 1 <
-                          int.parse(
-                              context.read<AddReportCubit>().state['amount'])) {
-                        cardIndex += 1;
-                      }
-                    });
-                  },
-                  child: Icon(
-                    Icons.chevron_right,
-                    color: cardIndex + 1 ==
-                            int.parse(
-                                context.read<AddReportCubit>().state['amount'])
-                        ? greyColor1
-                        : Colors.black,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(
-                horizontal: 20,
               ),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              generateReportItem(
+                title: "Nama: ",
+                value: Text(
+                  context
+                          .read<AuthCubit>()
+                          .profileModel
+                          .payload
+                          ?.profile
+                          ?.name ??
+                      "",
+                  style: inter.copyWith(
+                    fontWeight: semiBold,
+                  ),
+                  textAlign: TextAlign.end,
+                ),
+              ),
+              generateReportItem(
+                title: "Tanggal: ",
+                value: Text(
+                  "15 November 2024",
+                  style: inter.copyWith(
+                    fontWeight: semiBold,
+                  ),
+                  textAlign: TextAlign.end,
+                ),
+              ),
+              generateReportItem(
+                title: "Total Produk: ",
+                value: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    SizedBox(
-                      width: 136,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
-                        ),
-                        child: Text(
-                          "Ekspor",
-                          style: inter.copyWith(
-                            fontWeight: medium,
-                          ),
-                        ),
+                    GestureDetector(
+                      onTap: () {
+                        context.read<AddReportCubit>().decreaseStock(
+                            context.read<AddReportCubit>().state);
+                        setState(() {});
+                      },
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: primaryColor,
+                            )),
+                        child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: Icon(
+                              Icons.remove,
+                              color: primaryColor,
+                            )),
                       ),
                     ),
-                    SizedBox(
-                      width: 136,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (context) => ModalAlert(
-                                  title: "",
-                                  message:
-                                      "Apakah Anda yakin ingin menyimpan data? Data yang disimpan akan mempengaruhi stok produk dan tidak bisa diubah.",
-                                  completion: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        backgroundColor: primaryColor,
-                                        content: Text(
-                                          "data berhasil disimpan",
-                                          style: inter.copyWith(
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                    Navigator.pop(context);
-                                  }));
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    Text(
+                      "${context.read<AddReportCubit>().state['amount']}",
+                      style: inter,
+                    ),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        context.read<AddReportCubit>().increaseStock(
+                            context.read<AddReportCubit>().state);
+                        setState(() {});
+                      },
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(5),
                         ),
-                        child: Text(
-                          "Simpan",
-                          style: inter.copyWith(
-                            fontWeight: medium,
+                        child: const FittedBox(
+                            fit: BoxFit.contain,
+                            child: Icon(
+                              Icons.add,
+                              color: Colors.white,
+                            )),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 12,
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                ),
+                child: Row(
+                  children: [
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: 164,
+                      ),
+                      child: searchSetup(),
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => ModalAlert(
+                            title: "",
+                            message:
+                                "Apakah anda ingin ${isLocked ? "membuka kunci" : "mengunci"} produk “${productItems?[cardIndex].name ?? "-"}\"?",
+                            completion: () {
+                              setState(() {
+                                isLocked = !isLocked;
+                              });
+                            },
                           ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: greyColor1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                            isLocked ? Icons.lock_outline : Icons.lock_open),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 18,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => ModalAlert(
+                            title: "",
+                            message:
+                                "Apakah anda ingin membuang produk “${productItems?[cardIndex].name}” dari Stok Opname?",
+                            completion: () {
+                              setState(() {
+                                productItems?.removeAt(cardIndex);
+                                realStocks?.removeAt(cardIndex);
+                                context.read<AddReportCubit>().decreaseStock(
+                                    context.read<AddReportCubit>().state);
+                              });
+                            },
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: greyColor1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.delete_outline_rounded,
+                          color: Colors.red,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(
+                height: 12,
+              ),
+              if (productItems?[cardIndex].name == null) ...{
+                generateProductCard(
+                  productName: "Pilih Produk",
+                  expiredDate: "DD/MM/YYYY",
+                  input: "-",
+                  output: "-",
+                  systemStock: "-",
+                  realStock: "-",
+                  differenceStock: "${-(realStocks?[cardIndex] ?? 0)}",
+                ),
+              } else ...{
+                generateProductCard(
+                  productName: "${productItems?[cardIndex].name}",
+                  expiredDate: "${productItems?[cardIndex].expiredDate}",
+                  input: "-",
+                  output: "-",
+                  systemStock: "${productItems?[cardIndex].quantity}",
+                  realStock: "-",
+                  differenceStock:
+                      "${(productItems?[cardIndex].quantity ?? 0) - ((realStocks?[cardIndex] ?? 0) < 0 ? 0 : (realStocks?[cardIndex]) ?? 0)}",
+                ),
+              },
+              const SizedBox(
+                height: 16,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (cardIndex != 0) {
+                          cardIndex -= 1;
+                        }
+                      });
+                    },
+                    child: Icon(
+                      Icons.chevron_left,
+                      color: cardIndex == 0 ? greyColor1 : Colors.black,
+                    ),
+                  ),
+                  Text(
+                    "${cardIndex + 1}/${context.read<AddReportCubit>().state['amount']}",
+                    style: inter.copyWith(
+                      fontWeight: medium,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (cardIndex + 1 <
+                            int.parse(context
+                                .read<AddReportCubit>()
+                                .state['amount'])) {
+                          cardIndex += 1;
+                        }
+                      });
+                    },
+                    child: Icon(
+                      Icons.chevron_right,
+                      color: cardIndex + 1 ==
+                              int.parse(context
+                                  .read<AddReportCubit>()
+                                  .state['amount'])
+                          ? greyColor1
+                          : Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                ),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 136,
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                          ),
+                          child: Text(
+                            "Ekspor",
+                            style: inter.copyWith(
+                              fontWeight: medium,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 136,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (context) => ModalAlert(
+                                    title: "",
+                                    message:
+                                        "Apakah Anda yakin ingin menyimpan data? Data yang disimpan akan mempengaruhi stok produk dan tidak bisa diubah.",
+                                    completion: () {
+                                      setState(() {
+                                        productItems?.removeWhere((element) {
+                                          return element.name == null;
+                                        });
+
+                                        realStocks?.removeRange(
+                                            (productItems?.length ?? 1) - 1,
+                                            (realStocks?.length ?? 1) - 1);
+
+                                        context
+                                            .read<StockOpnameDetailCubit>()
+                                            .addReportStockOpname(
+                                                token: context
+                                                        .read<AuthCubit>()
+                                                        .token ??
+                                                    "",
+                                                title: context
+                                                    .read<AddReportCubit>()
+                                                    .state['title'],
+                                                productDatas:
+                                                    productItems ?? [],
+                                                realStocks: realStocks ?? []);
+                                      });
+                                    }));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                          ),
+                          child: Text(
+                            "Simpan",
+                            style: inter.copyWith(
+                              fontWeight: medium,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -5,6 +5,7 @@ Stock Opname
  - API belum bisa search
  - maksud icon kunci itu buat apa?
  - Tombol ekspor ini harapannya gimana? ekspor dalam bentuk pdf kah? kalo iya templatenya gimana? 
+ - API all available item belum ada key type sehingga type nya dibuat statik "makanan"
 
  Halaman buat laporan
  - tombol kunci buat apa? 
