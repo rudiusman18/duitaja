@@ -85,6 +85,7 @@ class StockOpnameService {
     required List<int> realStocks,
   }) async {
     var url = Uri.parse("$baseURL/stock-opname");
+
     var header = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
@@ -113,7 +114,7 @@ class StockOpnameService {
       }
     }
 
-    Map data = { 
+    Map data = {
       "title": title,
       "items": dataItems,
     };
