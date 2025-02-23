@@ -1,3 +1,5 @@
+// ignore_for_file: library_prefixes
+
 import 'dart:convert';
 
 import 'package:duitaja/model/detail_stock_opname_model.dart';
@@ -7,6 +9,8 @@ import 'package:duitaja/shared/utils.dart';
 import 'package:http/http.dart' as http;
 import 'package:duitaja/model/stock_opname_available_items_model.dart'
     as availableItem;
+
+import 'package:dio/dio.dart';
 
 class StockOpnameService {
   Future<StockOpnameModel> getAllStockOpname({
@@ -121,20 +125,27 @@ class StockOpnameService {
 
     var body = jsonEncode(data);
 
-    var response = await http.post(
-      url,
-      headers: header,
-      body: body,
+    // var response = await http.post(
+    //   url,
+    //   headers: header,
+    //   body: body,
+    // );
+
+    var response = await Dio().post(
+      url.toString(),
+      data: body,
+      options: Options(headers: header),
     );
 
     print(
-        "token: $token, statusCode : ${response.statusCode}, dan body: ${response.body}");
+        "token: $token, statusCode : ${response.statusCode}, dan body: ${response.data}");
 
-    if (response.statusCode >= 200 && response.statusCode <= 299) {
-      var data = jsonDecode(response.body);
+    if ((response.statusCode ?? 0) >= 200 &&
+        (response.statusCode ?? 0) <= 299) {
+      var data = jsonDecode(response.data);
       return data['message'];
     } else {
-      var data = jsonDecode(response.body);
+      var data = jsonDecode(response.data);
       throw Exception("${data['errors']}");
     }
   }

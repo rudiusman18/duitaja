@@ -162,7 +162,8 @@ class _LoginPageState extends State<LoginPage> {
       listener: (context, loginState) {
         if (loginState is LoginSuccess) {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          Navigator.pushNamed(context, "/main-page");
+          Navigator.pushNamedAndRemoveUntil(
+              context, "/main-page", (route) => false);
         } else if (loginState is AuthFailure) {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
