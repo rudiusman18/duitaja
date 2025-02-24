@@ -33,6 +33,7 @@ class _CashierPageState extends State<CashierPage> {
 
   @override
   void initState() {
+    context.read<ProductCartCubit>().resetProduct();
     context.read<ProductMenuCubit>().sellableProduct(
           token: context.read<AuthCubit>().token ?? "",
           page: "$menuProductPage",
@@ -825,6 +826,9 @@ class _CashierPageState extends State<CashierPage> {
                             .payload
                             ?.toList() ??
                         []);
+
+                    menuProduct?.payload =
+                        menuProduct?.payload?.toSet().toList();
                   }
 
                   if (menuProduct?.payload == null) {
@@ -847,7 +851,7 @@ class _CashierPageState extends State<CashierPage> {
                     ),
                     leading: GestureDetector(
                       onTap: () {
-                        Navigator.pop(context);
+                        Navigator.popAndPushNamed(context, '/main-page');
                       },
                       child: const Icon(
                         Icons.chevron_left,

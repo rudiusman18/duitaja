@@ -307,6 +307,42 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
                                 ),
                               ),
                             ),
+                          },
+                          if ((detailSaleHistoryModel.payload?.status ?? "")
+                                  .toLowerCase() ==
+                              "belum lunas") ...{
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    Navigator.pushNamed(
+                                        context, '/main-page/cashier-page');
+                                  },
+                                  child: Text(
+                                    "Tambah Pesanan",
+                                    style: inter,
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                  ),
+                                  onPressed: () {},
+                                  child: Text(
+                                    "Bayar Sekarang",
+                                    style: inter,
+                                  ),
+                                ),
+                              ],
+                            ),
                           }
                         ],
                       ),

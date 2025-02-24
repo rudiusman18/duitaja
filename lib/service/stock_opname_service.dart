@@ -10,8 +10,6 @@ import 'package:http/http.dart' as http;
 import 'package:duitaja/model/stock_opname_available_items_model.dart'
     as availableItem;
 
-import 'package:dio/dio.dart';
-
 class StockOpnameService {
   Future<StockOpnameModel> getAllStockOpname({
     required String token,
@@ -125,27 +123,20 @@ class StockOpnameService {
 
     var body = jsonEncode(data);
 
-    // var response = await http.post(
-    //   url,
-    //   headers: header,
-    //   body: body,
-    // );
-
-    var response = await Dio().post(
-      url.toString(),
-      data: body,
-      options: Options(headers: header),
+    var response = await http.post(
+      url,
+      body: body,
+      headers: header,
     );
 
     print(
-        "token: $token, statusCode : ${response.statusCode}, dan body: ${response.data}");
+        "token: $token, statusCode : ${response.statusCode}, dan body: ${response.body}");
 
-    if ((response.statusCode ?? 0) >= 200 &&
-        (response.statusCode ?? 0) <= 299) {
-      var data = jsonDecode(response.data);
+    if ((response.statusCode) >= 200 && (response.statusCode) <= 299) {
+      var data = jsonDecode(response.body);
       return data['message'];
     } else {
-      var data = jsonDecode(response.data);
+      var data = jsonDecode(response.body);
       throw Exception("${data['errors']}");
     }
   }
