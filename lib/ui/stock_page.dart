@@ -26,6 +26,8 @@ class _StockPageState extends State<StockPage> {
   int stockPage = 1;
   String? categoryId;
 
+  bool scrolledData = false;
+
   @override
   void initState() {
     context.read<StockManagementCubit>().stockManagementData(
@@ -359,27 +361,15 @@ class _StockPageState extends State<StockPage> {
                       if (title.toLowerCase() == "kategori") ...{
                         for (var index = 0;
                             index <
-                                (context
-                                        .read<IndexCashierFilterCubit>()
-                                        .cashierCategoryModel
-                                        .payload
-                                        ?.length ??
-                                    0);
+                                (stockManagementModel?.payload?.length ?? 0);
                             index++) ...{
                           generateFilterContentItem(
                               groupName: title,
-                              name: context
-                                      .read<IndexCashierFilterCubit>()
-                                      .cashierCategoryModel
-                                      .payload?[index]
-                                      .name ??
-                                  "",
+                              name:
+                                  stockManagementModel?.payload?[index].name ??
+                                      "",
                               context: context,
-                              id: context
-                                      .read<IndexCashierFilterCubit>()
-                                      .cashierCategoryModel
-                                      .payload?[index]
-                                      .id ??
+                              id: stockManagementModel?.payload?[index].id ??
                                   ''),
                         },
                       } else ...{
@@ -602,7 +592,7 @@ class _StockPageState extends State<StockPage> {
         }
 
         if (state is StockManagementSuccess) {
-          if (stockManagementModel == null) {
+          if (scrolledData == false) {
             stockManagementModel =
                 context.read<StockManagementCubit>().stockManagementModel;
           } else {
@@ -790,6 +780,7 @@ class _StockPageState extends State<StockPage> {
                         : NotificationListener(
                             onNotification:
                                 (ScrollEndNotification notification) {
+                              scrolledData = true;
                               if (stockPage !=
                                   context
                                       .read<StockManagementCubit>()
@@ -797,7 +788,6 @@ class _StockPageState extends State<StockPage> {
                                       .meta
                                       ?.totalPage) {
                                 stockPage += 1;
-                                stockManagementModel = null;
                                 context
                                     .read<StockManagementCubit>()
                                     .stockManagementData(

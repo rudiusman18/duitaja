@@ -71,6 +71,10 @@ class DetailSaleCubit extends Cubit<DetailSaleState> {
       }
     }
   }
+
+  Future<void> clearSalesHistory() async {
+    emit(DetailSaleSuccess(DetailSaleHistoryModel()));
+  }
 }
 
 class RefundSaleCubit extends Cubit<RefundSaleState> {

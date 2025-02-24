@@ -33,6 +33,9 @@ class _CashierPageState extends State<CashierPage> {
 
   @override
   void initState() {
+    print(
+        "menambah pesanan ${context.read<DetailSaleCubit>().detailSaleHistoryModel.payload?.customerName}");
+
     context.read<ProductCartCubit>().resetProduct();
     context.read<ProductMenuCubit>().sellableProduct(
           token: context.read<AuthCubit>().token ?? "",
@@ -839,274 +842,286 @@ class _CashierPageState extends State<CashierPage> {
                 }
               },
               builder: (context, state) {
-                return Scaffold(
-                  appBar: AppBar(
-                    backgroundColor: primaryColor,
-                    title: Text(
-                      "Kasir",
-                      style: inter.copyWith(
-                        fontWeight: medium,
-                        fontSize: 20,
+                return WillPopScope(
+                  onWillPop: () async {
+                    Navigator.popAndPushNamed(context, '/main-page');
+                    return true;
+                  },
+                  child: Scaffold(
+                    appBar: AppBar(
+                      backgroundColor: primaryColor,
+                      title: Text(
+                        "Kasir",
+                        style: inter.copyWith(
+                          fontWeight: medium,
+                          fontSize: 20,
+                        ),
                       ),
-                    ),
-                    leading: GestureDetector(
-                      onTap: () {
-                        Navigator.popAndPushNamed(context, '/main-page');
-                      },
-                      child: const Icon(
-                        Icons.chevron_left,
-                        size: 24,
+                      leading: GestureDetector(
+                        onTap: () {
+                          Navigator.popAndPushNamed(context, '/main-page');
+                        },
+                        child: const Icon(
+                          Icons.chevron_left,
+                          size: 24,
+                        ),
                       ),
+                      centerTitle: true,
                     ),
-                    centerTitle: true,
-                  ),
-                  body: Stack(
-                    children: [
-                      // Content
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(
-                            height: 24,
-                          ),
-                          searchSetup(),
-                          const SizedBox(
-                            height: 36,
-                          ),
-                          filterSetup(),
-                          if (context
-                                  .read<SaleCubit>()
-                                  .saleHistoryModel
-                                  .payload ==
-                              null) ...{
-                            const SizedBox()
-                          } else ...{
+                    body: Stack(
+                      children: [
+                        // Content
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             const SizedBox(
                               height: 24,
                             ),
-                            orderListSetup(),
-                          },
-                          const SizedBox(
-                            height: 24,
-                          ),
-                          Container(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 20,
+                            searchSetup(),
+                            const SizedBox(
+                              height: 36,
                             ),
-                            child: Text(
-                              "Menu",
-                              textAlign:
-                                  TextAlign.center, // Center align the text
-                              style: inter.copyWith(
-                                fontSize: 16,
-                                fontWeight: medium,
+                            filterSetup(),
+                            if (context
+                                    .read<SaleCubit>()
+                                    .saleHistoryModel
+                                    .payload ==
+                                null) ...{
+                              const SizedBox()
+                            } else ...{
+                              const SizedBox(
+                                height: 24,
                               ),
+                              orderListSetup(),
+                            },
+                            const SizedBox(
+                              height: 24,
                             ),
-                          ),
-                          const SizedBox(
-                            height: 16,
-                          ),
-                          Expanded(
-                            child: isEmptyData
-                                ? Center(
-                                    child: Text(
-                                      "Data tidak ditemukan",
-                                      style: inter,
-                                    ),
-                                  )
-                                : NotificationListener(
-                                    onNotification:
-                                        (ScrollEndNotification notification) {
-                                      if (menuProductPage !=
-                                          context
-                                              .read<ProductMenuCubit>()
-                                              .sellableProductModel
-                                              .meta
-                                              ?.totalPage) {
-                                        menuProductPage += 1;
-                                        context
-                                            .read<ProductMenuCubit>()
-                                            .sellableProduct(
-                                              token: context
-                                                      .read<AuthCubit>()
-                                                      .token ??
-                                                  "",
-                                              page: "$menuProductPage",
-                                              limit: "100",
-                                              categoryId: context
-                                                          .read<
-                                                              IndexCashierFilterCubit>()
-                                                          .cashierCategoryIndex ==
-                                                      -1
-                                                  ? ""
-                                                  : "${context.read<IndexCashierFilterCubit>().cashierCategoryModel.payload?[context.read<IndexCashierFilterCubit>().cashierCategoryIndex].id}",
-                                              search: menuSearchTextField.text,
-                                              inStatus: "active",
-                                            );
-                                      }
-                                      return true;
-                                    },
-                                    child: SingleChildScrollView(
-                                      physics:
-                                          const AlwaysScrollableScrollPhysics(),
-                                      child: Column(
-                                        children: [
-                                          for (var i = 0;
-                                              i <
-                                                  (menuProduct
-                                                          ?.payload?.length ??
-                                                      0);
-                                              i++)
-                                            itemMenuListSetup(
-                                              product: ProductModel(
-                                                id: i,
-                                                productId:
-                                                    "${menuProduct?.payload?[i].id}",
-                                                productURL:
-                                                    "${menuProduct?.payload?[i].image}",
-                                                productName:
-                                                    "${menuProduct?.payload?[i].name}",
-                                                stock: menuProduct!.payload?[i]
-                                                    .currentQuantity,
-                                                description:
-                                                    "Belum ada deskripsi",
-                                                price: menuProduct
-                                                    ?.payload?[i].price,
-                                                discountId: menuProduct
-                                                    ?.payload?[i].promo?.id,
-                                                discountPrice: menuProduct
-                                                            ?.payload?[i]
-                                                            .promo !=
-                                                        null
-                                                    ? ((menuProduct!.payload?[i]
-                                                                .price ??
-                                                            0) -
-                                                        (menuProduct
-                                                                ?.payload?[i]
-                                                                .promo
-                                                                ?.amount ??
-                                                            0))
-                                                    : 0,
-                                                productCategory:
-                                                    "${menuProduct?.payload?[i].category?.name}",
-                                                status:
-                                                    "${menuProduct?.payload?[i].statusDisplay}",
-                                              ),
-                                            ),
-                                          groupedProduct.isNotEmpty
-                                              ? const SizedBox(
-                                                  height: 100,
-                                                )
-                                              : const SizedBox(),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                          ),
-                        ],
-                      ),
-
-                      // Floating card
-                      context.read<ProductCartCubit>().state.isEmpty
-                          ? const SizedBox()
-                          : Align(
-                              alignment: Alignment.bottomCenter,
-                              child: GestureDetector(
-                                onTap: () {
-                                  ScaffoldMessenger.of(context)
-                                      .hideCurrentSnackBar();
-                                  Navigator.pushNamed(context,
-                                          "/main-page/cashier-page/detail-order-page")
-                                      .then((_) {
-                                    setState(() {});
-                                    menuProductPage = 1;
-                                    menuProduct = null;
-                                    context
-                                        .read<ProductMenuCubit>()
-                                        .sellableProduct(
-                                          token:
-                                              context.read<AuthCubit>().token ??
-                                                  "",
-                                          page: "$menuProductPage",
-                                          limit: "100",
-                                          categoryId: "",
-                                          inStatus: "active",
-                                          search: menuSearchTextField.text,
-                                        );
-
-                                    context.read<SaleCubit>().allSalesHistory(
-                                          token:
-                                              context.read<AuthCubit>().token ??
-                                                  "",
-                                          page: "1",
-                                          limit: "15",
-                                          status: "",
-                                          startDate: "",
-                                          endDate: "",
-                                          search: "",
-                                          inStatus: "",
-                                        );
-
-                                    context
-                                        .read<IndexCashierFilterCubit>()
-                                        .category(
-                                          token:
-                                              context.read<AuthCubit>().token ??
-                                                  "",
-                                        );
-
-                                    context
-                                        .read<IndexCashierFilterCubit>()
-                                        .setIndex(-1);
-                                  });
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 36,
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 15,
-                                    horizontal: 33,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: primaryColor,
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Image.asset(
-                                        "assets/subtract.png",
-                                        width: 30,
-                                        height: 30,
-                                      ),
-                                      const SizedBox(
-                                        width: 16,
-                                      ),
-                                      Expanded(
-                                        child: Text(
-                                          "$totalCount Pesanan",
-                                          style: inter.copyWith(
-                                            color: Colors.white,
-                                            fontWeight: medium,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        formatCurrency(totalPrice),
-                                        style: inter.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: semiBold,
-                                          fontSize: 15,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: Text(
+                                "Menu",
+                                textAlign:
+                                    TextAlign.center, // Center align the text
+                                style: inter.copyWith(
+                                  fontSize: 16,
+                                  fontWeight: medium,
                                 ),
                               ),
                             ),
-                    ],
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            Expanded(
+                              child: isEmptyData
+                                  ? Center(
+                                      child: Text(
+                                        "Data tidak ditemukan",
+                                        style: inter,
+                                      ),
+                                    )
+                                  : NotificationListener(
+                                      onNotification:
+                                          (ScrollEndNotification notification) {
+                                        if (menuProductPage !=
+                                            context
+                                                .read<ProductMenuCubit>()
+                                                .sellableProductModel
+                                                .meta
+                                                ?.totalPage) {
+                                          menuProductPage += 1;
+                                          context
+                                              .read<ProductMenuCubit>()
+                                              .sellableProduct(
+                                                token: context
+                                                        .read<AuthCubit>()
+                                                        .token ??
+                                                    "",
+                                                page: "$menuProductPage",
+                                                limit: "100",
+                                                categoryId: context
+                                                            .read<
+                                                                IndexCashierFilterCubit>()
+                                                            .cashierCategoryIndex ==
+                                                        -1
+                                                    ? ""
+                                                    : "${context.read<IndexCashierFilterCubit>().cashierCategoryModel.payload?[context.read<IndexCashierFilterCubit>().cashierCategoryIndex].id}",
+                                                search:
+                                                    menuSearchTextField.text,
+                                                inStatus: "active",
+                                              );
+                                        }
+                                        return true;
+                                      },
+                                      child: SingleChildScrollView(
+                                        physics:
+                                            const AlwaysScrollableScrollPhysics(),
+                                        child: Column(
+                                          children: [
+                                            for (var i = 0;
+                                                i <
+                                                    (menuProduct
+                                                            ?.payload?.length ??
+                                                        0);
+                                                i++)
+                                              itemMenuListSetup(
+                                                product: ProductModel(
+                                                  id: i,
+                                                  productId:
+                                                      "${menuProduct?.payload?[i].id}",
+                                                  productURL:
+                                                      "${menuProduct?.payload?[i].image}",
+                                                  productName:
+                                                      "${menuProduct?.payload?[i].name}",
+                                                  stock: menuProduct!
+                                                      .payload?[i]
+                                                      .currentQuantity,
+                                                  description:
+                                                      "Belum ada deskripsi",
+                                                  price: menuProduct
+                                                      ?.payload?[i].price,
+                                                  discountId: menuProduct
+                                                      ?.payload?[i].promo?.id,
+                                                  discountPrice: menuProduct
+                                                              ?.payload?[i]
+                                                              .promo !=
+                                                          null
+                                                      ? ((menuProduct!
+                                                                  .payload?[i]
+                                                                  .price ??
+                                                              0) -
+                                                          (menuProduct
+                                                                  ?.payload?[i]
+                                                                  .promo
+                                                                  ?.amount ??
+                                                              0))
+                                                      : 0,
+                                                  productCategory:
+                                                      "${menuProduct?.payload?[i].category?.name}",
+                                                  status:
+                                                      "${menuProduct?.payload?[i].statusDisplay}",
+                                                ),
+                                              ),
+                                            groupedProduct.isNotEmpty
+                                                ? const SizedBox(
+                                                    height: 100,
+                                                  )
+                                                : const SizedBox(),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ),
+
+                        // Floating card
+                        context.read<ProductCartCubit>().state.isEmpty
+                            ? const SizedBox()
+                            : Align(
+                                alignment: Alignment.bottomCenter,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context)
+                                        .hideCurrentSnackBar();
+                                    Navigator.pushNamed(context,
+                                            "/main-page/cashier-page/detail-order-page")
+                                        .then((_) {
+                                      setState(() {});
+                                      menuProductPage = 1;
+                                      menuProduct = null;
+                                      context
+                                          .read<ProductMenuCubit>()
+                                          .sellableProduct(
+                                            token: context
+                                                    .read<AuthCubit>()
+                                                    .token ??
+                                                "",
+                                            page: "$menuProductPage",
+                                            limit: "100",
+                                            categoryId: "",
+                                            inStatus: "active",
+                                            search: menuSearchTextField.text,
+                                          );
+
+                                      context.read<SaleCubit>().allSalesHistory(
+                                            token: context
+                                                    .read<AuthCubit>()
+                                                    .token ??
+                                                "",
+                                            page: "1",
+                                            limit: "15",
+                                            status: "",
+                                            startDate: "",
+                                            endDate: "",
+                                            search: "",
+                                            inStatus: "",
+                                          );
+
+                                      context
+                                          .read<IndexCashierFilterCubit>()
+                                          .category(
+                                            token: context
+                                                    .read<AuthCubit>()
+                                                    .token ??
+                                                "",
+                                          );
+
+                                      context
+                                          .read<IndexCashierFilterCubit>()
+                                          .setIndex(-1);
+                                    });
+                                  },
+                                  child: Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 36,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 15,
+                                      horizontal: 33,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: primaryColor,
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Image.asset(
+                                          "assets/subtract.png",
+                                          width: 30,
+                                          height: 30,
+                                        ),
+                                        const SizedBox(
+                                          width: 16,
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            "$totalCount Pesanan",
+                                            style: inter.copyWith(
+                                              color: Colors.white,
+                                              fontWeight: medium,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          formatCurrency(totalPrice),
+                                          style: inter.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: semiBold,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                      ],
+                    ),
                   ),
                 );
               },

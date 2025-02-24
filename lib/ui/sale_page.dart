@@ -75,8 +75,6 @@ class _SalePageState extends State<SalePage> {
                 textInputAction: TextInputAction.search,
                 onChanged: (value) {
                   if (value == "") {
-                    print(
-                        "asw ${context.read<FilterCubit>().state['Tanggal']}");
                     saleHistoryModel = null;
                     saleProductPage = 1;
                     context.read<SaleCubit>().allSalesHistory(

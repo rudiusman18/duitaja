@@ -295,7 +295,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                               ));
                             }
 
-                            if ((purchaseds![index].qty ?? 0) != 0) {
+                            if (((purchaseds![index].qty ?? 0) - 1) > 0) {
                               purchaseds![index].qty =
                                   (purchaseds![index].qty ?? 0) - 1;
                             } else {
@@ -703,7 +703,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                               ? null
                               : noteTextField.text,
                           paymentMethod: "CASH",
-                          status: false,
+                          status: true,
                           subTotal: totalPrice,
                           tax: totalTax,
                           taxId: context

@@ -144,7 +144,8 @@ class _PaymentPageState extends State<PaymentPage> {
         if (state is CashierOrderSuccess) {
           Navigator.pop(context);
           context.read<ProductCartCubit>().resetProduct();
-          Navigator.pop(context);
+          Navigator.popAndPushNamed(
+              context, '/main-page/payment-page/payment-status-page');
         }
 
         if (state is CashierOrderFailure) {

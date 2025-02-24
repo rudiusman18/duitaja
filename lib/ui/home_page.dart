@@ -492,6 +492,9 @@ class _HomePageState extends State<HomePage> {
                                     children: [
                                       GestureDetector(
                                         onTap: () {
+                                          context
+                                              .read<DetailSaleCubit>()
+                                              .clearSalesHistory();
                                           Navigator.pushNamed(
                                             context,
                                             '/main-page/cashier-page',
