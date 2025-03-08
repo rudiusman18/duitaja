@@ -15,7 +15,7 @@ class ReportDetailPage extends StatefulWidget {
 class _ReportDetailPageState extends State<ReportDetailPage> {
   DetailStockOpnameModel? detailStockOpnameModel;
   int cardIndex = 0;
-  DateTime? dateTime;
+  // DateTime? dateTime;
   String? date;
 
   TextEditingController searchTextField = TextEditingController(text: "");
@@ -130,6 +130,8 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
       required String realStock,
       required String differenceStock,
     }) {
+      var dateTime = DateTime.parse(expiredDate).toLocal();
+      var date = "${dateTime.year}-${dateTime.month}-${dateTime.day}";
       return Container(
         margin: const EdgeInsets.symmetric(
           horizontal: 20,
@@ -158,7 +160,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
             ),
             generateProductCardItem(
               title: "kadaluarsa :",
-              value: expiredDate,
+              value: date,
             ),
             const SizedBox(
               height: 17,
@@ -212,10 +214,11 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
 
         if (state is StockOpnameDetailSuccess) {
           detailStockOpnameModel = state.detailStockOpnameData;
-          dateTime =
-              DateTime.parse(detailStockOpnameModel?.payload?.createdAt ?? "")
-                  .toLocal();
-          date = "${dateTime?.year}-${dateTime?.month}-${dateTime?.day}";
+          // dateTime = DateTime.parse(
+          //         detailStockOpnameModel?.payload?.items!.first.toString() ??
+          //             "")
+          //     .toLocal();
+          // date = "${dateTime?.year}-${dateTime?.month}-${dateTime?.day}";
         }
       },
       builder: (context, state) {
@@ -312,14 +315,18 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                         generateProductCard(
                           productName:
                               "${detailStockOpnameModel?.payload?.items?[cardIndex].name}",
-                          expiredDate: "tanggal expired belum ditemukan",
-                          input: "belum ditemukan",
-                          output: "belum ditemukan",
+                          expiredDate:
+                              "${detailStockOpnameModel?.payload?.items?[cardIndex].expiredDate}",
+                          input:
+                              "${detailStockOpnameModel?.payload?.items?[cardIndex].inputQuantity}",
+                          output:
+                              "${detailStockOpnameModel?.payload?.items?[cardIndex].outputQuantity}",
                           systemStock:
                               "${detailStockOpnameModel?.payload?.items?[cardIndex].quantity}",
-                          realStock: "belum ditemukan",
+                          realStock:
+                              "${detailStockOpnameModel?.payload?.items?[cardIndex].realQuantity}",
                           differenceStock:
-                              "${detailStockOpnameModel?.payload?.items?[cardIndex].differenceQuantity}",
+                              "${(detailStockOpnameModel?.payload?.items?[cardIndex].systemQuantity ?? 0) - (detailStockOpnameModel?.payload?.items?[cardIndex].realQuantity ?? 0)}",
                         ),
                         const SizedBox(
                           height: 16,

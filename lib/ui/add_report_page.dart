@@ -453,6 +453,9 @@ class _AddReportPageState extends State<AddReportPage> {
       listener: (context, state) {
         if (state is StockOpnameDetailSuccess) {
           Navigator.pop(context);
+          Navigator.pop(context);
+          Navigator.pushReplacementNamed(
+              context, '/main-page/stock-opname-page');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: primaryColor,
@@ -464,7 +467,6 @@ class _AddReportPageState extends State<AddReportPage> {
               ),
             ),
           );
-          Navigator.pop(context);
         }
 
         if (state is StockOpnameDetailLoading) {
@@ -478,11 +480,14 @@ class _AddReportPageState extends State<AddReportPage> {
 
         if (state is StockOpnameDetailFailure) {
           Navigator.pop(context);
+          Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: primaryColor,
               content: Text(
-                state.error,
+                state.error.toLowerCase().contains("null")
+                    ? "gagal membuat data stock opname baru"
+                    : state.error,
                 style: inter.copyWith(
                   color: Colors.white,
                 ),

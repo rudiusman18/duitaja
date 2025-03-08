@@ -86,7 +86,7 @@ class StockOpnameService {
     required List<availableItem.Payload> productDatas,
     required List<int> realStocks,
   }) async {
-    var url = Uri.parse("$baseURL/stock-opname");
+    var url = Uri.parse("$baseURL/stock-opname/");
 
     var header = {
       'Authorization': 'Bearer $token',

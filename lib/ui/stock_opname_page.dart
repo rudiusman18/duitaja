@@ -85,9 +85,8 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
     String time = "${dateTime.hour}:${dateTime.minute}:${dateTime.second}";
     return GestureDetector(
       onTap: () {
-        context
-            .read<StockOpnameDetailCubit>()
-            .setStockOpnameData(stockOpnameData: (stockOpnameModel?.payload?[index])!);
+        context.read<StockOpnameDetailCubit>().setStockOpnameData(
+            stockOpnameData: (stockOpnameModel?.payload?[index])!);
         Navigator.pushNamed(
             context, '/main-page/stock-opname-page/report-detail-page');
       },

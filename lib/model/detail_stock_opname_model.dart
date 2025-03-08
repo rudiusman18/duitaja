@@ -37,29 +37,16 @@ class DetailStockOpnameModel {
 class Payload {
   String? _id;
   String? _title;
-  String? _companyId;
-  String? _createdAt;
   String? _changerName;
   List<Items>? _items;
 
   Payload(
-      {String? id,
-      String? title,
-      String? companyId,
-      String? createdAt,
-      String? changerName,
-      List<Items>? items}) {
+      {String? id, String? title, String? changerName, List<Items>? items}) {
     if (id != null) {
       _id = id;
     }
     if (title != null) {
       _title = title;
-    }
-    if (companyId != null) {
-      _companyId = companyId;
-    }
-    if (createdAt != null) {
-      _createdAt = createdAt;
     }
     if (changerName != null) {
       _changerName = changerName;
@@ -73,10 +60,6 @@ class Payload {
   set id(String? id) => _id = id;
   String? get title => _title;
   set title(String? title) => _title = title;
-  String? get companyId => _companyId;
-  set companyId(String? companyId) => _companyId = companyId;
-  String? get createdAt => _createdAt;
-  set createdAt(String? createdAt) => _createdAt = createdAt;
   String? get changerName => _changerName;
   set changerName(String? changerName) => _changerName = changerName;
   List<Items>? get items => _items;
@@ -85,8 +68,6 @@ class Payload {
   Payload.fromJson(Map<String, dynamic> json) {
     _id = json['id'];
     _title = json['title'];
-    _companyId = json['company_id'];
-    _createdAt = json['created_at'];
     _changerName = json['changer_name'];
     if (json['items'] != null) {
       _items = <Items>[];
@@ -100,8 +81,6 @@ class Payload {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = _id;
     data['title'] = _title;
-    data['company_id'] = _companyId;
-    data['created_at'] = _createdAt;
     data['changer_name'] = _changerName;
     if (_items != null) {
       data['items'] = _items!.map((v) => v.toJson()).toList();
@@ -111,79 +90,78 @@ class Payload {
 }
 
 class Items {
-  String? _id;
-  String? _stockOpnameId;
   int? _quantity;
-  String? _stockId;
-  String? _productType;
-  int? _differenceQuantity;
+  int? _systemQuantity;
+  int? _realQuantity;
+  int? _inputQuantity;
+  int? _outputQuantity;
+  String? _expiredDate;
   String? _name;
 
   Items(
-      {String? id,
-      String? stockOpnameId,
-      int? quantity,
-      String? stockId,
-      String? productType,
-      int? differenceQuantity,
+      {int? quantity,
+      int? systemQuantity,
+      int? realQuantity,
+      int? inputQuantity,
+      int? outputQuantity,
+      String? expiredDate,
       String? name}) {
-    if (id != null) {
-      _id = id;
-    }
-    if (stockOpnameId != null) {
-      _stockOpnameId = stockOpnameId;
-    }
     if (quantity != null) {
       _quantity = quantity;
     }
-    if (stockId != null) {
-      _stockId = stockId;
+    if (systemQuantity != null) {
+      _systemQuantity = systemQuantity;
     }
-    if (productType != null) {
-      _productType = productType;
+    if (realQuantity != null) {
+      _realQuantity = realQuantity;
     }
-    if (differenceQuantity != null) {
-      _differenceQuantity = differenceQuantity;
+    if (inputQuantity != null) {
+      _inputQuantity = inputQuantity;
+    }
+    if (outputQuantity != null) {
+      _outputQuantity = outputQuantity;
+    }
+    if (expiredDate != null) {
+      _expiredDate = expiredDate;
     }
     if (name != null) {
       _name = name;
     }
   }
 
-  String? get id => _id;
-  set id(String? id) => _id = id;
-  String? get stockOpnameId => _stockOpnameId;
-  set stockOpnameId(String? stockOpnameId) => _stockOpnameId = stockOpnameId;
   int? get quantity => _quantity;
   set quantity(int? quantity) => _quantity = quantity;
-  String? get stockId => _stockId;
-  set stockId(String? stockId) => _stockId = stockId;
-  String? get productType => _productType;
-  set productType(String? productType) => _productType = productType;
-  int? get differenceQuantity => _differenceQuantity;
-  set differenceQuantity(int? differenceQuantity) =>
-      _differenceQuantity = differenceQuantity;
+  int? get systemQuantity => _systemQuantity;
+  set systemQuantity(int? systemQuantity) => _systemQuantity = systemQuantity;
+  int? get realQuantity => _realQuantity;
+  set realQuantity(int? realQuantity) => _realQuantity = realQuantity;
+  int? get inputQuantity => _inputQuantity;
+  set inputQuantity(int? inputQuantity) => _inputQuantity = inputQuantity;
+  int? get outputQuantity => _outputQuantity;
+  set outputQuantity(int? outputQuantity) => _outputQuantity = outputQuantity;
+  String? get expiredDate => _expiredDate;
+  set expiredDate(String? expiredDate) => _expiredDate = expiredDate;
   String? get name => _name;
   set name(String? name) => _name = name;
 
   Items.fromJson(Map<String, dynamic> json) {
-    _id = json['id'];
-    _stockOpnameId = json['stock_opname_id'];
     _quantity = json['quantity'];
-    _stockId = json['stock_id'];
-    _productType = json['product_type'];
-    _differenceQuantity = json['difference_quantity'];
+    _systemQuantity = json['system_quantity'];
+    _realQuantity = json['real_quantity'];
+    _inputQuantity = json['input_quantity'];
+    _outputQuantity = json['output_quantity'];
+    _expiredDate = json['expired_date'];
     _name = json['name'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = _id;
-    data['stock_opname_id'] = _stockOpnameId;
     data['quantity'] = _quantity;
-    data['stock_id'] = _stockId;
-    data['product_type'] = _productType;
-    data['difference_quantity'] = _differenceQuantity;
+    data['system_quantity'] = _systemQuantity;
+    data['real_quantity'] = _realQuantity;
+    data['input_quantity'] = _inputQuantity;
+    data['output_quantity'] = _outputQuantity;
+    data['expired_date'] = _expiredDate;
     data['name'] = _name;
     return data;
   }
