@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:duitaja/cubit/auth_cubit.dart';
 import 'package:duitaja/cubit/cashier_cubit.dart';
 import 'package:duitaja/cubit/page_cubit.dart';
 import 'package:duitaja/cubit/sale_cubit.dart';
+import 'package:duitaja/model/order_model.dart';
 import 'package:duitaja/model/product_model.dart';
 import 'package:duitaja/model/sellable_product_model.dart';
 import 'package:duitaja/shared/sale_detail_page.dart';
@@ -33,9 +36,6 @@ class _CashierPageState extends State<CashierPage> {
 
   @override
   void initState() {
-    print(
-        "menambah pesanan ${context.read<DetailSaleCubit>().detailSaleHistoryModel.payload?.customerName}");
-
     context.read<ProductCartCubit>().resetProduct();
     context.read<ProductMenuCubit>().sellableProduct(
           token: context.read<AuthCubit>().token ?? "",
@@ -67,15 +67,16 @@ class _CashierPageState extends State<CashierPage> {
 
   @override
   Widget build(BuildContext context) {
-    final groupedProduct =
-        groupBy(context.read<ProductCartCubit>().state, (item) => item.id);
+    final groupedProduct = groupBy(
+        context.read<ProductCartCubit>().state, (item) => item.productId);
 
-    Map<int?, int> counts = {};
+    Map<String?, int> counts = {};
     int totalCount = 0;
-    Map<int?, int> groupPriceSums = {};
+    Map<String?, int> groupPriceSums = {};
     int totalPrice = 0;
     if (groupedProduct.isNotEmpty) {
       counts = groupedProduct.map((id, group) => MapEntry(id, group.length));
+
       // Sum all counts
       totalCount = counts.values.reduce((a, b) => a + b);
 
@@ -600,7 +601,9 @@ class _CashierPageState extends State<CashierPage> {
                               ),
                               onPressed: () {
                                 Navigator.pop(context);
-                                if ((groupedProduct[product.id]?.length ?? 0) <
+                                if ((groupedProduct[product.productId]
+                                            ?.length ??
+                                        0) <
                                     (product.stock ?? 0)) {
                                   var products =
                                       context.read<ProductCartCubit>().state;
@@ -968,7 +971,7 @@ class _CashierPageState extends State<CashierPage> {
                                                 i++)
                                               itemMenuListSetup(
                                                 product: ProductModel(
-                                                  id: i,
+                                                  // id: i,
                                                   productId:
                                                       "${menuProduct?.payload?[i].id}",
                                                   productURL:
@@ -979,7 +982,7 @@ class _CashierPageState extends State<CashierPage> {
                                                       .payload?[i]
                                                       .currentQuantity,
                                                   description:
-                                                      "Belum ada deskripsi",
+                                                      "${menuProduct?.payload?[i].description}",
                                                   price: menuProduct
                                                       ?.payload?[i].price,
                                                   discountId: menuProduct
@@ -988,15 +991,33 @@ class _CashierPageState extends State<CashierPage> {
                                                               ?.payload?[i]
                                                               .promo !=
                                                           null
-                                                      ? ((menuProduct!
-                                                                  .payload?[i]
-                                                                  .price ??
-                                                              0) -
-                                                          (menuProduct
-                                                                  ?.payload?[i]
+                                                      ? menuProduct!
+                                                                  .payload![i]
                                                                   .promo
-                                                                  ?.amount ??
-                                                              0))
+                                                                  ?.type ==
+                                                              "PERCENT"
+                                                          ? ((menuProduct!
+                                                                      .payload?[
+                                                                          i]
+                                                                      .price ??
+                                                                  0) -
+                                                              ((menuProduct!.payload?[i].price ??
+                                                                          0) *
+                                                                      ((menuProduct?.payload?[i].promo?.amount ??
+                                                                              0) /
+                                                                          100))
+                                                                  .toInt())
+                                                          : ((menuProduct!
+                                                                      .payload?[
+                                                                          i]
+                                                                      .price ??
+                                                                  0) -
+                                                              (menuProduct
+                                                                      ?.payload?[
+                                                                          i]
+                                                                      .promo
+                                                                      ?.amount ??
+                                                                  0))
                                                       : 0,
                                                   productCategory:
                                                       "${menuProduct?.payload?[i].category?.name}",
@@ -1028,51 +1049,9 @@ class _CashierPageState extends State<CashierPage> {
                                         .hideCurrentSnackBar();
                                     Navigator.pushNamed(context,
                                             "/main-page/cashier-page/detail-order-page")
-                                        .then((_) {
+                                        .then(((_) {
                                       setState(() {});
-                                      menuProductPage = 1;
-                                      menuProduct = null;
-                                      context
-                                          .read<ProductMenuCubit>()
-                                          .sellableProduct(
-                                            token: context
-                                                    .read<AuthCubit>()
-                                                    .token ??
-                                                "",
-                                            page: "$menuProductPage",
-                                            limit: "100",
-                                            categoryId: "",
-                                            inStatus: "active",
-                                            search: menuSearchTextField.text,
-                                          );
-
-                                      context.read<SaleCubit>().allSalesHistory(
-                                            token: context
-                                                    .read<AuthCubit>()
-                                                    .token ??
-                                                "",
-                                            page: "1",
-                                            limit: "15",
-                                            status: "",
-                                            startDate: "",
-                                            endDate: "",
-                                            search: "",
-                                            inStatus: "",
-                                          );
-
-                                      context
-                                          .read<IndexCashierFilterCubit>()
-                                          .category(
-                                            token: context
-                                                    .read<AuthCubit>()
-                                                    .token ??
-                                                "",
-                                          );
-
-                                      context
-                                          .read<IndexCashierFilterCubit>()
-                                          .setIndex(-1);
-                                    });
+                                    }));
                                   },
                                   child: Container(
                                     margin: const EdgeInsets.symmetric(

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:duitaja/cubit/auth_cubit.dart';
 import 'package:duitaja/cubit/cashier_cubit.dart';
 import 'package:duitaja/model/order_model.dart';
@@ -142,9 +144,8 @@ class _PaymentPageState extends State<PaymentPage> {
         }
 
         if (state is CashierOrderSuccess) {
-          Navigator.pop(context);
           context.read<ProductCartCubit>().resetProduct();
-          Navigator.popAndPushNamed(
+          Navigator.pushNamed(
               context, '/main-page/payment-page/payment-status-page');
         }
 
@@ -286,6 +287,8 @@ class _PaymentPageState extends State<PaymentPage> {
                                       message:
                                           "Apakah nominal yang telah anda masukan sudah sesuai dengan nominal yang anda terima?",
                                       completion: () {
+                                        orderModel.moneyReceived =
+                                            int.parse(paymenttextField.text);
                                         context.read<CashierCubit>().order(
                                             token: context
                                                     .read<AuthCubit>()

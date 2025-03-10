@@ -846,7 +846,7 @@ class _StockPageState extends State<StockPage> {
                                     index++) ...{
                                   generateListProductItem(
                                     product: ProductModel(
-                                      id: index,
+                                      // id: index,
                                       productId:
                                           "${stockManagementModel!.payload?[index].id}",
                                       productURL:

@@ -1,6 +1,6 @@
 // Ini adalah model dummy
 class ProductModel {
-  int? id;
+  // int? id;
   String? productId;
   String? productCategory;
   String? productURL;
@@ -13,7 +13,7 @@ class ProductModel {
   String? status;
 
   ProductModel({
-    required this.id,
+    // required this.id,
     required this.productId,
     required this.productCategory,
     required this.productURL,

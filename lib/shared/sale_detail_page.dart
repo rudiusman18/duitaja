@@ -66,7 +66,7 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
                   style: inter,
                 ),
                 Text(
-                    "${invoiceItem?.quantity} x ${formatCurrency((invoiceItem?.price ?? 0) - (invoiceItem?.promoAmount ?? 0))}")
+                    "${invoiceItem?.quantity} x ${formatCurrency((invoiceItem?.price ?? 0) - (invoiceItem?.promo?.type == 'PERCENT' ? (((invoiceItem?.price ?? 0) * (invoiceItem?.promoAmount ?? 0) ~/ 100)) : (invoiceItem?.promoAmount ?? 0)))}")
               ],
             ),
           ),
@@ -186,15 +186,15 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
           generateInfoitem(
             title: "Pembayaran (Cash): ",
             value: (formatCurrency(
-                (detailSaleHistoryModel.payload?.subTotal ?? 0) +
-                    (detailSaleHistoryModel.payload?.tax ?? 0))),
+                (detailSaleHistoryModel.payload?.moneyReceived ?? 0))),
           ),
           const SizedBox(
             height: 16,
           ),
           generateInfoitem(
             title: "Kembalian: ",
-            value: (formatCurrency(0)),
+            value: (formatCurrency(
+                (detailSaleHistoryModel.payload?.moneyBack ?? 0))),
           ),
           if (widget.paymentStatus == null) ...{
             if ((detailSaleHistoryModel.payload?.status ?? "").toLowerCase() ==

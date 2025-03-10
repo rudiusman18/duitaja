@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_typing_uninitialized_variables, prefer_collection_literals
-
 class SellableProductModel {
   String? message;
   List<Payload>? payload;
@@ -19,7 +17,7 @@ class SellableProductModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['message'] = message;
     if (payload != null) {
       data['payload'] = payload!.map((v) => v.toJson()).toList();
@@ -35,7 +33,10 @@ class Payload {
   String? id;
   String? name;
   String? image;
+  String? description;
+  bool? status;
   String? statusDisplay;
+  bool? hasReceipt;
   int? currentQuantity;
   int? price;
   dynamic deletedAt;
@@ -46,7 +47,10 @@ class Payload {
       {this.id,
       this.name,
       this.image,
+      this.description,
+      this.status,
       this.statusDisplay,
+      this.hasReceipt,
       this.currentQuantity,
       this.price,
       this.deletedAt,
@@ -57,7 +61,10 @@ class Payload {
     id = json['id'];
     name = json['name'];
     image = json['image'];
+    description = json['description'];
+    status = json['status'];
     statusDisplay = json['status_display'];
+    hasReceipt = json['has_receipt'];
     currentQuantity = json['current_quantity'];
     price = json['price'];
     deletedAt = json['deleted_at'];
@@ -67,11 +74,14 @@ class Payload {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['name'] = name;
     data['image'] = image;
+    data['description'] = description;
+    data['status'] = status;
     data['status_display'] = statusDisplay;
+    data['has_receipt'] = hasReceipt;
     data['current_quantity'] = currentQuantity;
     data['price'] = price;
     data['deleted_at'] = deletedAt;
@@ -88,7 +98,7 @@ class Payload {
 class Category {
   String? id;
   String? name;
-  dynamic deletedAt;
+  Null? deletedAt;
 
   Category({this.id, this.name, this.deletedAt});
 
@@ -99,7 +109,7 @@ class Category {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['name'] = name;
     data['deleted_at'] = deletedAt;
@@ -110,24 +120,33 @@ class Category {
 class Promo {
   String? id;
   String? name;
+  String? type;
   String? startDate;
   String? endDate;
   int? amount;
 
-  Promo({this.id, this.name, this.startDate, this.endDate, this.amount});
+  Promo(
+      {this.id,
+      this.name,
+      this.type,
+      this.startDate,
+      this.endDate,
+      this.amount});
 
   Promo.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
+    type = json['type'];
     startDate = json['start_date'];
     endDate = json['end_date'];
     amount = json['amount'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['name'] = name;
+    data['type'] = type;
     data['start_date'] = startDate;
     data['end_date'] = endDate;
     data['amount'] = amount;
@@ -161,7 +180,7 @@ class Meta {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['page'] = page;
     data['limit'] = limit;
     data['total_data'] = totalData;

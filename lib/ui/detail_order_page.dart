@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
 import 'package:duitaja/cubit/auth_cubit.dart';
 import 'package:duitaja/cubit/cashier_cubit.dart';
+import 'package:duitaja/cubit/sale_cubit.dart';
 import 'package:duitaja/model/order_model.dart';
 import 'package:duitaja/model/product_model.dart';
 import 'package:duitaja/shared/loading.dart';
@@ -19,6 +22,7 @@ class DetailOrderPage extends StatefulWidget {
 }
 
 class _DetailOrderPageState extends State<DetailOrderPage> {
+  OrderModel? orderModelData;
   TextEditingController customerNameTextField = TextEditingController(text: "");
   TextEditingController phoneNumberTextField = TextEditingController(text: "");
   TextEditingController noteTextField = TextEditingController(text: "");
@@ -27,6 +31,13 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
 
   @override
   void initState() {
+    if (context.read<DetailSaleCubit>().detailSaleHistoryModel.payload !=
+        null) {
+      var data = context.read<DetailSaleCubit>().detailSaleHistoryModel.payload;
+      customerNameTextField.text = data?.customerName ?? "";
+      phoneNumberTextField.text = data?.phoneNumber ?? "";
+    }
+
     context
         .read<CashierCubit>()
         .tax(token: context.read<AuthCubit>().token ?? "");
@@ -35,12 +46,12 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
 
   @override
   Widget build(BuildContext context) {
-    final groupedProduct =
-        groupBy(context.read<ProductCartCubit>().state, (item) => item.id);
+    final groupedProduct = groupBy(
+        context.read<ProductCartCubit>().state, (item) => item.productId);
 
-    Map<int?, int> counts = {};
+    Map<String?, int> counts = {};
     int totalCount = 0;
-    Map<int?, int> groupPriceSums = {};
+    Map<String?, int> groupPriceSums = {};
     int totalPrice = 0;
     int totalTax = 0;
     if (groupedProduct.isNotEmpty) {
@@ -154,13 +165,16 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
       if ((purchaseds?.length ?? 0) < groupedProduct.length) {
         purchaseds?.add(Purchaseds(
           id: product.productId,
-          qty: groupedProduct[product.id]?.length,
+          qty: groupedProduct[product.productId]?.length,
           priceAll: product.discountPrice == null || product.discountPrice == 0
               ? product.price
               : product.discountPrice,
           promoId: product.discountId,
           promoAmount: (product.price ?? 0) - (product.discountPrice ?? 0),
         ));
+
+        print(
+            "panjang grouped product adalah: ${groupedProduct.length} dengan panjang purchaseds adalah ${purchaseds?.length} dan order model adalah ${orderModelData?.purchaseds?.length}");
       }
 
       return Column(
@@ -284,7 +298,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                                 groupedProduct.length) {
                               purchaseds?.add(Purchaseds(
                                 id: product.productId,
-                                qty: groupedProduct[product.id]?.length,
+                                qty: groupedProduct[product.productId]?.length,
                                 priceAll: product.discountPrice == null ||
                                         product.discountPrice == 0
                                     ? product.price
@@ -316,13 +330,13 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                       const SizedBox(
                         width: 14,
                       ),
-                      Text('${groupedProduct[product.id]?.length}'),
+                      Text('${groupedProduct[product.productId]?.length}'),
                       const SizedBox(
                         width: 14,
                       ),
                       GestureDetector(
                         onTap: () {
-                          if ((groupedProduct[product.id]?.length ?? 0) <
+                          if ((groupedProduct[product.productId]?.length ?? 0) <
                               (product.stock ?? 0)) {
                             var products =
                                 context.read<ProductCartCubit>().state;
@@ -477,7 +491,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
         if (state is CashierOrderSuccess) {
           Navigator.pop(context);
           context.read<ProductCartCubit>().resetProduct();
-          Navigator.pop(context);
+          Navigator.pushReplacementNamed(context, '/main-page/cashier-page');
         }
 
         if (state is CashierOrderFailure) {
@@ -554,7 +568,6 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                             groupedProduct[groupedProduct.keys.toList()[index]]
                                     ?[0] ??
                                 ProductModel(
-                                  id: -1,
                                   productId: "",
                                   productURL: "",
                                   productName: '',

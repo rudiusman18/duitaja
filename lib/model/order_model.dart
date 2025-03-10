@@ -7,6 +7,7 @@ class OrderModel {
   String? invoiceNumber;
   String? taxId;
   int? tax;
+  int? moneyReceived;
   bool? status;
   List<Purchaseds>? purchaseds;
 
@@ -19,6 +20,7 @@ class OrderModel {
       this.invoiceNumber,
       this.taxId,
       this.tax,
+      this.moneyReceived,
       this.status,
       this.purchaseds});
 
@@ -31,6 +33,7 @@ class OrderModel {
     invoiceNumber = json['invoice_number'];
     taxId = json['tax_id'];
     tax = json['tax'];
+    moneyReceived = json['money_received'];
     status = json['status'];
     if (json['purchaseds'] != null) {
       purchaseds = <Purchaseds>[];
@@ -50,6 +53,7 @@ class OrderModel {
     data['invoice_number'] = invoiceNumber;
     data['tax_id'] = taxId;
     data['tax'] = tax;
+    data['money_received'] = moneyReceived;
     data['status'] = status;
     if (purchaseds != null) {
       data['purchaseds'] = purchaseds!.map((v) => v.toJson()).toList();

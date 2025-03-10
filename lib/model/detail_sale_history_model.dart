@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_collection_literals
+
 class DetailSaleHistoryModel {
   String? message;
   Payload? payload;
@@ -11,7 +13,7 @@ class DetailSaleHistoryModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['message'] = message;
     if (payload != null) {
       data['payload'] = payload!.toJson();
@@ -24,11 +26,14 @@ class Payload {
   String? id;
   String? customerName;
   String? phoneNumber;
-  String? note;
   String? invoiceNumber;
   String? status;
+  String? note;
   int? tax;
   int? subTotal;
+  int? moneyReceived;
+  int? moneyBack;
+  int? total;
   String? createdAt;
   int? countSale;
   List<InvoiceItems>? invoiceItems;
@@ -37,11 +42,14 @@ class Payload {
       {this.id,
       this.customerName,
       this.phoneNumber,
-      this.note,
       this.invoiceNumber,
       this.status,
+      this.note,
       this.tax,
       this.subTotal,
+      this.moneyReceived,
+      this.moneyBack,
+      this.total,
       this.createdAt,
       this.countSale,
       this.invoiceItems});
@@ -55,6 +63,9 @@ class Payload {
     status = json['status'];
     tax = json['tax'];
     subTotal = json['sub_total'];
+    moneyReceived = json['money_received'];
+    moneyBack = json['money_back'];
+    total = json['total'];
     createdAt = json['created_at'];
     countSale = json['count_sale'];
     if (json['invoice_items'] != null) {
@@ -66,7 +77,7 @@ class Payload {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['id'] = id;
     data['customer_name'] = customerName;
     data['phone_number'] = phoneNumber;
@@ -75,6 +86,9 @@ class Payload {
     data['status'] = status;
     data['tax'] = tax;
     data['sub_total'] = subTotal;
+    data['money_received'] = moneyReceived;
+    data['money_back'] = moneyBack;
+    data['total'] = total;
     data['created_at'] = createdAt;
     data['count_sale'] = countSale;
     if (invoiceItems != null) {
@@ -89,6 +103,7 @@ class InvoiceItems {
   int? quantity;
   String? name;
   int? price;
+  Promo? promo;
   int? resultTotal;
   int? promoAmount;
 
@@ -97,6 +112,7 @@ class InvoiceItems {
       this.quantity,
       this.name,
       this.price,
+      this.promo,
       this.resultTotal,
       this.promoAmount});
 
@@ -105,18 +121,59 @@ class InvoiceItems {
     quantity = json['quantity'];
     name = json['name'];
     price = json['price'];
+    promo = json['promo'] != null ? Promo.fromJson(json['promo']) : null;
     resultTotal = json['result_total'];
     promoAmount = json['promo_amount'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['sellable_product_id'] = sellableProductId;
     data['quantity'] = quantity;
     data['name'] = name;
     data['price'] = price;
+    if (promo != null) {
+      data['promo'] = promo!.toJson();
+    }
     data['result_total'] = resultTotal;
     data['promo_amount'] = promoAmount;
+    return data;
+  }
+}
+
+class Promo {
+  String? id;
+  String? name;
+  String? type;
+  String? startDate;
+  String? endDate;
+  int? amount;
+
+  Promo(
+      {this.id,
+      this.name,
+      this.type,
+      this.startDate,
+      this.endDate,
+      this.amount});
+
+  Promo.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    type = json['type'];
+    startDate = json['start_date'];
+    endDate = json['end_date'];
+    amount = json['amount'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['id'] = id;
+    data['name'] = name;
+    data['type'] = type;
+    data['start_date'] = startDate;
+    data['end_date'] = endDate;
+    data['amount'] = amount;
     return data;
   }
 }
