@@ -295,8 +295,6 @@ class _PaymentPageState extends State<PaymentPage> {
                                                     .token ??
                                                 "",
                                             orderModel: orderModel);
-
-                                        inspect(orderModel);
                                       });
                                 }));
                           },

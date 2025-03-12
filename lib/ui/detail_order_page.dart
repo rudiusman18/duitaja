@@ -45,7 +45,11 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
           ?.invoiceItems
           ?.map((item) => Purchaseds(
               id: item.sellableProductId,
-              promoAmount: item.promoAmount,
+              promoAmount: item.promo == null
+                  ? item.price
+                  : ((item.promo?.type == 'PERCENT'
+                      ? (((item.price ?? 0) * (item.promo?.amount ?? 0) ~/ 100))
+                      : (item.promoAmount ?? 0))),
               qty: item.quantity,
               promoId: item.promo?.id,
               priceAll: item.resultTotal))
@@ -790,7 +794,14 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                               : noteTextField.text,
                           paymentMethod: "CASH",
                           status: false,
-                          subTotal: totalPrice,
+                          subTotal: totalPrice +
+                              (context
+                                      .read<DetailSaleCubit>()
+                                      .dataToAddOrderModel
+                                      ?.payload
+                                      ?.subTotal
+                                      ?.toInt() ??
+                                  0),
                           tax: totalTax,
                           taxId: context
                               .read<CashierCubit>()
@@ -878,7 +889,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                                       .read<DetailSaleCubit>()
                                       .dataToAddOrderModel
                                       ?.payload
-                                      ?.total
+                                      ?.subTotal
                                       ?.toInt() ??
                                   0),
                           tax: totalTax,

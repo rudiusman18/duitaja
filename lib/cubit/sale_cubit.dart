@@ -67,7 +67,6 @@ class DetailSaleCubit extends Cubit<DetailSaleState> {
     try {
       final data = await SaleService()
           .getDetailSaleHistory(token: token, payloadId: payloadId);
-      inspect(state.dataToAddOrderModel);
       emit(DetailSaleSuccess(data, savedOrder));
     } catch (e) {
       if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
