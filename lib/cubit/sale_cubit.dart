@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
@@ -56,13 +57,18 @@ class DetailSaleCubit extends Cubit<DetailSaleState> {
   DetailSaleHistoryModel get detailSaleHistoryModel =>
       state.detailSaleHistoryModel;
 
+  DetailSaleHistoryModel? get dataToAddOrderModel => state.dataToAddOrderModel;
+
   Future<void> detailSalesHistory(
-      {required String token, required String payloadId}) async {
+      {required String token,
+      required String payloadId,
+      DetailSaleHistoryModel? savedOrder}) async {
     emit(DetailSaleLoading());
     try {
       final data = await SaleService()
           .getDetailSaleHistory(token: token, payloadId: payloadId);
-      emit(DetailSaleSuccess(data));
+      inspect(state.dataToAddOrderModel);
+      emit(DetailSaleSuccess(data, savedOrder));
     } catch (e) {
       if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
         emit(DetailSaleTokenExpired());
@@ -72,8 +78,13 @@ class DetailSaleCubit extends Cubit<DetailSaleState> {
     }
   }
 
-  Future<void> clearSalesHistory() async {
-    emit(DetailSaleSuccess(DetailSaleHistoryModel()));
+  Future<void> detailSalesHistoryToAddOrder(
+      {required DetailSaleHistoryModel detailSaleHistoryModel}) async {
+    emit(DetailSaleSaveData(detailSaleHistoryModel));
+  }
+
+  Future<void> clearSalesHistory({DetailSaleHistoryModel? dataOrder}) async {
+    emit(DetailSaleSaveData(dataOrder));
   }
 }
 

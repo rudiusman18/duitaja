@@ -36,6 +36,7 @@ class _PaymentStatusPageState extends State<PaymentStatusPage> {
       builder: (context, state) {
         return WillPopScope(
           onWillPop: () async {
+            context.read<DetailSaleCubit>().clearSalesHistory();
             Navigator.pop(context);
             Navigator.pushReplacementNamed(context, "/main-page/cashier-page");
             return true;
@@ -52,6 +53,7 @@ class _PaymentStatusPageState extends State<PaymentStatusPage> {
               ),
               leading: GestureDetector(
                 onTap: () {
+                  context.read<DetailSaleCubit>().clearSalesHistory();
                   Navigator.pop(context);
                   Navigator.pushReplacementNamed(
                       context, "/main-page/cashier-page");
@@ -101,6 +103,9 @@ class _PaymentStatusPageState extends State<PaymentStatusPage> {
                                     backgroundColor: primaryColor,
                                   ),
                                   onPressed: () {
+                                    context
+                                        .read<DetailSaleCubit>()
+                                        .clearSalesHistory();
                                     Navigator.pop(context);
                                     Navigator.pushReplacementNamed(
                                         context, "/main-page/cashier-page");

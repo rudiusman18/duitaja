@@ -1,3 +1,7 @@
+// ignore_for_file: equal_elements_in_set
+
+import 'dart:developer';
+
 import 'package:duitaja/cubit/auth_cubit.dart';
 import 'package:duitaja/cubit/cashier_cubit.dart';
 import 'package:duitaja/cubit/sale_cubit.dart';
@@ -10,7 +14,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class SaleDetailPage extends StatefulWidget {
   final String saleId;
   final bool? paymentStatus;
-  const SaleDetailPage({super.key, required this.saleId, this.paymentStatus});
+  final bool? detailOrder;
+  const SaleDetailPage(
+      {super.key, required this.saleId, this.paymentStatus, this.detailOrder});
 
   @override
   State<SaleDetailPage> createState() => _SaleDetailPageState();
@@ -24,6 +30,7 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
     context.read<DetailSaleCubit>().detailSalesHistory(
           token: context.read<AuthCubit>().token ?? "",
           payloadId: widget.saleId,
+          savedOrder: context.read<DetailSaleCubit>().dataToAddOrderModel,
         );
     context
         .read<CashierCubit>()
@@ -150,110 +157,122 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
           const SizedBox(
             height: 16,
           ),
-          generateInfoitem(
-            title:
-                "PPN (${context.read<CashierCubit>().taxModel.payload?.first.precentage}%): ",
-            value: formatCurrency(detailSaleHistoryModel.payload?.tax ?? 0),
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          const Divider(
-            color: Colors.black,
-            height: 1,
-            thickness: 2,
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          generateInfoitem(
-            title: "TOTAL: ",
-            value: (formatCurrency(
-                (detailSaleHistoryModel.payload?.subTotal ?? 0) +
-                    (detailSaleHistoryModel.payload?.tax ?? 0))),
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          const Divider(
-            color: Colors.black,
-            height: 1,
-            thickness: 2,
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          generateInfoitem(
-            title: "Pembayaran (Cash): ",
-            value: (formatCurrency(
-                (detailSaleHistoryModel.payload?.moneyReceived ?? 0))),
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          generateInfoitem(
-            title: "Kembalian: ",
-            value: (formatCurrency(
-                (detailSaleHistoryModel.payload?.moneyBack ?? 0))),
-          ),
-          if (widget.paymentStatus == null) ...{
-            if ((detailSaleHistoryModel.payload?.status ?? "").toLowerCase() ==
-                "lunas") ...{
-              const SizedBox(
-                height: 16,
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                  ),
-                  onPressed: () {
-                    context.read<RefundSaleCubit>().refundSalesHistory(
-                          token: context.read<AuthCubit>().token ?? "",
-                          payloadId: detailSaleHistoryModel.payload?.id ?? "",
-                        );
-                  },
-                  child: Text(
-                    "Refund",
-                    style: inter,
-                  ),
+          if (widget.detailOrder == null) ...{
+            generateInfoitem(
+              title:
+                  "PPN (${context.read<CashierCubit>().taxModel.payload?.first.precentage}%): ",
+              value: formatCurrency(detailSaleHistoryModel.payload?.tax ?? 0),
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            const Divider(
+              color: Colors.black,
+              height: 1,
+              thickness: 2,
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            generateInfoitem(
+              title: "TOTAL: ",
+              value: (formatCurrency(
+                  (detailSaleHistoryModel.payload?.subTotal ?? 0) +
+                      (detailSaleHistoryModel.payload?.tax ?? 0))),
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            const Divider(
+              color: Colors.black,
+              height: 1,
+              thickness: 2,
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            generateInfoitem(
+              title: "Pembayaran (Cash): ",
+              value: (formatCurrency(
+                  (detailSaleHistoryModel.payload?.moneyReceived ?? 0))),
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            generateInfoitem(
+              title: "Kembalian: ",
+              value: (formatCurrency(
+                  (detailSaleHistoryModel.payload?.moneyBack ?? 0))),
+            ),
+            if (widget.paymentStatus == null) ...{
+              if ((detailSaleHistoryModel.payload?.status ?? "")
+                      .toLowerCase() ==
+                  "lunas") ...{
+                const SizedBox(
+                  height: 16,
                 ),
-              ),
-            },
-            if ((detailSaleHistoryModel.payload?.status ?? "").toLowerCase() ==
-                "belum lunas") ...{
-              const SizedBox(
-                height: 16,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ElevatedButton(
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: Colors.red,
                     ),
                     onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/main-page/cashier-page');
+                      context.read<RefundSaleCubit>().refundSalesHistory(
+                            token: context.read<AuthCubit>().token ?? "",
+                            payloadId: detailSaleHistoryModel.payload?.id ?? "",
+                          );
                     },
                     child: Text(
-                      "Tambah Pesanan",
-                      style: inter.copyWith(fontSize: 12),
+                      "Refund",
+                      style: inter,
                     ),
                   ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                ),
+              },
+              if ((detailSaleHistoryModel.payload?.status ?? "")
+                      .toLowerCase() ==
+                  "belum lunas") ...{
+                const SizedBox(
+                  height: 16,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                      ),
+                      onPressed: () {
+                        context
+                            .read<DetailSaleCubit>()
+                            .detailSalesHistoryToAddOrder(
+                                detailSaleHistoryModel: detailSaleHistoryModel);
+
+                        Navigator.pushReplacementNamed(
+                            context, '/main-page/cashier-page');
+                      },
+                      child: Text(
+                        "Tambah Pesanan",
+                        style: inter.copyWith(fontSize: 12),
+                      ),
                     ),
-                    onPressed: () {},
-                    child: Text(
-                      "Bayar Sekarang",
-                      style: inter.copyWith(fontSize: 12),
+                    const SizedBox(
+                      width: 5,
                     ),
-                  ),
-                ],
-              ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                      ),
+                      onPressed: () {},
+                      child: Text(
+                        "Bayar Sekarang",
+                        style: inter.copyWith(fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              }
             }
           }
         ],

@@ -9,6 +9,7 @@ import 'package:duitaja/model/order_model.dart';
 import 'package:duitaja/model/product_model.dart';
 import 'package:duitaja/shared/loading.dart';
 import 'package:duitaja/shared/modal_alert.dart';
+import 'package:duitaja/shared/sale_detail_page.dart';
 import 'package:duitaja/shared/theme.dart';
 import 'package:duitaja/shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -28,14 +29,29 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
   TextEditingController noteTextField = TextEditingController(text: "");
 
   List<Purchaseds>? purchaseds = [];
+  List<Purchaseds>? addedPurchasedsItem = [];
 
   @override
   void initState() {
-    if (context.read<DetailSaleCubit>().detailSaleHistoryModel.payload !=
-        null) {
-      var data = context.read<DetailSaleCubit>().detailSaleHistoryModel.payload;
+    if (context.read<DetailSaleCubit>().dataToAddOrderModel?.payload != null) {
+      var data = context.read<DetailSaleCubit>().dataToAddOrderModel?.payload;
       customerNameTextField.text = data?.customerName ?? "";
       phoneNumberTextField.text = data?.phoneNumber ?? "";
+
+      addedPurchasedsItem = context
+          .read<DetailSaleCubit>()
+          .dataToAddOrderModel
+          ?.payload
+          ?.invoiceItems
+          ?.map((item) => Purchaseds(
+              id: item.sellableProductId,
+              promoAmount: item.promoAmount,
+              qty: item.quantity,
+              promoId: item.promo?.id,
+              priceAll: item.resultTotal))
+          .toList();
+
+      purchaseds?.addAll(addedPurchasedsItem ?? []);
     }
 
     context
@@ -76,7 +92,9 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
       // Calculate the total sum of prices across all items
       totalPrice = groupPriceSums.values.reduce((a, b) => a + b);
 
-      totalTax = (double.parse("$totalPrice") *
+      totalTax = ((double.parse("$totalPrice") +
+                  double.parse(
+                      "${context.read<DetailSaleCubit>().dataToAddOrderModel?.payload?.subTotal ?? 0}")) *
               ((context
                           .read<CashierCubit>()
                           .taxModel
@@ -162,7 +180,11 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
 
     Widget itemMenuListSetup(
         {required ProductModel product, required int index}) {
-      if ((purchaseds?.length ?? 0) < groupedProduct.length) {
+      if (((context.read<DetailSaleCubit>().dataToAddOrderModel?.payload !=
+                  null)
+              ? ((purchaseds?.length ?? 0) - (addedPurchasedsItem?.length ?? 0))
+              : (purchaseds?.length ?? 0)) <
+          groupedProduct.length) {
         purchaseds?.add(Purchaseds(
           id: product.productId,
           qty: groupedProduct[product.productId]?.length,
@@ -172,9 +194,6 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
           promoId: product.discountId,
           promoAmount: (product.price ?? 0) - (product.discountPrice ?? 0),
         ));
-
-        print(
-            "panjang grouped product adalah: ${groupedProduct.length} dengan panjang purchaseds adalah ${purchaseds?.length} dan order model adalah ${orderModelData?.purchaseds?.length}");
       }
 
       return Column(
@@ -401,10 +420,70 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
         ),
         child: Column(
           children: [
+            context.read<DetailSaleCubit>().dataToAddOrderModel?.payload == null
+                ? const SizedBox()
+                : Row(
+                    children: [
+                      Text(
+                        "Pesanan Sebelumnya",
+                        style: inter,
+                      ),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return SaleDetailPage(
+                                  saleId: context
+                                          .read<DetailSaleCubit>()
+                                          .dataToAddOrderModel
+                                          ?.payload
+                                          ?.id ??
+                                      "",
+                                  detailOrder: true,
+                                );
+                              }).then(((_) {
+                            setState(() {});
+                          }));
+                        },
+                        child: const Icon(
+                          Icons.info,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      Expanded(
+                        child: Text(
+                          formatCurrency(context
+                                  .read<DetailSaleCubit>()
+                                  .dataToAddOrderModel
+                                  ?.payload
+                                  ?.subTotal
+                                  ?.toInt() ??
+                              0),
+                          textAlign: TextAlign.end,
+                        ),
+                      )
+                    ],
+                  ),
+            const SizedBox(
+              height: 16,
+            ),
             Row(
               children: [
                 Text(
-                  "Total Pesanan ($totalCount)",
+                  context
+                              .read<DetailSaleCubit>()
+                              .dataToAddOrderModel
+                              ?.payload !=
+                          null
+                      ? "Total Tambahan Pesanan ($totalCount)"
+                      : "Total Pesanan ($totalCount)",
                   style: inter,
                 ),
                 Expanded(
@@ -455,7 +534,15 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                 ),
                 Expanded(
                   child: Text(
-                    formatCurrency(totalPrice + totalTax),
+                    formatCurrency(totalPrice +
+                        totalTax +
+                        (context
+                                .read<DetailSaleCubit>()
+                                .dataToAddOrderModel
+                                ?.payload
+                                ?.total
+                                ?.toInt() ??
+                            0)),
                     style: inter,
                     textAlign: TextAlign.end,
                   ),
@@ -470,7 +557,10 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
     return BlocConsumer<CashierCubit, CashierState>(
       listener: (context, state) {
         if (state is CashierSuccess) {
-          totalTax = (double.parse("$totalPrice") *
+          setState(() {});
+          totalTax = ((double.parse("$totalPrice") +
+                      double.parse(
+                          "${context.read<DetailSaleCubit>().dataToAddOrderModel?.payload?.tax ?? 0}")) *
                   ((context
                               .read<CashierCubit>()
                               .taxModel
@@ -489,6 +579,7 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
         }
 
         if (state is CashierOrderSuccess) {
+          context.read<DetailSaleCubit>().clearSalesHistory();
           Navigator.pop(context);
           context.read<ProductCartCubit>().resetProduct();
           Navigator.pushReplacementNamed(context, '/main-page/cashier-page');
@@ -653,7 +744,15 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                             ),
                           ),
                           Text(
-                            formatCurrency(totalPrice + totalTax),
+                            formatCurrency((totalPrice +
+                                totalTax +
+                                (context
+                                        .read<DetailSaleCubit>()
+                                        .dataToAddOrderModel
+                                        ?.payload
+                                        ?.total
+                                        ?.toInt() ??
+                                    0))),
                             style: inter,
                           ),
                         ],
@@ -661,6 +760,26 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                     ),
                     ElevatedButton(
                       onPressed: () {
+                        // Fungsi untuk menggabungkan produk dengan id yang sama dan menambahkan quantity nya
+                        Map<String, Purchaseds> mergedMap = {};
+
+                        for (var item in purchaseds!) {
+                          if (item.id != null) {
+                            if (mergedMap.containsKey(item.id)) {
+                              // Add quantity to existing entry
+                              mergedMap[item.id]!.qty =
+                                  (mergedMap[item.id]!.qty ?? 0) +
+                                      (item.qty ?? 0);
+                            } else {
+                              // Store the reference of the first occurrence
+                              mergedMap[item.id!] = item;
+                            }
+                          }
+                        }
+
+                        purchaseds?.clear();
+                        purchaseds?.addAll(mergedMap.values);
+
                         OrderModel orderModel = OrderModel(
                           customerName: customerNameTextField.text,
                           phoneNumber: phoneNumberTextField.text == ""
@@ -682,9 +801,26 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                           invoiceNumber: "#${generateSixDigitNumber()}",
                           purchaseds: purchaseds,
                         );
-                        context.read<CashierCubit>().order(
-                            token: context.read<AuthCubit>().token ?? "",
-                            orderModel: orderModel);
+
+                        if (context
+                                .read<DetailSaleCubit>()
+                                .dataToAddOrderModel
+                                ?.payload !=
+                            null) {
+                          context.read<CashierCubit>().updateOrder(
+                              token: context.read<AuthCubit>().token ?? "",
+                              orderModel: orderModel,
+                              orderId: context
+                                      .read<DetailSaleCubit>()
+                                      .dataToAddOrderModel
+                                      ?.payload
+                                      ?.id ??
+                                  "");
+                        } else {
+                          context.read<CashierCubit>().order(
+                              token: context.read<AuthCubit>().token ?? "",
+                              orderModel: orderModel);
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
@@ -707,6 +843,26 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                         backgroundColor: primaryColor,
                       ),
                       onPressed: () {
+                        // Fungsi untuk menggabungkan produk dengan id yang sama dan menambahkan quantity nya
+                        Map<String, Purchaseds> mergedMap = {};
+
+                        for (var item in purchaseds!) {
+                          if (item.id != null) {
+                            if (mergedMap.containsKey(item.id)) {
+                              // Add quantity to existing entry
+                              mergedMap[item.id]!.qty =
+                                  (mergedMap[item.id]!.qty ?? 0) +
+                                      (item.qty ?? 0);
+                            } else {
+                              // Store the reference of the first occurrence
+                              mergedMap[item.id!] = item;
+                            }
+                          }
+                        }
+
+                        purchaseds?.clear();
+                        purchaseds?.addAll(mergedMap.values);
+
                         OrderModel orderModel = OrderModel(
                           customerName: customerNameTextField.text,
                           phoneNumber: phoneNumberTextField.text == ""
@@ -717,7 +873,14 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                               : noteTextField.text,
                           paymentMethod: "CASH",
                           status: true,
-                          subTotal: totalPrice,
+                          subTotal: totalPrice +
+                              (context
+                                      .read<DetailSaleCubit>()
+                                      .dataToAddOrderModel
+                                      ?.payload
+                                      ?.total
+                                      ?.toInt() ??
+                                  0),
                           tax: totalTax,
                           taxId: context
                               .read<CashierCubit>()
@@ -728,12 +891,15 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                           invoiceNumber: "#${generateSixDigitNumber()}",
                           purchaseds: purchaseds,
                         );
+
                         context
                             .read<CashierCubit>()
                             .saveOrder(orderModel: orderModel);
                         Navigator.pushNamed(context, '/main-page/payment-page')
-                            .then((value) => context.read<CashierCubit>().tax(
-                                token: context.read<AuthCubit>().token ?? ""));
+                            .then((value) {
+                          context.read<CashierCubit>().tax(
+                              token: context.read<AuthCubit>().token ?? "");
+                        });
                       },
                       child: Text(
                         "Bayar Sekarang",

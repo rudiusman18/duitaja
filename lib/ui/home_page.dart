@@ -574,12 +574,11 @@ class _HomePageState extends State<HomePage> {
                                           ),
                                         )
                                       : (context
-                                                          .read<SaleCubit>()
-                                                          .saleHistoryModel
-                                                          .payload
-                                                          ?.isEmpty ??
-                                                      true) &&
-                                                  state is SaleSuccess ||
+                                                      .read<SaleCubit>()
+                                                      .saleHistoryModel
+                                                      .payload
+                                                      ?.isEmpty ??
+                                                  true) ||
                                               state is SaleFailure
                                           ? Center(
                                               child: Text(

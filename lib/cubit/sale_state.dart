@@ -35,7 +35,9 @@ final class SaleTokenExpired extends SaleState {
 @immutable
 final class DetailSaleState {
   final DetailSaleHistoryModel detailSaleHistoryModel;
-  const DetailSaleState(this.detailSaleHistoryModel);
+  final DetailSaleHistoryModel? dataToAddOrderModel;
+  const DetailSaleState(this.detailSaleHistoryModel,
+      {this.dataToAddOrderModel});
 }
 
 final class DetailSaleInitial extends DetailSaleState {
@@ -48,7 +50,15 @@ final class DetailSaleLoading extends DetailSaleState {
 
 final class DetailSaleSuccess extends DetailSaleState {
   final DetailSaleHistoryModel detailData;
-  const DetailSaleSuccess(this.detailData) : super(detailData);
+  final DetailSaleHistoryModel? detailSaveOrder;
+  const DetailSaleSuccess(this.detailData, this.detailSaveOrder)
+      : super(detailData, dataToAddOrderModel: detailSaveOrder);
+}
+
+final class DetailSaleSaveData extends DetailSaleState {
+  final DetailSaleHistoryModel? detailData;
+  DetailSaleSaveData(this.detailData)
+      : super(DetailSaleHistoryModel(), dataToAddOrderModel: detailData);
 }
 
 final class DetailSaleFailure extends DetailSaleState {

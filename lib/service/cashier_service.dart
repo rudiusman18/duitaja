@@ -105,4 +105,31 @@ class CashierService {
       throw Exception("${data['errors'] ?? data['message']}");
     }
   }
+
+  // Digunakan untuk mengupdate data pesanan
+  Future<void> putOrder({
+    required String token,
+    required String orderId,
+    required OrderModel orderModel,
+  }) async {
+    var url = Uri.parse("$baseURL/invoice/cashier/update/$orderId");
+    var header = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+
+    var response = await http.put(
+      url,
+      headers: header,
+      body: jsonEncode(orderModel.toJson()),
+    );
+
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      var data = jsonDecode(response.body);
+      return data;
+    } else {
+      var data = jsonDecode(response.body);
+      throw Exception("${data['errors'] ?? data['message']}");
+    }
+  }
 }

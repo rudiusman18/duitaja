@@ -50,6 +50,24 @@ class CashierCubit extends Cubit<CashierState> {
     }
   }
 
+  Future<void> updateOrder(
+      {required String token,
+      required OrderModel orderModel,
+      required String orderId}) async {
+    emit(CashierOrderLoading());
+    try {
+      final _ = await CashierService()
+          .putOrder(token: token, orderModel: orderModel, orderId: orderId);
+      emit(CashierOrderSuccess());
+    } catch (e) {
+      if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
+        emit(CashierTokenExpired());
+      } else {
+        emit(CashierOrderFailure(e.toString(), state.taxtModel));
+      }
+    }
+  }
+
 // Digunakan untuk menyimpan data pemesanan untuk langsung ditambahkan nominal (bayar sekarang)
   Future<void> saveOrder({required OrderModel orderModel}) async {
     emit(CashierSaveOrder(orderModel));

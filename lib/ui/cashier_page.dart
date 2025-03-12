@@ -292,7 +292,11 @@ class _CashierPageState extends State<CashierPage> {
                 return SaleDetailPage(
                   saleId: payloadId,
                 );
-              });
+              }).then((value) {
+            print("dijlankan");
+            var data = context.read<DetailSaleCubit>().dataToAddOrderModel;
+            context.read<DetailSaleCubit>().clearSalesHistory(dataOrder: data);
+          });
         },
         child: Container(
           padding: const EdgeInsets.symmetric(
