@@ -29,9 +29,6 @@ class StockOpnameService {
 
     var response = await http.get(url, headers: header);
 
-    print(
-        "url yang diakses adalah: $url dengan isi response adalah ${response.body}");
-
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       var data = jsonDecode(response.body);
       final StockOpnameModel stockOpnameModel = StockOpnameModel.fromJson(data);
@@ -135,9 +132,6 @@ class StockOpnameService {
       body: body,
       headers: header,
     );
-
-    print(
-        "token: $token, statusCode : ${response.statusCode}, dan body: ${response.body}");
 
     if ((response.statusCode) >= 200 && (response.statusCode) <= 299) {
       var data = jsonDecode(response.body);
