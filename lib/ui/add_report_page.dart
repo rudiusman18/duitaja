@@ -480,7 +480,6 @@ class _AddReportPageState extends State<AddReportPage> {
 
         if (state is StockOpnameDetailFailure) {
           Navigator.pop(context);
-          Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: primaryColor,
@@ -710,6 +709,8 @@ class _AddReportPageState extends State<AddReportPage> {
                                 realStocks?.removeAt(cardIndex);
                                 context.read<AddReportCubit>().decreaseStock(
                                     context.read<AddReportCubit>().state);
+                                cardIndex =
+                                    cardIndex > 0 ? cardIndex - 1 : cardIndex;
                               });
                             },
                           ),
@@ -743,7 +744,7 @@ class _AddReportPageState extends State<AddReportPage> {
                   output: "-",
                   systemStock: "-",
                   realStock: "-",
-                  differenceStock: "${-(realStocks?[cardIndex] ?? 0)}",
+                  differenceStock: "-",
                 ),
               } else ...{
                 generateProductCard(
@@ -851,6 +852,10 @@ class _AddReportPageState extends State<AddReportPage> {
                                         realStocks?.removeRange(
                                             (productItems?.length ?? 1) - 1,
                                             (realStocks?.length ?? 1) - 1);
+
+                                        realStocks = realStocks
+                                            ?.map((e) => e == -1 ? 0 : e)
+                                            .toList();
 
                                         context
                                             .read<StockOpnameDetailCubit>()

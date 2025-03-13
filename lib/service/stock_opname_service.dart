@@ -133,12 +133,14 @@ class StockOpnameService {
       headers: header,
     );
 
+    print(
+        "isi response adalah ${response.body} dengan status ${response.statusCode}");
     if ((response.statusCode) >= 200 && (response.statusCode) <= 299) {
       var data = jsonDecode(response.body);
       return data['message'];
     } else {
       var data = jsonDecode(response.body);
-      throw Exception("${data['errors']}");
+      throw Exception("${data['message']}");
     }
   }
 }
