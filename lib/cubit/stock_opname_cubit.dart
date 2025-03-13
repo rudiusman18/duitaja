@@ -16,11 +16,19 @@ class StockOpnameCubit extends Cubit<StockOpnameState> {
     required String token,
     required String page,
     required String limit,
+    String? search = "",
+    String? startDate = "",
+    String? endDate = "",
   }) async {
     emit(StockOpnameLoading());
     try {
-      var data = await StockOpnameService()
-          .getAllStockOpname(token: token, page: page, limit: limit);
+      var data = await StockOpnameService().getAllStockOpname(
+          token: token,
+          page: page,
+          limit: limit,
+          search: search,
+          startDate: startDate,
+          endDate: endDate);
       emit(StockOpnameSuccess(data));
     } catch (e) {
       if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {

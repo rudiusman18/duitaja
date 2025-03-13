@@ -15,8 +15,12 @@ class StockOpnameService {
     required String token,
     required String page,
     required String limit,
+    String? search = "",
+    String? startDate = "",
+    String? endDate = "",
   }) async {
-    var url = Uri.parse("$baseURL/stock-opname?page=$page&limit=$limit");
+    var url = Uri.parse(
+        "$baseURL/stock-opname?page=$page&limit=$limit&search=$search&start_date=$startDate&end_date=$endDate");
 
     var header = {
       'Authorization': 'Bearer $token',
@@ -24,6 +28,9 @@ class StockOpnameService {
     };
 
     var response = await http.get(url, headers: header);
+
+    print(
+        "url yang diakses adalah: $url dengan isi response adalah ${response.body}");
 
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       var data = jsonDecode(response.body);

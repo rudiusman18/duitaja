@@ -6,6 +6,7 @@ import 'package:duitaja/cubit/auth_cubit.dart';
 import 'package:duitaja/cubit/cashier_cubit.dart';
 import 'package:duitaja/cubit/sale_cubit.dart';
 import 'package:duitaja/model/detail_sale_history_model.dart';
+import 'package:duitaja/model/order_model.dart';
 import 'package:duitaja/shared/theme.dart';
 import 'package:duitaja/shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ class SaleDetailPage extends StatefulWidget {
 
 class _SaleDetailPageState extends State<SaleDetailPage> {
   DetailSaleHistoryModel detailSaleHistoryModel = DetailSaleHistoryModel();
+  List<Purchaseds>? purchaseds = [];
 
   @override
   void initState() {
@@ -264,7 +266,41 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        OrderModel orderModel = OrderModel(
+                          customerName:
+                              detailSaleHistoryModel.payload?.customerName,
+                          phoneNumber:
+                              detailSaleHistoryModel.payload?.phoneNumber == ""
+                                  ? null
+                                  : detailSaleHistoryModel.payload?.phoneNumber,
+                          notes: detailSaleHistoryModel.payload?.note == ""
+                              ? null
+                              : detailSaleHistoryModel.payload?.note,
+                          paymentMethod: "CASH",
+                          status: true,
+                          subTotal: detailSaleHistoryModel.payload?.subTotal,
+                          tax: detailSaleHistoryModel.payload?.tax,
+                          taxId: context
+                              .read<CashierCubit>()
+                              .taxModel
+                              .payload
+                              ?.first
+                              .id,
+                          invoiceNumber:
+                              "#${detailSaleHistoryModel.payload?.invoiceNumber}",
+                          purchaseds: purchaseds,
+                        );
+
+                        context
+                            .read<CashierCubit>()
+                            .saveOrder(orderModel: orderModel);
+                        Navigator.pushNamed(context, '/main-page/payment-page')
+                            .then((value) {
+                          context.read<CashierCubit>().tax(
+                              token: context.read<AuthCubit>().token ?? "");
+                        });
+                      },
                       child: Text(
                         "Bayar Sekarang",
                         style: inter.copyWith(fontSize: 12),
@@ -330,6 +366,23 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
 
               if (state is DetailSaleSuccess) {
                 detailSaleHistoryModel = state.detailData;
+                var purchasedsItem = detailSaleHistoryModel
+                    .payload?.invoiceItems
+                    ?.map((item) => Purchaseds(
+                        id: item.sellableProductId,
+                        promoAmount: item.promo == null
+                            ? item.price
+                            : ((item.promo?.type == 'PERCENT'
+                                ? (((item.price ?? 0) *
+                                    (item.promo?.amount ?? 0) ~/
+                                    100))
+                                : (item.promoAmount ?? 0))),
+                        qty: item.quantity,
+                        promoId: item.promo?.id,
+                        priceAll: item.resultTotal))
+                    .toList();
+
+                purchaseds?.addAll(purchasedsItem ?? []);
               }
             },
             builder: (context, state) {

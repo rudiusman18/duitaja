@@ -38,10 +38,15 @@ class Payload {
   String? _id;
   String? _title;
   String? _changerName;
+  String? _createdAt;
   List<Items>? _items;
 
   Payload(
-      {String? id, String? title, String? changerName, List<Items>? items}) {
+      {String? id,
+      String? title,
+      String? changerName,
+      String? createdAt,
+      List<Items>? items}) {
     if (id != null) {
       _id = id;
     }
@@ -50,6 +55,9 @@ class Payload {
     }
     if (changerName != null) {
       _changerName = changerName;
+    }
+    if (createdAt != null) {
+      _createdAt = createdAt;
     }
     if (items != null) {
       _items = items;
@@ -62,6 +70,8 @@ class Payload {
   set title(String? title) => _title = title;
   String? get changerName => _changerName;
   set changerName(String? changerName) => _changerName = changerName;
+  String? get createdAt => _createdAt;
+  set createdAt(String? createdAt) => _createdAt = createdAt;
   List<Items>? get items => _items;
   set items(List<Items>? items) => _items = items;
 
@@ -69,6 +79,7 @@ class Payload {
     _id = json['id'];
     _title = json['title'];
     _changerName = json['changer_name'];
+    _createdAt = json['created_at'];
     if (json['items'] != null) {
       _items = <Items>[];
       json['items'].forEach((v) {
@@ -82,6 +93,7 @@ class Payload {
     data['id'] = _id;
     data['title'] = _title;
     data['changer_name'] = _changerName;
+    data['created_at'] = _createdAt;
     if (_items != null) {
       data['items'] = _items!.map((v) => v.toJson()).toList();
     }

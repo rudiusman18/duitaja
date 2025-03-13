@@ -131,7 +131,8 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
       required String differenceStock,
     }) {
       var dateTime = DateTime.parse(expiredDate).toLocal();
-      var date = "${dateTime.year}-${dateTime.month}-${dateTime.day}";
+      var date =
+          "${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}";
       return Container(
         margin: const EdgeInsets.symmetric(
           horizontal: 20,
@@ -214,11 +215,11 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
 
         if (state is StockOpnameDetailSuccess) {
           detailStockOpnameModel = state.detailStockOpnameData;
-          // dateTime = DateTime.parse(
-          //         detailStockOpnameModel?.payload?.items!.first.toString() ??
-          //             "")
-          //     .toLocal();
-          // date = "${dateTime?.year}-${dateTime?.month}-${dateTime?.day}";
+          var dateTime =
+              DateTime.parse(detailStockOpnameModel?.payload?.createdAt ?? "")
+                  .toLocal();
+          date =
+              "${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}";
         }
       },
       builder: (context, state) {

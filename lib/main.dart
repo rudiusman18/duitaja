@@ -142,7 +142,8 @@ class MainApp extends StatelessWidget {
               );
             case '/main-page/stock-opname-page':
               return PageTransition(
-                child: const StockOpnamePage(),
+                child: StockOpnamePage(
+                ),
                 type: PageTransitionType.rightToLeft,
               );
             case '/main-page/stock-opname-page/report-detail-page':

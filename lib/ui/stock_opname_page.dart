@@ -27,6 +27,12 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
   TextEditingController titleTextField = TextEditingController(text: "");
   TextEditingController amountTextField = TextEditingController(text: "");
 
+  // ignore: no_leading_underscores_for_local_identifiers
+  List<DateTime?> _rangeDatePickerValueWithDefaultValue = [
+    DateTime.now(),
+  ];
+  bool resetDate = true;
+
   String _getValueText(
     CalendarDatePicker2Type datePickerType,
     List<DateTime?> values,
@@ -157,10 +163,12 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
 
   @override
   Widget build(BuildContext context) {
-    // ignore: no_leading_underscores_for_local_identifiers
-    List<DateTime?> _rangeDatePickerValueWithDefaultValue = [
-      DateTime.now(),
-    ];
+    DateTime currentDate = DateTime.now();
+    DateTime date30DaysBefore = currentDate.subtract(const Duration(days: 30));
+    DateTime date90DaysBefore = currentDate.subtract(const Duration(days: 90));
+    String formattedDateNow = DateFormat('yyyy-MM-dd').format(currentDate);
+    String formattedDate30 = DateFormat('yyyy-MM-dd').format(date30DaysBefore);
+    String formattedDate90 = DateFormat('yyyy-MM-dd').format(date90DaysBefore);
 
     // ignore: no_leading_underscores_for_local_identifiers
     Widget _buildRangeDatePickerWithValue() {
@@ -182,35 +190,114 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
         disabledDayTextStyle:
             const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
       );
-      return SizedBox(
-        width: 375,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 10),
-            CalendarDatePicker2(
-              config: config,
-              value: _rangeDatePickerValueWithDefaultValue,
-              onValueChanged: (dates) =>
-                  setState(() => _rangeDatePickerValueWithDefaultValue = dates),
-            ),
-            const SizedBox(height: 10),
-            Row(
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter2) {
+          return SizedBox(
+            width: 375,
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Selection(s):  '),
-                const SizedBox(width: 10),
-                Text(
-                  _getValueText(
-                    config.calendarType,
-                    _rangeDatePickerValueWithDefaultValue,
+                const SizedBox(height: 10),
+                CalendarDatePicker2(
+                  config: config,
+                  value: _rangeDatePickerValueWithDefaultValue,
+                  onValueChanged: (dates) {
+                    stateSetter2(() {
+                      _rangeDatePickerValueWithDefaultValue = dates;
+                    });
+                  },
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  margin: const EdgeInsets.only(
+                    right: 10,
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        setState(() {
+                          resetDate = false;
+                        });
+                        var data = context.read<FilterCubit>().state;
+                        if (data['Tanggal'] != null) {
+                          data['Tanggal'] = [
+                            '${DateFormat('yyyy-MM-dd').format(_rangeDatePickerValueWithDefaultValue.first ?? DateTime.now())} - ${DateFormat('yyyy-MM-dd').format(_rangeDatePickerValueWithDefaultValue.last ?? DateTime.now())}'
+                          ];
+                        } else {
+                          data.addAll({
+                            'Tanggal': [
+                              '${DateFormat('yyyy-MM-dd').format(_rangeDatePickerValueWithDefaultValue.first ?? DateTime.now())} - ${DateFormat('yyyy-MM-dd').format(_rangeDatePickerValueWithDefaultValue.last ?? DateTime.now())}'
+                            ]
+                          });
+                        }
+                        context.read<FilterCubit>().setFilter(data);
+                        stockOpnameModel = null;
+                        stockOpnamePage = 1;
+                        context.read<StockOpnameCubit>().allStockOpnameData(
+                              token: context.read<AuthCubit>().token ?? "",
+                              page: "$stockOpnamePage",
+                              limit: '100',
+                              startDate: resetDate
+                                  ? ''
+                                  : context
+                                              .read<FilterCubit>()
+                                              .state['Tanggal']
+                                              ?.first
+                                              .toLowerCase() ==
+                                          '30 hari terakhir'
+                                      ? formattedDate30
+                                      : context
+                                                  .read<FilterCubit>()
+                                                  .state['Tanggal']
+                                                  ?.first
+                                                  .toLowerCase() ==
+                                              '90 hari terakhir'
+                                          ? formattedDate90
+                                          : DateFormat('yyyy-MM-dd').format(
+                                              _rangeDatePickerValueWithDefaultValue
+                                                      .first ??
+                                                  DateTime.now()),
+                              endDate: resetDate
+                                  ? ''
+                                  : context
+                                              .read<FilterCubit>()
+                                              .state['Tanggal']
+                                              ?.first
+                                              .toLowerCase() ==
+                                          '30 hari terakhir'
+                                      ? formattedDateNow
+                                      : context
+                                                  .read<FilterCubit>()
+                                                  .state['Tanggal']
+                                                  ?.first
+                                                  .toLowerCase() ==
+                                              '90 hari terakhir'
+                                          ? formattedDateNow
+                                          : DateFormat('yyyy-MM-dd').format(
+                                              _rangeDatePickerValueWithDefaultValue
+                                                      .last ??
+                                                  DateTime.now()),
+                              search: searchTextField.text,
+                            );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                      ),
+                      child: Text(
+                        "Simpan",
+                        style: inter,
+                      ),
+                    ),
                   ),
                 ),
+                const SizedBox(height: 10),
               ],
             ),
-            const SizedBox(height: 25),
-          ],
-        ),
+          );
+        },
       );
     }
 
@@ -237,10 +324,13 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
                 ),
                 child: GestureDetector(
                   onTap: () {
-                    context.read<PreviousPageCubit>().setPage(0);
-                    context.read<PageCubit>().setPage(0);
-
                     var filterList = context.read<FilterCubit>().state;
+
+                    if (groupName == 'Tanggal') {
+                      setState(() {
+                        resetDate = false;
+                      });
+                    }
 
                     if (context
                             .read<FilterCubit>()
@@ -250,10 +340,18 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
                       filterList[groupName]!.remove(name);
                       if (filterList[groupName]!.isEmpty) {
                         filterList.remove(groupName);
+                        if (groupName == 'Tanggal') {
+                          setState(() {
+                            resetDate = true;
+
+                            _rangeDatePickerValueWithDefaultValue = [
+                              DateTime.now()
+                            ];
+                          });
+                        }
                       }
                     } else {
-                      if (name.toLowerCase() != "semua tanggal" &&
-                          name.toLowerCase() != "30 hari terakhir" &&
+                      if (name.toLowerCase() != "30 hari terakhir" &&
                           name.toLowerCase() != "90 hari terakhir" &&
                           groupName.toLowerCase() == "tanggal") {
                         showModalBottomSheet(
@@ -268,13 +366,69 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
                               return _buildRangeDatePickerWithValue();
                             });
                       } else {
+                        filterList.putIfAbsent(groupName, () => []).clear();
                         filterList.putIfAbsent(groupName, () => []).add(name);
+                        if (groupName == 'Tanggal') {
+                          _rangeDatePickerValueWithDefaultValue = [
+                            DateTime.now(),
+                          ];
+                        }
                       }
                     }
-
-                    context.read<FilterCubit>().setFilter(filterList);
-                    setState(() {});
-                    stateSetter(() {});
+                    if (name.toLowerCase() != 'atur tanggal') {
+                      context.read<FilterCubit>().setFilter(filterList);
+                      setState(() {});
+                      stateSetter(() {});
+                      Navigator.pop(context);
+                      stockOpnameModel = null;
+                      stockOpnamePage = 1;
+                      context.read<StockOpnameCubit>().allStockOpnameData(
+                            token: context.read<AuthCubit>().token ?? "",
+                            page: "$stockOpnamePage",
+                            limit: '100',
+                            startDate: resetDate
+                                ? ''
+                                : context
+                                            .read<FilterCubit>()
+                                            .state['Tanggal']
+                                            ?.first
+                                            .toLowerCase() ==
+                                        '30 hari terakhir'
+                                    ? formattedDate30
+                                    : context
+                                                .read<FilterCubit>()
+                                                .state['Tanggal']
+                                                ?.first
+                                                .toLowerCase() ==
+                                            '90 hari terakhir'
+                                        ? formattedDate90
+                                        : DateFormat('yyyy-MM-dd').format(
+                                            _rangeDatePickerValueWithDefaultValue
+                                                    .first ??
+                                                DateTime.now()),
+                            endDate: resetDate
+                                ? ''
+                                : context
+                                            .read<FilterCubit>()
+                                            .state['Tanggal']
+                                            ?.first
+                                            .toLowerCase() ==
+                                        '30 hari terakhir'
+                                    ? formattedDateNow
+                                    : context
+                                                .read<FilterCubit>()
+                                                .state['Tanggal']
+                                                ?.first
+                                                .toLowerCase() ==
+                                            '90 hari terakhir'
+                                        ? formattedDateNow
+                                        : DateFormat('yyyy-MM-dd').format(
+                                            _rangeDatePickerValueWithDefaultValue
+                                                    .last ??
+                                                DateTime.now()),
+                            search: searchTextField.text,
+                          );
+                    }
                   },
                   child: Row(
                     children: [
@@ -385,44 +539,23 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
                 Expanded(
                   child: ListView(
                     children: [
-                      if (title.toLowerCase() == "nama") ...{
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Sayid",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Bambang",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Sandi",
-                          context: context,
-                        ),
-                      } else ...{
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Semua Tanggal",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "30 Hari Terakhir",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "90 Hari Terakhir",
-                          context: context,
-                        ),
-                        generateFilterContentItem(
-                          groupName: title,
-                          name: "Atur Tanggal",
-                          context: context,
-                        ),
-                      },
+                      generateFilterContentItem(
+                        groupName: title,
+                        name: "30 Hari Terakhir",
+                        context: context,
+                      ),
+                      generateFilterContentItem(
+                        groupName: title,
+                        name: "90 Hari Terakhir",
+                        context: context,
+                      ),
+                      generateFilterContentItem(
+                        groupName: title,
+                        name: _rangeDatePickerValueWithDefaultValue.length == 1
+                            ? "Atur Tanggal"
+                            : "${DateFormat('yyyy-MM-dd').format(_rangeDatePickerValueWithDefaultValue.first ?? DateTime.now())} - ${DateFormat('yyyy-MM-dd').format(_rangeDatePickerValueWithDefaultValue.last ?? DateTime.now())}",
+                        context: context,
+                      ),
                     ],
                   ),
                 ),
@@ -495,6 +628,110 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
         ),
         child: TextFormField(
           controller: searchTextField,
+          textInputAction: TextInputAction.search,
+          onChanged: (text) {
+            if (text == "") {
+              stockOpnameModel = null;
+              stockOpnamePage = 1;
+              context.read<StockOpnameCubit>().allStockOpnameData(
+                    token: context.read<AuthCubit>().token ?? "",
+                    page: "$stockOpnamePage",
+                    limit: '100',
+                    startDate: resetDate
+                        ? ''
+                        : context
+                                    .read<FilterCubit>()
+                                    .state['Tanggal']
+                                    ?.first
+                                    .toLowerCase() ==
+                                '30 hari terakhir'
+                            ? formattedDate30
+                            : context
+                                        .read<FilterCubit>()
+                                        .state['Tanggal']
+                                        ?.first
+                                        .toLowerCase() ==
+                                    '90 hari terakhir'
+                                ? formattedDate90
+                                : DateFormat('yyyy-MM-dd').format(
+                                    _rangeDatePickerValueWithDefaultValue
+                                            .first ??
+                                        DateTime.now()),
+                    endDate: resetDate
+                        ? ''
+                        : context
+                                    .read<FilterCubit>()
+                                    .state['Tanggal']
+                                    ?.first
+                                    .toLowerCase() ==
+                                '30 hari terakhir'
+                            ? formattedDateNow
+                            : context
+                                        .read<FilterCubit>()
+                                        .state['Tanggal']
+                                        ?.first
+                                        .toLowerCase() ==
+                                    '90 hari terakhir'
+                                ? formattedDateNow
+                                : DateFormat('yyyy-MM-dd').format(
+                                    _rangeDatePickerValueWithDefaultValue
+                                            .last ??
+                                        DateTime.now()),
+                    search: text,
+                  );
+            }
+          },
+          onEditingComplete: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+            stockOpnameModel = null;
+            stockOpnamePage = 1;
+            stockOpnameModel = null;
+            stockOpnamePage = 1;
+            context.read<StockOpnameCubit>().allStockOpnameData(
+                  token: context.read<AuthCubit>().token ?? "",
+                  page: "$stockOpnamePage",
+                  limit: '100',
+                  startDate: resetDate
+                      ? ''
+                      : context
+                                  .read<FilterCubit>()
+                                  .state['Tanggal']
+                                  ?.first
+                                  .toLowerCase() ==
+                              '30 hari terakhir'
+                          ? formattedDate30
+                          : context
+                                      .read<FilterCubit>()
+                                      .state['Tanggal']
+                                      ?.first
+                                      .toLowerCase() ==
+                                  '90 hari terakhir'
+                              ? formattedDate90
+                              : DateFormat('yyyy-MM-dd').format(
+                                  _rangeDatePickerValueWithDefaultValue.first ??
+                                      DateTime.now()),
+                  endDate: resetDate
+                      ? ''
+                      : context
+                                  .read<FilterCubit>()
+                                  .state['Tanggal']
+                                  ?.first
+                                  .toLowerCase() ==
+                              '30 hari terakhir'
+                          ? formattedDateNow
+                          : context
+                                      .read<FilterCubit>()
+                                      .state['Tanggal']
+                                      ?.first
+                                      .toLowerCase() ==
+                                  '90 hari terakhir'
+                              ? formattedDateNow
+                              : DateFormat('yyyy-MM-dd').format(
+                                  _rangeDatePickerValueWithDefaultValue.last ??
+                                      DateTime.now()),
+                  search: searchTextField.text,
+                );
+          },
           decoration: InputDecoration(
             suffixIcon: Icon(
               Icons.search,
@@ -781,11 +1018,27 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
                         if (context.read<FilterCubit>().state.isNotEmpty) ...{
                           GestureDetector(
                             onTap: () {
+                              _rangeDatePickerValueWithDefaultValue = [
+                                DateTime.now(),
+                              ];
                               var filterList =
                                   context.read<FilterCubit>().state;
                               filterList.clear();
                               context.read<FilterCubit>().setFilter(filterList);
-                              setState(() {});
+                              stockOpnameModel = null;
+                              stockOpnamePage = 1;
+                              setState(() {
+                                resetDate = true;
+                              });
+                              context
+                                  .read<StockOpnameCubit>()
+                                  .allStockOpnameData(
+                                    token:
+                                        context.read<AuthCubit>().token ?? "",
+                                    page: '$stockOpnamePage',
+                                    limit: '100',
+                                    search: searchTextField.text,
+                                  );
                             },
                             child: Container(
                               padding: const EdgeInsets.all(
@@ -807,21 +1060,21 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
                             width: 24,
                           ),
                         },
-                        generateFilterItem(
-                          groupName: "Nama",
-                          title: (context
-                                      .read<FilterCubit>()
-                                      .state["Nama"]
-                                      ?.isEmpty ??
-                                  true)
-                              ? "Nama"
-                              : "${context.read<FilterCubit>().state["Nama"]}"
-                                  .replaceAll("[", "")
-                                  .replaceAll("]", ""),
-                        ),
-                        const SizedBox(
-                          width: 24,
-                        ),
+                        // generateFilterItem(
+                        //   groupName: "Nama",
+                        //   title: (context
+                        //               .read<FilterCubit>()
+                        //               .state["Nama"]
+                        //               ?.isEmpty ??
+                        //           true)
+                        //       ? "Nama"
+                        //       : "${context.read<FilterCubit>().state["Nama"]}"
+                        //           .replaceAll("[", "")
+                        //           .replaceAll("]", ""),
+                        // ),
+                        // const SizedBox(
+                        //   width: 24,
+                        // ),
                         generateFilterItem(
                           groupName: "Tanggal",
                           title: (context
@@ -878,7 +1131,8 @@ class _StockOpnamePageState extends State<StockOpnamePage> {
                                   index: index,
                                   judul:
                                       "${stockOpnameModel?.payload?[index].title}",
-                                  numberOfStock: "tidak ada stok",
+                                  numberOfStock:
+                                      "${stockOpnameModel?.payload?[index].amount} Produk",
                                   createdAt:
                                       "${stockOpnameModel?.payload?[index].createdAt}",
                                   changerName:

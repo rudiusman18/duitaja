@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_getters_setters
+// ignore_for_file: prefer_collection_literals, unnecessary_getters_setters
 
 class StockOpnameModel {
   String? _message;
@@ -51,30 +51,30 @@ class StockOpnameModel {
 class Payload {
   String? _id;
   String? _title;
-  String? _companyId;
-  String? _createdAt;
   String? _changerName;
+  int? _amount;
+  String? _createdAt;
 
   Payload(
       {String? id,
       String? title,
-      String? companyId,
-      String? createdAt,
-      String? changerName}) {
+      String? changerName,
+      int? amount,
+      String? createdAt}) {
     if (id != null) {
       _id = id;
     }
     if (title != null) {
       _title = title;
     }
-    if (companyId != null) {
-      _companyId = companyId;
+    if (changerName != null) {
+      _changerName = changerName;
+    }
+    if (amount != null) {
+      _amount = amount;
     }
     if (createdAt != null) {
       _createdAt = createdAt;
-    }
-    if (changerName != null) {
-      _changerName = changerName;
     }
   }
 
@@ -82,28 +82,28 @@ class Payload {
   set id(String? id) => _id = id;
   String? get title => _title;
   set title(String? title) => _title = title;
-  String? get companyId => _companyId;
-  set companyId(String? companyId) => _companyId = companyId;
-  String? get createdAt => _createdAt;
-  set createdAt(String? createdAt) => _createdAt = createdAt;
   String? get changerName => _changerName;
   set changerName(String? changerName) => _changerName = changerName;
+  int? get amount => _amount;
+  set amount(int? amount) => _amount = amount;
+  String? get createdAt => _createdAt;
+  set createdAt(String? createdAt) => _createdAt = createdAt;
 
   Payload.fromJson(Map<String, dynamic> json) {
     _id = json['id'];
     _title = json['title'];
-    _companyId = json['company_id'];
-    _createdAt = json['created_at'];
     _changerName = json['changer_name'];
+    _amount = json['amount'];
+    _createdAt = json['created_at'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['id'] = _id;
     data['title'] = _title;
-    data['company_id'] = _companyId;
-    data['created_at'] = _createdAt;
     data['changer_name'] = _changerName;
+    data['amount'] = _amount;
+    data['created_at'] = _createdAt;
     return data;
   }
 }
@@ -143,7 +143,6 @@ class Meta {
     }
   }
 
-  // ignore: unnecessary_getters_setters
   int? get page => _page;
   set page(int? page) => _page = page;
   int? get limit => _limit;
@@ -167,7 +166,7 @@ class Meta {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['page'] = _page;
     data['limit'] = _limit;
     data['total_data'] = _totalData;
