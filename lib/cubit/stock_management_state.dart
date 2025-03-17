@@ -10,8 +10,8 @@ final class StockManagementInitial extends StockManagementState {
   StockManagementInitial() : super(StockManagementModel());
 }
 
-final class StockManagementReset extends StockManagementState{
-   StockManagementReset() : super(StockManagementModel());
+final class StockManagementReset extends StockManagementState {
+  StockManagementReset() : super(StockManagementModel());
 }
 
 final class StockManagementLoading extends StockManagementState {
@@ -55,3 +55,27 @@ final class DetailStockManagementFailure extends DetailStockManagementState {
 
 final class DetailStockManagementTokenExpired
     extends DetailStockManagementState {}
+
+@immutable
+final class DetailStockManagementPromoState {}
+
+final class DetailStockManagementPromoInitial
+    extends DetailStockManagementPromoState {}
+
+final class DetailStockManagementPromoLoading
+    extends DetailStockManagementPromoState {}
+
+final class DetailStockManagementPromoSuccess
+    extends DetailStockManagementPromoState {
+  final PromoModel promoModel;
+  DetailStockManagementPromoSuccess(this.promoModel);
+}
+
+final class DetailStockManagementPromoFailure
+    extends DetailStockManagementPromoState {
+  final String error;
+  DetailStockManagementPromoFailure(this.error);
+}
+
+final class DetailStockManagementPromoTokenExpired
+    extends DetailStockManagementPromoState {}

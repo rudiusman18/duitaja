@@ -903,6 +903,8 @@ class _DetailOrderPageState extends State<DetailOrderPage> {
                           purchaseds: purchaseds,
                         );
 
+                        
+
                         context
                             .read<CashierCubit>()
                             .saveOrder(orderModel: orderModel);

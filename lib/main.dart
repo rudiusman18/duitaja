@@ -1,5 +1,6 @@
 import 'package:duitaja/cubit/add_report_cubit.dart';
 import 'package:duitaja/cubit/cashier_cubit.dart';
+import 'package:duitaja/cubit/dashboard_cubit.dart';
 import 'package:duitaja/cubit/filter_cubit.dart';
 import 'package:duitaja/cubit/home_cubit.dart';
 import 'package:duitaja/cubit/auth_cubit.dart';
@@ -99,6 +100,12 @@ class MainApp extends StatelessWidget {
         BlocProvider(
           create: (context) => StockOpnameAvailableItemCubit(),
         ),
+        BlocProvider(
+          create: (context) => DashboardCubit(),
+        ),
+        BlocProvider(
+          create: (context) => DetailStockManagementPromoCubit(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -142,8 +149,7 @@ class MainApp extends StatelessWidget {
               );
             case '/main-page/stock-opname-page':
               return PageTransition(
-                child: StockOpnamePage(
-                ),
+                child: const StockOpnamePage(),
                 type: PageTransitionType.rightToLeft,
               );
             case '/main-page/stock-opname-page/report-detail-page':

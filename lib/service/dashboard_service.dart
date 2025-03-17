@@ -1,12 +1,14 @@
 import 'dart:convert';
 
-import 'package:duitaja/model/promo_model.dart';
+import 'package:duitaja/model/dashboard_model.dart';
 import 'package:duitaja/shared/utils.dart';
 import 'package:http/http.dart' as http;
 
-class PromoService {
-  Future<PromoModel> getAllPromos({required String token}) async {
-    var url = Uri.parse("$baseURL/promos?limit=999999999");
+class DashboardService {
+  Future<DashboardModel> getDashboard({
+    required String token,
+  }) async {
+    var url = Uri.parse("$baseURL/dashboard/sales-resume");
     var header = {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
@@ -15,8 +17,8 @@ class PromoService {
 
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       var data = jsonDecode(response.body);
-      PromoModel promoModel = PromoModel.fromJson(data);
-      return promoModel;
+      DashboardModel dashboardModel = DashboardModel.fromJson(data);
+      return dashboardModel;
     } else {
       var data = jsonDecode(response.body);
       throw Exception(

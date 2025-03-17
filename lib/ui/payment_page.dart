@@ -222,7 +222,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   Center(
                     child: Text(
                       formatCurrency(int.parse(
-                          "${(orderModel.subTotal ?? 0) + (orderModel.tax ?? 0)}")),
+                          "${(orderModel.subTotal ?? 0) + (orderModel.tax ?? 0).toInt()}")),
                       style: inter.copyWith(
                         fontSize: 20,
                         color: primaryColor,

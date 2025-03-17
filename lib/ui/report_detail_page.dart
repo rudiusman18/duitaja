@@ -285,30 +285,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                           margin: const EdgeInsets.symmetric(
                             horizontal: 20,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 164,
-                                ),
-                                child: searchSetup(),
-                              ),
-                              GestureDetector(
-                                onTap: () {},
-                                child: Container(
-                                  padding: const EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: greyColor1,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(Icons.lock_outline),
-                                ),
-                              )
-                            ],
-                          ),
+                          child: searchSetup(),
                         ),
                         const SizedBox(
                           height: 12,

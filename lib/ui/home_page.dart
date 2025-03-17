@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:duitaja/cubit/auth_cubit.dart';
+import 'package:duitaja/cubit/dashboard_cubit.dart';
 import 'package:duitaja/cubit/filter_cubit.dart';
 import 'package:duitaja/cubit/home_cubit.dart';
 import 'package:duitaja/cubit/sale_cubit.dart';
@@ -29,6 +30,10 @@ class _HomePageState extends State<HomePage> {
           endDate: "",
           search: "",
           inStatus: "",
+        );
+
+    context.read<DashboardCubit>().dashboardData(
+          token: context.read<AuthCubit>().token ?? "",
         );
     super.initState();
   }
@@ -363,273 +368,300 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    return BlocConsumer<SaleCubit, SaleState>(
-      listener: (context, state) {
-        if (state is SaleTokenExpired) {
-          context.read<AuthCubit>().logout();
-          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-        }
-        if (state is SaleReset) {
-          context.read<SaleCubit>().allSalesHistory(
-                token: context.read<AuthCubit>().token ?? "",
-                page: "1",
-                limit: "15",
-                status: "",
-                startDate: "",
-                endDate: "",
-                search: "",
-                inStatus: "",
-              );
-        }
-      },
-      builder: (context, state) {
-        return BlocBuilder<ReportCardIndexCubit, int>(
+    return BlocBuilder<DashboardCubit, DashboardState>(
+      builder: (dashboardContext, dashboardState) {
+        return BlocConsumer<SaleCubit, SaleState>(
+          listener: (context, state) {
+            if (state is SaleTokenExpired) {
+              context.read<AuthCubit>().logout();
+              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+            }
+            if (state is SaleReset) {
+              context.read<SaleCubit>().allSalesHistory(
+                    token: context.read<AuthCubit>().token ?? "",
+                    page: "1",
+                    limit: "15",
+                    status: "",
+                    startDate: "",
+                    endDate: "",
+                    search: "",
+                    inStatus: "",
+                  );
+            }
+          },
           builder: (context, state) {
-            return Scaffold(
-              backgroundColor: primaryColor,
-              body: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white.withAlpha(99),
-                      primaryColor,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.centerRight,
-                  ),
-                ),
-                child: SafeArea(
-                  child: Column(
-                    children: [
-                      profile(),
-                      const SizedBox(
-                        height: 24,
+            return BlocBuilder<ReportCardIndexCubit, int>(
+              builder: (context, state) {
+                return Scaffold(
+                  backgroundColor: primaryColor,
+                  body: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withAlpha(99),
+                          primaryColor,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.centerRight,
                       ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 35,
-                        ),
-                        child: CarouselSlider(
-                          options: CarouselOptions(
-                            initialPage:
+                    ),
+                    child: SafeArea(
+                      child: Column(
+                        children: [
+                          profile(),
+                          const SizedBox(
+                            height: 24,
+                          ),
+                          Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 35,
+                            ),
+                            child: CarouselSlider(
+                              options: CarouselOptions(
+                                initialPage:
+                                    context.read<ReportCardIndexCubit>().state,
+                                height: 150,
+                                viewportFraction: 1,
+                                autoPlay: true,
+                                onPageChanged: (index, reason) {
+                                  context
+                                      .read<ReportCardIndexCubit>()
+                                      .setIndex(index);
+                                },
+                              ),
+                              items: [
+                                // reportCard(
+                                //   title: "SandiAI",
+                                //   message:
+                                //       "50 juta diperlukan untuk mengelola operasional dan pembayaran hutang di bulan depan.",
+                                //   subtitle: "+20% dari bulan lalu",
+                                //   asset: "assets/Magicpen.png",
+                                // ),
+                                reportCard(
+                                  title: "Penjualan bulan ini",
+                                  message: formatCurrency(
+                                      (dashboardState is DashboardSuccess)
+                                          ? (dashboardState.dashboardModel
+                                                  .payload?.salesThisMonth ??
+                                              0)
+                                          : 0),
+                                  subtitle: "-",
+                                  asset: "assets/calendar-check.png",
+                                ),
+                                reportCard(
+                                  title: "Penjualan hari ini",
+                                  message: formatCurrency(
+                                      (dashboardState is DashboardSuccess)
+                                          ? (dashboardState.dashboardModel
+                                                  .payload?.salesThisDay ??
+                                              0)
+                                          : 0),
+                                  subtitle: "-",
+                                  asset: "assets/Chart_alt_fill.png",
+                                ),
+                                reportCard(
+                                  title: "Produk terlaris hari ini",
+                                  message: (dashboardState is DashboardSuccess)
+                                      ? ((dashboardState.dashboardModel.payload
+                                                      ?.bestSellingProduct ??
+                                                  "") ==
+                                              ""
+                                          ? "-"
+                                          : (dashboardState
+                                                  .dashboardModel
+                                                  .payload
+                                                  ?.bestSellingProduct ??
+                                              ""))
+                                      : "",
+                                  subtitle: "-",
+                                  asset: "assets/subtract.png",
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          DotsIndicator(
+                            dotsCount: 3,
+                            position:
                                 context.read<ReportCardIndexCubit>().state,
-                            height: 150,
-                            viewportFraction: 1,
-                            autoPlay: true,
-                            onPageChanged: (index, reason) {
-                              context
-                                  .read<ReportCardIndexCubit>()
-                                  .setIndex(index);
-                            },
-                          ),
-                          items: [
-                            reportCard(
-                              title: "SandiAI",
-                              message:
-                                  "50 juta diperlukan untuk mengelola operasional dan pembayaran hutang di bulan depan.",
-                              subtitle: "+20% dari bulan lalu",
-                              asset: "assets/Magicpen.png",
-                            ),
-                            reportCard(
-                              title: "Penjualan bulan ini",
-                              message: formatCurrency(45231),
-                              subtitle: "+20% dari bulan lalu",
-                              asset: "assets/calendar-check.png",
-                            ),
-                            reportCard(
-                              title: "Penjualan hari ini",
-                              message: formatCurrency(45231),
-                              subtitle: "+20% dari bulan lalu",
-                              asset: "assets/Chart_alt_fill.png",
-                            ),
-                            reportCard(
-                              title: "Produk terlaris hari ini",
-                              message: "Nasi Goreng",
-                              subtitle: "150 Terjual",
-                              asset: "assets/subtract.png",
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      DotsIndicator(
-                        dotsCount: 4,
-                        position: context.read<ReportCardIndexCubit>().state,
-                        decorator: DotsDecorator(
-                          activeColor: cardColor2,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 21,
-                      ),
-                      Expanded(
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(
-                                15,
-                              ),
+                            decorator: DotsDecorator(
+                              activeColor: cardColor2,
+                              color: Colors.white,
                             ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                height: 11,
-                              ),
-                              Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 35,
-                                ),
-                                child: Center(
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          context
-                                              .read<DetailSaleCubit>()
-                                              .clearSalesHistory();
-                                          Navigator.pushNamed(
-                                            context,
-                                            '/main-page/cashier-page',
-                                          );
-                                        },
-                                        child: generateMenuItem(
-                                          title: "Kasir",
-                                          image: "assets/cart.png",
-                                        ),
-                                      ),
-                                      generateMenuItem(
-                                        title: "E-Commerce",
-                                        image: "assets/chart.png",
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {
-                                          context
-                                              .read<FilterCubit>()
-                                              .setFilter({});
-                                          Navigator.pushNamed(context,
-                                              '/main-page/stock-opname-page');
-                                        },
-                                        child: generateMenuItem(
-                                          title: "Stok Opname",
-                                          image: "assets/desk.png",
-                                        ),
-                                      ),
-                                    ],
+                          const SizedBox(
+                            height: 21,
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(
+                                    15,
                                   ),
                                 ),
                               ),
-                              const SizedBox(
-                                height: 40,
-                              ),
-                              Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                ),
-                                child: Text(
-                                  "Riwayat Penjualan",
-                                  style: inter.copyWith(
-                                    fontWeight: medium,
-                                    fontSize: 13,
-                                    color: greyColor,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    height: 11,
                                   ),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 16,
-                              ),
-                              Expanded(
-                                child: RefreshIndicator(
-                                  color: primaryColor,
-                                  onRefresh: () {
-                                    context
-                                        .read<SaleCubit>()
-                                        .resetSalesHistory();
-                                    return context
-                                        .read<SaleCubit>()
-                                        .allSalesHistory(
-                                            token: context
-                                                    .read<AuthCubit>()
-                                                    .token ??
-                                                "",
-                                            page: "1",
-                                            limit: "15",
-                                            status: "",
-                                            startDate: "",
-                                            endDate: "",
-                                            search: "",
-                                            inStatus: "");
-                                  },
-                                  child: state is SaleLoading
-                                      ? Center(
-                                          child: CircularProgressIndicator(
-                                            color: primaryColor,
+                                  Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 35,
+                                    ),
+                                    child: Center(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              context
+                                                  .read<DetailSaleCubit>()
+                                                  .clearSalesHistory();
+                                              Navigator.pushNamed(
+                                                context,
+                                                '/main-page/cashier-page',
+                                              );
+                                            },
+                                            child: generateMenuItem(
+                                              title: "Kasir",
+                                              image: "assets/cart.png",
+                                            ),
                                           ),
-                                        )
-                                      : (context
-                                                      .read<SaleCubit>()
-                                                      .saleHistoryModel
-                                                      .payload
-                                                      ?.isEmpty ??
-                                                  true) ||
-                                              state is SaleFailure
+                                          generateMenuItem(
+                                            title: "E-Commerce",
+                                            image: "assets/chart.png",
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              context
+                                                  .read<FilterCubit>()
+                                                  .setFilter({});
+                                              Navigator.pushNamed(context,
+                                                  '/main-page/stock-opname-page');
+                                            },
+                                            child: generateMenuItem(
+                                              title: "Stok Opname",
+                                              image: "assets/desk.png",
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 40,
+                                  ),
+                                  Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                    ),
+                                    child: Text(
+                                      "Riwayat Penjualan",
+                                      style: inter.copyWith(
+                                        fontWeight: medium,
+                                        fontSize: 13,
+                                        color: greyColor,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                  Expanded(
+                                    child: RefreshIndicator(
+                                      color: primaryColor,
+                                      onRefresh: () {
+                                        context
+                                            .read<SaleCubit>()
+                                            .resetSalesHistory();
+                                        return context
+                                            .read<SaleCubit>()
+                                            .allSalesHistory(
+                                                token: context
+                                                        .read<AuthCubit>()
+                                                        .token ??
+                                                    "",
+                                                page: "1",
+                                                limit: "15",
+                                                status: "",
+                                                startDate: "",
+                                                endDate: "",
+                                                search: "",
+                                                inStatus: "");
+                                      },
+                                      child: state is SaleLoading
                                           ? Center(
-                                              child: Text(
-                                                "Data tidak ditemukan",
-                                                style: inter,
+                                              child: CircularProgressIndicator(
+                                                color: primaryColor,
                                               ),
                                             )
-                                          : ListView(
-                                              children: [
-                                                for (var i = 0;
-                                                    i <
-                                                        (context
+                                          : (context
+                                                          .read<SaleCubit>()
+                                                          .saleHistoryModel
+                                                          .payload
+                                                          ?.isEmpty ??
+                                                      true) ||
+                                                  state is SaleFailure
+                                              ? Center(
+                                                  child: Text(
+                                                    "Data tidak ditemukan",
+                                                    style: inter,
+                                                  ),
+                                                )
+                                              : ListView(
+                                                  children: [
+                                                    for (var i = 0;
+                                                        i <
+                                                            (context
+                                                                    .read<
+                                                                        SaleCubit>()
+                                                                    .saleHistoryModel
+                                                                    .payload
+                                                                    ?.length ??
+                                                                0);
+                                                        i++)
+                                                      generateSalesHistoryItem(
+                                                        payloadId:
+                                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].id}",
+                                                        buyerName:
+                                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].customerName}",
+                                                        orderAmount:
+                                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].countSale}",
+                                                        date:
+                                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].createdAt?.split(" ").first}",
+                                                        time:
+                                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].createdAt?.split(" ").last}",
+                                                        status:
+                                                            "${context.read<SaleCubit>().saleHistoryModel.payload?[i].status}",
+                                                        price: formatCurrency(context
                                                                 .read<
                                                                     SaleCubit>()
                                                                 .saleHistoryModel
-                                                                .payload
-                                                                ?.length ??
-                                                            0);
-                                                    i++)
-                                                  generateSalesHistoryItem(
-                                                    payloadId:
-                                                        "${context.read<SaleCubit>().saleHistoryModel.payload?[i].id}",
-                                                    buyerName:
-                                                        "${context.read<SaleCubit>().saleHistoryModel.payload?[i].customerName}",
-                                                    orderAmount:
-                                                        "${context.read<SaleCubit>().saleHistoryModel.payload?[i].countSale}",
-                                                    date:
-                                                        "${context.read<SaleCubit>().saleHistoryModel.payload?[i].createdAt?.split(" ").first}",
-                                                    time:
-                                                        "${context.read<SaleCubit>().saleHistoryModel.payload?[i].createdAt?.split(" ").last}",
-                                                    status:
-                                                        "${context.read<SaleCubit>().saleHistoryModel.payload?[i].status}",
-                                                    price: formatCurrency(context
-                                                            .read<SaleCubit>()
-                                                            .saleHistoryModel
-                                                            .payload?[i]
-                                                            .subTotal ??
-                                                        0),
-                                                  ),
-                                              ],
-                                            ),
-                                ),
+                                                                .payload?[i]
+                                                                .subTotal ??
+                                                            0),
+                                                      ),
+                                                  ],
+                                                ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             );
           },
         );

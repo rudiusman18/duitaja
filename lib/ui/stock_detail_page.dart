@@ -4,6 +4,7 @@ import 'package:duitaja/cubit/product_cubit.dart';
 import 'package:duitaja/cubit/stock_management_cubit.dart';
 import 'package:duitaja/model/detail_stock_management_model.dart';
 import 'package:duitaja/model/product_model.dart';
+import 'package:duitaja/model/promo_model.dart';
 import 'package:duitaja/shared/loading.dart';
 import 'package:duitaja/shared/modal_alert.dart';
 import 'package:duitaja/shared/theme.dart';
@@ -23,6 +24,8 @@ class _StockDetailPageState extends State<StockDetailPage> {
 
   TextEditingController descriptionTextField = TextEditingController(text: "");
 
+  String? selectedPromo;
+
   // ignore: unused_field, non_constant_identifier_names
   final _controller = ValueNotifier<bool>(false);
 
@@ -38,6 +41,114 @@ class _StockDetailPageState extends State<StockDetailPage> {
   @override
   Widget build(BuildContext context) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    showPromoModalBottomSheet() {
+      return showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        isScrollControlled:
+            true, // To make the sheet adjustable for larger content
+        builder: (context) {
+          PromoModel? promoModel;
+          context
+              .read<DetailStockManagementPromoCubit>()
+              .allPromo(token: context.read<AuthCubit>().token ?? "");
+
+          return BlocConsumer<DetailStockManagementPromoCubit,
+              DetailStockManagementPromoState>(
+            listener: (context, state) {
+              if (state is DetailStockManagementPromoSuccess) {
+                promoModel = state.promoModel;
+              }
+
+              if (state is DetailStockManagementPromoTokenExpired) {
+                context.read<AuthCubit>().logout();
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/', (route) => false);
+              }
+            },
+            builder: (context, state) {
+              return SizedBox(
+                height: MediaQuery.sizeOf(context).height * 0.4,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(
+                      height: 12,
+                    ),
+                    Container(
+                      width: 150,
+                      height: 5,
+                      margin: const EdgeInsets.only(bottom: 13),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                        ),
+                        child: ListView(
+                          children: [
+                            for (var index = 0;
+                                index < (promoModel?.payload?.length ?? 0);
+                                index++) ...{
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    // productItems?[cardIndex] =
+                                    //     stockOpnameAvailableItemModel
+                                    //             ?.payload?[index] ??
+                                    //         availableItem.Payload();
+                                    selectedPromo =
+                                        "${promoModel?.payload?[index].name}||${promoModel?.payload?[index].id}";
+                                    Navigator.pop(context);
+                                  });
+                                },
+                                child: Container(
+                                  color: Colors.white,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                            promoModel?.payload?[index].name ??
+                                                ""),
+                                      ),
+                                      const Icon(
+                                        Icons.chevron_right,
+                                        color: Colors.black,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Divider(
+                                height: 1,
+                                color: greyColor2,
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                            }
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
 
     Widget generateInfoItem({
       required String title,
@@ -91,6 +202,8 @@ class _StockDetailPageState extends State<StockDetailPage> {
           detailStockManagementModel = state.detailStockManagementModel;
           _controller.value =
               state.detailStockManagementModel.payload?.status ?? false;
+          descriptionTextField.text =
+              detailStockManagementModel?.payload?.description ?? "";
         }
 
         if (state is DetailStockManagementUpdateSuccess) {
@@ -306,20 +419,28 @@ class _StockDetailPageState extends State<StockDetailPage> {
                     ),
                     generateInfoItem(
                       title: "Promo:",
-                      action: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            detailStockManagementModel?.payload?.promoId ?? "-",
-                            style: inter.copyWith(
-                              fontWeight: light,
-                              color: greyColor2,
+                      action: GestureDetector(
+                        onTap: () {
+                          showPromoModalBottomSheet();
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              selectedPromo == null
+                                  ? (detailStockManagementModel
+                                          ?.payload?.promo?.name ??
+                                      "Pilih Promo")
+                                  : "${selectedPromo?.split("||").first}",
+                              style: inter.copyWith(
+                                fontWeight: light,
+                              ),
                             ),
-                          ),
-                          // const Icon(
-                          //   Icons.keyboard_arrow_down_rounded,
-                          // ),
-                        ],
+                            const Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     generateInfoItem(
@@ -396,9 +517,10 @@ class _StockDetailPageState extends State<StockDetailPage> {
                                                   detailStockManagementModel
                                                           ?.payload?.id ??
                                                       "",
-                                              promoId:
-                                                  detailStockManagementModel
-                                                      ?.payload?.promoId,
+                                              promoId: selectedPromo == null
+                                                  ? detailStockManagementModel
+                                                      ?.payload?.id
+                                                  : "${selectedPromo?.split("||").last}",
                                               description:
                                                   descriptionTextField.text,
                                               status: "${_controller.value}",

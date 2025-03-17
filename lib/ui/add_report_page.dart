@@ -20,11 +20,12 @@ class AddReportPage extends StatefulWidget {
 
 class _AddReportPageState extends State<AddReportPage> {
   int cardIndex = 0;
-  bool isLocked = false;
+  // bool isLocked = false;
   TextEditingController searchTextField = TextEditingController(text: "");
 
   List<availableItem.Payload>? productItems;
   List<int>? realStocks;
+  List<bool>? isLocked;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +34,7 @@ class _AddReportPageState extends State<AddReportPage> {
     if (cardIndex + 1 >
         int.parse(context.read<AddReportCubit>().state['amount'])) {
       cardIndex -= 1;
+      isLocked?.removeAt(cardIndex);
       realStocks?.removeAt(cardIndex);
       productItems?.removeAt(cardIndex);
       int.parse(context.read<AddReportCubit>().state['amount']) - 1;
@@ -43,11 +45,13 @@ class _AddReportPageState extends State<AddReportPage> {
         index++) {
       if (productItems?.isEmpty ?? true) {
         productItems = [availableItem.Payload()];
+        isLocked = [false];
         realStocks = [-1];
       } else {
         if (((productItems?.length ?? 0) - 1) < cardIndex) {
           productItems?.add(availableItem.Payload());
           realStocks?.add(-1);
+          isLocked?.add(false);
         }
       }
     }
@@ -129,9 +133,7 @@ class _AddReportPageState extends State<AddReportPage> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                            stockOpnameAvailableItemModel
-                                                    ?.payload?[index].name ??
-                                                ""),
+                                            "${stockOpnameAvailableItemModel?.payload?[index].name ?? ""} (${stockOpnameAvailableItemModel?.payload?[index].expiredDate ?? ""})"),
                                       ),
                                       const Icon(
                                         Icons.chevron_right,
@@ -247,7 +249,9 @@ class _AddReportPageState extends State<AddReportPage> {
               title: "Produk :",
               value: GestureDetector(
                 onTap: () {
-                  _showBottomSheet(context);
+                  if ((isLocked?[cardIndex] ?? false) == false) {
+                    _showBottomSheet(context);
+                  }
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -324,7 +328,8 @@ class _AddReportPageState extends State<AddReportPage> {
             ),
             generateProductCardItem(
               title: "Stok Asli :",
-              value: productItems?[cardIndex].name == null
+              value: productItems?[cardIndex].name == null ||
+                      (isLocked?[cardIndex] ?? false)
                   ? Text(
                       "${realStocks?[cardIndex] == -1 ? 0 : realStocks?[cardIndex]}",
                       style: inter,
@@ -657,28 +662,31 @@ class _AddReportPageState extends State<AddReportPage> {
                 ),
                 child: Row(
                   children: [
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: 164,
-                      ),
-                      child: searchSetup(),
-                    ),
+                    // ConstrainedBox(
+                    //   constraints: const BoxConstraints(
+                    //     maxWidth: 164,
+                    //   ),
+                    //   child: searchSetup(),
+                    // ),
                     const Spacer(),
                     GestureDetector(
                       onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => ModalAlert(
-                            title: "",
-                            message:
-                                "Apakah anda ingin ${isLocked ? "membuka kunci" : "mengunci"} produk “${productItems?[cardIndex].name ?? "-"}\"?",
-                            completion: () {
-                              setState(() {
-                                isLocked = !isLocked;
-                              });
-                            },
-                          ),
-                        );
+                        if (productItems?[cardIndex].name != null) {
+                          showDialog(
+                            context: context,
+                            builder: (context) => ModalAlert(
+                              title: "",
+                              message:
+                                  "Apakah anda ingin ${(isLocked?[cardIndex] ?? false) ? "membuka kunci" : "mengunci"} produk “${productItems?[cardIndex].name ?? "-"}\"?",
+                              completion: () {
+                                setState(() {
+                                  isLocked?[cardIndex] =
+                                      !(isLocked?[cardIndex] ?? false);
+                                });
+                              },
+                            ),
+                          );
+                        }
                       },
                       child: Container(
                         padding: const EdgeInsets.all(5),
@@ -688,8 +696,9 @@ class _AddReportPageState extends State<AddReportPage> {
                           ),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Icon(
-                            isLocked ? Icons.lock_outline : Icons.lock_open),
+                        child: Icon((isLocked?[cardIndex] ?? false)
+                            ? Icons.lock_outline
+                            : Icons.lock_open),
                       ),
                     ),
                     const SizedBox(
@@ -697,24 +706,23 @@ class _AddReportPageState extends State<AddReportPage> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => ModalAlert(
-                            title: "",
-                            message:
-                                "Apakah anda ingin membuang produk “${productItems?[cardIndex].name}” dari Stok Opname?",
-                            completion: () {
-                              setState(() {
-                                productItems?.removeAt(cardIndex);
-                                realStocks?.removeAt(cardIndex);
-                                context.read<AddReportCubit>().decreaseStock(
-                                    context.read<AddReportCubit>().state);
-                                cardIndex =
-                                    cardIndex > 0 ? cardIndex - 1 : cardIndex;
-                              });
-                            },
-                          ),
-                        );
+                        if (productItems?[cardIndex].name != null) {
+                          if ((isLocked?[cardIndex] ?? false) == true) {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  "Produk anda saat ini sedang dalam status terkunci. Silahkan buka kunci untuk melanjutkan aktifitas ini.",
+                                  style: inter,
+                                ),
+                                backgroundColor: Colors.red,
+                                duration: const Duration(
+                                  seconds: 5,
+                                ),
+                              ),
+                            );
+                          }
+                        }
                       },
                       child: Container(
                         padding: const EdgeInsets.all(5),
