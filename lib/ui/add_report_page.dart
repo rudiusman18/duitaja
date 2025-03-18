@@ -721,6 +721,29 @@ class _AddReportPageState extends State<AddReportPage> {
                                 ),
                               ),
                             );
+                          } else {
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return ModalAlert(
+                                      title: "",
+                                      message:
+                                          "Apakah anda yakin ingin membuang ${productItems?[cardIndex].name}?",
+                                      completion: () {
+                                        setState(() {
+                                          productItems?.removeAt(cardIndex);
+                                          realStocks?.removeAt(cardIndex);
+                                          context
+                                              .read<AddReportCubit>()
+                                              .decreaseStock(context
+                                                  .read<AddReportCubit>()
+                                                  .state);
+                                          cardIndex = cardIndex > 0
+                                              ? cardIndex - 1
+                                              : cardIndex;
+                                        });
+                                      });
+                                });
                           }
                         }
                       },
