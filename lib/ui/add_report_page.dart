@@ -124,6 +124,7 @@ class _AddReportPageState extends State<AddReportPage> {
                                         stockOpnameAvailableItemModel
                                                 ?.payload?[index] ??
                                             availableItem.Payload();
+
                                     Navigator.pop(context);
                                   });
                                 },
@@ -331,7 +332,7 @@ class _AddReportPageState extends State<AddReportPage> {
               value: productItems?[cardIndex].name == null ||
                       (isLocked?[cardIndex] ?? false)
                   ? Text(
-                      "${realStocks?[cardIndex] == -1 ? 0 : realStocks?[cardIndex]}",
+                      "${realStocks?[cardIndex] == -1 ? systemStock : realStocks?[cardIndex]}",
                       style: inter,
                       textAlign: TextAlign.end,
                     )
@@ -367,7 +368,7 @@ class _AddReportPageState extends State<AddReportPage> {
                           width: 15,
                         ),
                         Text(
-                          "${realStocks?[cardIndex] == -1 ? 0 : realStocks?[cardIndex]}",
+                          "${realStocks?[cardIndex] == -1 ? systemStock : realStocks?[cardIndex]}",
                           style: inter,
                         ),
                         const SizedBox(

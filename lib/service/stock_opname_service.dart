@@ -1,6 +1,7 @@
 // ignore_for_file: library_prefixes
 
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:duitaja/model/detail_stock_opname_model.dart';
 import 'package:duitaja/model/stock_opname_available_items_model.dart';
@@ -106,7 +107,7 @@ class StockOpnameService {
             "stock_id": productDatas[index].id,
             "system_quantity": productDatas[index].quantity,
             "name": productDatas[index].name,
-            "type": "makanan"
+            "type": productDatas[index].type
           }
         ];
       } else {
@@ -115,7 +116,7 @@ class StockOpnameService {
           "stock_id": productDatas[index].id,
           "system_quantity": productDatas[index].quantity,
           "name": productDatas[index].name,
-          "type": "makanan"
+          "type": productDatas[index].type
         });
       }
     }
