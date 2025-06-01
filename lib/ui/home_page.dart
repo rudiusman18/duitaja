@@ -98,105 +98,111 @@ class _HomePageState extends State<HomePage> {
       required String message,
       required String subtitle,
     }) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            // margin: const EdgeInsets.symmetric(
-            //   horizontal: 35,
-            // ),
-            padding: const EdgeInsets.symmetric(
-              vertical: 17,
-              horizontal: 20,
-            ),
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  spreadRadius: 5,
-                  blurRadius: 7,
-                  offset: const Offset(0, 3), // changes position of shadow
-                ),
-              ],
-              borderRadius: BorderRadius.circular(6),
-              image: const DecorationImage(
-                image: AssetImage(
-                  'assets/card-background.png',
-                ),
-                fit: BoxFit.cover,
+      return Container(
+        margin: const EdgeInsets.symmetric(
+          horizontal: 35,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              // margin: const EdgeInsets.symmetric(
+              //   horizontal: 35,
+              // ),
+              padding: const EdgeInsets.symmetric(
+                vertical: 17,
+                horizontal: 20,
               ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(title,
-                            style: inter.copyWith(
-                              fontSize: 16,
-                              color: Colors.white,
-                            )),
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      Text(
-                        message,
-                        style: inter.copyWith(
-                          fontSize: title.toLowerCase() == "sandiai" ? 14 : 25,
-                          fontWeight: title.toLowerCase() == "sandiai"
-                              ? regular
-                              : semiBold,
-                          color: Colors.white,
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    spreadRadius: 5,
+                    blurRadius: 7,
+                    offset: const Offset(0, 3), // changes position of shadow
+                  ),
+                ],
+                borderRadius: BorderRadius.circular(6),
+                image: const DecorationImage(
+                  image: AssetImage(
+                    'assets/card-background.png',
+                  ),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(title,
+                              style: inter.copyWith(
+                                fontSize: 16,
+                                color: Colors.white,
+                              )),
                         ),
-                        softWrap: true,
-                      ),
-                      if (title.toLowerCase() != "sandiai") ...{
                         const SizedBox(
                           height: 16,
                         ),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            subtitle,
-                            style: inter.copyWith(
-                              fontSize: 13,
-                              fontWeight: medium,
-                              color: Colors.white,
+                        Text(
+                          message,
+                          style: inter.copyWith(
+                            fontSize:
+                                title.toLowerCase() == "sandiai" ? 14 : 25,
+                            fontWeight: title.toLowerCase() == "sandiai"
+                                ? regular
+                                : semiBold,
+                            color: Colors.white,
+                          ),
+                          softWrap: true,
+                        ),
+                        if (title.toLowerCase() != "sandiai") ...{
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              subtitle,
+                              style: inter.copyWith(
+                                fontSize: 13,
+                                fontWeight: medium,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                        ),
-                      } else ...{
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            "Selengkapnya",
-                            style: inter.copyWith(
-                              fontSize: 10,
-                              color: Colors.white,
-                              decoration: TextDecoration.underline,
+                        } else ...{
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              "Selengkapnya",
+                              style: inter.copyWith(
+                                fontSize: 10,
+                                color: Colors.white,
+                                decoration: TextDecoration.underline,
+                              ),
+                              textAlign: TextAlign.right,
                             ),
-                            textAlign: TextAlign.right,
                           ),
-                        ),
-                      },
-                    ],
+                        },
+                      ],
+                    ),
                   ),
-                ),
-                Image.asset(
-                  asset,
-                  width: 24,
-                  height: 24,
-                ),
-              ],
+                  Image.asset(
+                    asset,
+                    width: 24,
+                    height: 24,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
@@ -414,7 +420,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           Container(
                             margin: const EdgeInsets.symmetric(
-                              horizontal: 35,
+                              horizontal: 0,
                             ),
                             child: CarouselSlider(
                               options: CarouselOptions(
