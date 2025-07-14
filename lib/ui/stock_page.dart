@@ -359,18 +359,21 @@ class _StockPageState extends State<StockPage> {
                   child: ListView(
                     children: [
                       if (title.toLowerCase() == "kategori") ...{
-                        for (var index = 0;
+                        for (int index = 0;
                             index <
-                                (stockManagementModel?.payload?.length ?? 0);
+                                (context
+                                        .read<IndexCashierFilterCubit>()
+                                        .cashierCategoryModel
+                                        .payload
+                                        ?.length ??
+                                    0);
                             index++) ...{
                           generateFilterContentItem(
                               groupName: title,
                               name:
-                                  stockManagementModel?.payload?[index].name ??
-                                      "",
+                                  "${context.read<IndexCashierFilterCubit>().cashierCategoryModel.payload?[index].name}",
                               context: context,
-                              id: stockManagementModel?.payload?[index].id ??
-                                  ''),
+                              id: "${context.read<IndexCashierFilterCubit>().cashierCategoryModel.payload?[index].id}"),
                         },
                       } else ...{
                         generateFilterContentItem(

@@ -451,7 +451,8 @@ class _HomePageState extends State<HomePage> {
                                                   .payload?.salesThisMonth ??
                                               0)
                                           : 0),
-                                  subtitle: "-",
+                                  subtitle:
+                                      "${(dashboardState is DashboardSuccess) ? (dashboardState.dashboardModel.payload?.lastMonthComparison ?? 0) : 0}%",
                                   asset: "assets/calendar-check.png",
                                 ),
                                 reportCard(
@@ -462,7 +463,8 @@ class _HomePageState extends State<HomePage> {
                                                   .payload?.salesThisDay ??
                                               0)
                                           : 0),
-                                  subtitle: "-",
+                                  subtitle:
+                                      "${(dashboardState is DashboardSuccess) ? (dashboardState.dashboardModel.payload?.lastDayComparison ?? 0) : 0}%",
                                   asset: "assets/Chart_alt_fill.png",
                                 ),
                                 reportCard(
@@ -478,8 +480,9 @@ class _HomePageState extends State<HomePage> {
                                                   .payload
                                                   ?.bestSellingProduct ??
                                               ""))
-                                      : "",
-                                  subtitle: "-",
+                                      : "-",
+                                  subtitle:
+                                      "${(dashboardState is DashboardSuccess) ? (dashboardState.dashboardModel.payload?.numberOfBestSellingProductSold ?? 0) : 0} Produk",
                                   asset: "assets/subtract.png",
                                 ),
                               ],
