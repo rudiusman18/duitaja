@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:duitaja/cubit/auth_cubit.dart';
+import 'package:duitaja/cubit/setting_cubit.dart';
 import 'package:duitaja/shared/modal_alert.dart';
 import 'package:duitaja/shared/theme.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,6 @@ class _SettingPageState extends State<SettingPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     initCamera();
     super.initState();
   }
@@ -229,6 +229,9 @@ class _SettingPageState extends State<SettingPage> {
       if (pickedFile != null) {
         setState(() {
           _selectedImage = File(pickedFile.path);
+          context.read<UploadProfilePictCubit>().uploadProfilePict(
+              token: context.read<AuthCubit>().token ?? "",
+              imageFile: _selectedImage ?? File(""));
         });
       } else {
         print('No image selected.');
@@ -286,8 +289,23 @@ class _SettingPageState extends State<SettingPage> {
                   height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    image: _selectedImage != null
-                        ? DecorationImage(image: FileImage(_selectedImage!))
+                    image: context
+                                .read<AuthCubit>()
+                                .profileModel
+                                .payload
+                                ?.profile
+                                ?.company
+                                ?.image !=
+                            null
+                        ? DecorationImage(
+                            image: NetworkImage(context
+                                    .read<AuthCubit>()
+                                    .profileModel
+                                    .payload
+                                    ?.profile
+                                    ?.company
+                                    ?.image ??
+                                ""))
                         : const DecorationImage(
                             image: AssetImage(
                               'assets/default picture.png',
@@ -395,183 +413,200 @@ class _SettingPageState extends State<SettingPage> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: primaryColor,
-        title: Text(
-          "Pengaturan",
-          style: inter.copyWith(
-            fontWeight: medium,
-            fontSize: 20,
-          ),
-        ),
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        return BlocConsumer<UploadProfilePictCubit, UploadProfilePictState>(
+          listener: (context, state) {
+            if (state is UploadProfilePictTokenExpired) {
+              context.read<AuthCubit>().logout();
+              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+            }
+            if (state is UploadProfilePictSuccess) {
+              context.read<AuthCubit>().autoLogin();
+            }
           },
-          child: const Icon(
-            Icons.chevron_left,
-            size: 24,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(
-            height: 40,
-          ),
-          profilePicture(),
-          const SizedBox(
-            height: 47,
-          ),
-          settings(),
-          if (selectedIndex == 0) ...{
-            Expanded(
-              child: ListView(
-                children: const [
-                  UserInfo(),
-                ],
-              ),
-            ),
-          } else if (selectedIndex == 1) ...{
-            Expanded(
-              child: ListView(
-                children: const [
-                  BusinessInfo(),
-                ],
-              ),
-            ),
-          } else if (selectedIndex == 2) ...{
-            const SizedBox(
-              height: 50,
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Total Karyawan : 14",
-                        style: inter.copyWith(
-                          color: greyColor2,
-                          fontWeight: semiBold,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          modalDialog();
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: primaryColor,
-                            borderRadius: BorderRadius.circular(
-                              5,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 32,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Nama",
-                        style: inter.copyWith(
-                          fontWeight: semiBold,
-                        ),
-                      ),
-                      Text(
-                        "Status",
-                        style: inter.copyWith(
-                          fontWeight: semiBold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Expanded(
-              child: ListView(
-                children: const [
-                  Employee(),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      8,
-                    ),
+          builder: (context, state) {
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: primaryColor,
+                title: Text(
+                  "Pengaturan",
+                  style: inter.copyWith(
+                    fontWeight: medium,
+                    fontSize: 20,
                   ),
                 ),
-                onPressed: () {},
-                child: Text(
-                  "Simpan Data Karyawan",
-                  style: inter,
+                leading: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Icon(
+                    Icons.chevron_left,
+                    size: 24,
+                  ),
                 ),
+                centerTitle: true,
               ),
-            ),
-          } else ...{
-            Container(
-              margin: const EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
-              child: Column(
+              body: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(
-                    height: 50,
+                    height: 40,
                   ),
-                  Text(
-                    "Aktivitas Terbaru",
-                    style: inter.copyWith(
-                      color: greyColor2,
-                      fontWeight: semiBold,
-                    ),
-                  ),
+                  profilePicture(),
                   const SizedBox(
-                    height: 32,
+                    height: 47,
                   ),
+                  settings(),
+                  if (selectedIndex == 0) ...{
+                    Expanded(
+                      child: ListView(
+                        children: const [
+                          UserInfo(),
+                        ],
+                      ),
+                    ),
+                  } else if (selectedIndex == 1) ...{
+                    Expanded(
+                      child: ListView(
+                        children: const [
+                          BusinessInfo(),
+                        ],
+                      ),
+                    ),
+                  } else if (selectedIndex == 2) ...{
+                    const SizedBox(
+                      height: 50,
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Total Karyawan : 14",
+                                style: inter.copyWith(
+                                  color: greyColor2,
+                                  fontWeight: semiBold,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  modalDialog();
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: primaryColor,
+                                    borderRadius: BorderRadius.circular(
+                                      5,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 32,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Nama",
+                                style: inter.copyWith(
+                                  fontWeight: semiBold,
+                                ),
+                              ),
+                              Text(
+                                "Status",
+                                style: inter.copyWith(
+                                  fontWeight: semiBold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Expanded(
+                      child: ListView(
+                        children: const [
+                          Employee(),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                      ),
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              8,
+                            ),
+                          ),
+                        ),
+                        onPressed: () {},
+                        child: Text(
+                          "Simpan Data Karyawan",
+                          style: inter,
+                        ),
+                      ),
+                    ),
+                  } else ...{
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(
+                            height: 50,
+                          ),
+                          Text(
+                            "Aktivitas Terbaru",
+                            style: inter.copyWith(
+                              color: greyColor2,
+                              fontWeight: semiBold,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 32,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView(
+                        children: const [
+                          ActivityLog(),
+                        ],
+                      ),
+                    ),
+                  }
                 ],
               ),
-            ),
-            Expanded(
-              child: ListView(
-                children: const [
-                  ActivityLog(),
-                ],
-              ),
-            ),
-          }
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }

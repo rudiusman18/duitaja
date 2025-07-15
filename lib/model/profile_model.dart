@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_collection_literals
-
 class ProfileModel {
   String? message;
   Payload? payload;
@@ -13,7 +11,7 @@ class ProfileModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['message'] = message;
     if (payload != null) {
       data['payload'] = payload!.toJson();
@@ -33,7 +31,7 @@ class Payload {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     if (profile != null) {
       data['profile'] = profile!.toJson();
     }
@@ -49,7 +47,8 @@ class Profile {
   String? email;
   String? companyId;
   String? companyName;
-  bool? isEmployee;
+  String? rolePermission;
+  Company? company;
 
   Profile(
       {this.id,
@@ -59,7 +58,8 @@ class Profile {
       this.email,
       this.companyId,
       this.companyName,
-      this.isEmployee});
+      this.rolePermission,
+      this.company});
 
   Profile.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -69,11 +69,13 @@ class Profile {
     email = json['email'];
     companyId = json['company_id'];
     companyName = json['company_name'];
-    isEmployee = json['is_employee'];
+    rolePermission = json['role_permission'];
+    company =
+        json['company'] != null ? Company.fromJson(json['company']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['username'] = username;
     data['phone'] = phone;
@@ -81,7 +83,55 @@ class Profile {
     data['email'] = email;
     data['company_id'] = companyId;
     data['company_name'] = companyName;
-    data['is_employee'] = isEmployee;
+    data['role_permission'] = rolePermission;
+    if (company != null) {
+      data['company'] = company!.toJson();
+    }
+    return data;
+  }
+}
+
+class Company {
+  String? id;
+  String? code;
+  String? name;
+  String? address;
+  String? image;
+  String? typeAccount;
+  String? createdAt;
+  String? updatedAt;
+
+  Company(
+      {this.id,
+      this.code,
+      this.name,
+      this.address,
+      this.image,
+      this.typeAccount,
+      this.createdAt,
+      this.updatedAt});
+
+  Company.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    code = json['code'];
+    name = json['name'];
+    address = json['address'];
+    image = json['image'];
+    typeAccount = json['type_account'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['code'] = code;
+    data['name'] = name;
+    data['address'] = address;
+    data['image'] = image;
+    data['type_account'] = typeAccount;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
     return data;
   }
 }

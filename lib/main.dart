@@ -7,6 +7,7 @@ import 'package:duitaja/cubit/auth_cubit.dart';
 import 'package:duitaja/cubit/page_cubit.dart';
 import 'package:duitaja/cubit/product_cubit.dart';
 import 'package:duitaja/cubit/sale_cubit.dart';
+import 'package:duitaja/cubit/setting_cubit.dart';
 import 'package:duitaja/cubit/stock_management_cubit.dart';
 import 'package:duitaja/cubit/stock_opname_cubit.dart';
 import 'package:duitaja/ui/add_report_page.dart';
@@ -105,6 +106,9 @@ class MainApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => DetailStockManagementPromoCubit(),
+        ),
+        BlocProvider(
+          create: (context) => UploadProfilePictCubit(),
         ),
       ],
       child: MaterialApp(
