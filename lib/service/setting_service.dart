@@ -42,6 +42,8 @@ class SettingService {
   //   }
   // }
 
+  Future<void> getLogActivity({required String token})async{}
+
   Future<void> uploadProfilePicture({
     required String token,
     required File imageFile,
