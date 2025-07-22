@@ -843,9 +843,8 @@ class _StockPageState extends State<StockPage> {
                               children: [
                                 for (var index = 0;
                                     index <
-                                        (stockManagementModel!
-                                                .payload?.length ??
-                                            0);
+                                        (stockManagementModel?.payload ?? [])
+                                            .length;
                                     index++) ...{
                                   generateListProductItem(
                                     product: ProductModel(

@@ -14,6 +14,8 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController emailTextField = TextEditingController(text: "");
   TextEditingController passwordTextField = TextEditingController(text: "");
 
+  bool _obscureText = true;
+
   @override
   void initState() {
     context.read<AuthCubit>().autoLogin();
@@ -40,7 +42,9 @@ class _LoginPageState extends State<LoginPage> {
           ),
           TextFormField(
             controller: controller,
-            obscureText: title.toLowerCase() == "password" ? true : false,
+            obscureText: title.toLowerCase() == "password" && _obscureText
+                ? true
+                : false,
             decoration: InputDecoration(
               hintText: title,
               border: OutlineInputBorder(
@@ -54,6 +58,17 @@ class _LoginPageState extends State<LoginPage> {
                   width: 2.0,
                 ),
               ),
+              suffixIcon: title.toLowerCase() == "password"
+                  ? GestureDetector(
+                      onTap: () {
+                        _obscureText = !_obscureText;
+                        setState(() {});
+                      },
+                      child: Icon(_obscureText
+                          ? Icons.visibility
+                          : Icons.visibility_off))
+                  : const SizedBox(),
+              suffixIconColor: Colors.grey,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 12,

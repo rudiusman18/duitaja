@@ -29,7 +29,7 @@ class AuthService {
       return loginModel;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception("${data['errors']}");
+      throw ("${data['message'] ?? "Login Gagal"}");
     }
   }
 

@@ -445,24 +445,22 @@ class _HomePageState extends State<HomePage> {
                                 // ),
                                 reportCard(
                                   title: "Penjualan bulan ini",
-                                  message: formatCurrency(
-                                      (dashboardState is DashboardSuccess)
-                                          ? (dashboardState.dashboardModel
-                                                  .payload?.salesThisMonth ??
-                                              0)
-                                          : 0),
+                                  message: formatCurrency((dashboardState
+                                          is DashboardSuccess)
+                                      ? int.parse(
+                                          "${dashboardState.dashboardModel.payload?.salesThisMonth ?? 0}")
+                                      : 0),
                                   subtitle:
                                       "${(dashboardState is DashboardSuccess) ? (dashboardState.dashboardModel.payload?.lastMonthComparison ?? 0) : 0}%",
                                   asset: "assets/calendar-check.png",
                                 ),
                                 reportCard(
                                   title: "Penjualan hari ini",
-                                  message: formatCurrency(
-                                      (dashboardState is DashboardSuccess)
-                                          ? (dashboardState.dashboardModel
-                                                  .payload?.salesThisDay ??
-                                              0)
-                                          : 0),
+                                  message: formatCurrency((dashboardState
+                                          is DashboardSuccess)
+                                      ? int.parse(
+                                          "${dashboardState.dashboardModel.payload?.salesThisDay ?? 0}")
+                                      : 0),
                                   subtitle:
                                       "${(dashboardState is DashboardSuccess) ? (dashboardState.dashboardModel.payload?.lastDayComparison ?? 0) : 0}%",
                                   asset: "assets/Chart_alt_fill.png",
@@ -543,9 +541,28 @@ class _HomePageState extends State<HomePage> {
                                               image: "assets/cart.png",
                                             ),
                                           ),
-                                          generateMenuItem(
-                                            title: "E-Commerce",
-                                            image: "assets/chart.png",
+                                          GestureDetector(
+                                            onTap: () {
+                                              ScaffoldMessenger.of(context)
+                                                  .hideCurrentSnackBar();
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    "Fitur belum tersedia",
+                                                    style: inter,
+                                                  ),
+                                                  backgroundColor: Colors.black,
+                                                  duration: const Duration(
+                                                    seconds: 5,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: generateMenuItem(
+                                              title: "E-Commerce",
+                                              image: "assets/chart.png",
+                                            ),
                                           ),
                                           GestureDetector(
                                             onTap: () {

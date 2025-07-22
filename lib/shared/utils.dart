@@ -51,4 +51,4 @@ int generateSixDigitNumber() {
 
 // Base URL yang digunakan untuk mengambil data
 var baseURL =
-    "https://be-duitaja-dev.cahayateknik.works/api/v1";//"https://be-duitaja.cahayateknik.works/api/v1";
+    "https://be-duitaja-dev.cahayateknik.works/api/v1"; // https://staging-duitaja.cahayateknik.works/

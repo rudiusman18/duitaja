@@ -37,7 +37,7 @@ class DashboardModel {
 class Payload {
   int? _salesThisMonth;
   int? _salesThisDay;
-  double? _lastMonthComparison;
+  int? _lastMonthComparison;
   int? _lastDayComparison;
   String? _bestSellingProduct;
   int? _numberOfBestSellingProductSold;
@@ -45,7 +45,7 @@ class Payload {
   Payload(
       {int? salesThisMonth,
       int? salesThisDay,
-      double? lastMonthComparison,
+      int? lastMonthComparison,
       int? lastDayComparison,
       String? bestSellingProduct,
       int? numberOfBestSellingProductSold}) {
@@ -73,8 +73,8 @@ class Payload {
   set salesThisMonth(int? salesThisMonth) => _salesThisMonth = salesThisMonth;
   int? get salesThisDay => _salesThisDay;
   set salesThisDay(int? salesThisDay) => _salesThisDay = salesThisDay;
-  double? get lastMonthComparison => _lastMonthComparison;
-  set lastMonthComparison(double? lastMonthComparison) =>
+  int? get lastMonthComparison => _lastMonthComparison;
+  set lastMonthComparison(int? lastMonthComparison) =>
       _lastMonthComparison = lastMonthComparison;
   int? get lastDayComparison => _lastDayComparison;
   set lastDayComparison(int? lastDayComparison) =>

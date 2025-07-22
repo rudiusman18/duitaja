@@ -19,6 +19,9 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController phoneTextField = TextEditingController(text: "");
   TextEditingController companyNameTextField = TextEditingController(text: "");
 
+  bool _obscureText = true;
+  bool _confirmObscureText = true;
+
   @override
   Widget build(BuildContext context) {
     Widget generateTextFormField({
@@ -26,23 +29,24 @@ class _RegisterPageState extends State<RegisterPage> {
       required TextEditingController controller,
       TextInputType inputType = TextInputType.text,
     }) {
+      bool isPassword = title.toLowerCase().contains("password");
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: inter.copyWith(
-              fontWeight: medium,
-            ),
+            style: inter.copyWith(fontWeight: medium),
           ),
-          const SizedBox(
-            height: 6,
-          ),
+          const SizedBox(height: 6),
           TextFormField(
-            keyboardType: inputType,
             controller: controller,
-            obscureText:
-                title.toLowerCase().contains("password") ? true : false,
+            keyboardType: inputType,
+            obscureText: isPassword
+                ? (title.toLowerCase().contains("konfirmasi")
+                    ? _confirmObscureText
+                    : _obscureText)
+                : false,
             decoration: InputDecoration(
               hintText: title,
               border: OutlineInputBorder(
@@ -56,6 +60,27 @@ class _RegisterPageState extends State<RegisterPage> {
                   width: 2.0,
                 ),
               ),
+              suffixIcon: isPassword
+                  ? GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (title.toLowerCase().contains("konfirmasi")) {
+                            _confirmObscureText = !_confirmObscureText;
+                          } else {
+                            _obscureText = !_obscureText;
+                          }
+                        });
+                      },
+                      child: Icon(
+                        (title.toLowerCase().contains("konfirmasi")
+                                ? _confirmObscureText
+                                : _obscureText)
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                    )
+                  : null,
+              suffixIconColor: Colors.grey,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 12,

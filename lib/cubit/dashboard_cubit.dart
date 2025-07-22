@@ -13,7 +13,8 @@ class DashboardCubit extends Cubit<DashboardState> {
   }) async {
     emit(DashboardLoading());
     try {
-      var data = await DashboardService().getDashboard(token: token);
+      DashboardModel data = await DashboardService().getDashboard(token: token);
+
       emit(DashboardSuccess(data));
     } catch (e) {
       if (e.toString().contains("E_UNAUTHORIZE_ACCESS")) {
