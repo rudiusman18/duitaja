@@ -110,6 +110,9 @@ class MainApp extends StatelessWidget {
         BlocProvider(
           create: (context) => UploadProfilePictCubit(),
         ),
+        BlocProvider(
+          create: (context) => ActivityLogCubit(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

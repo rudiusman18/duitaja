@@ -4,9 +4,33 @@ sealed class SettingState {}
 
 final class SettingInitial extends SettingState {}
 
-sealed class ActivityLogState {}
+sealed class ActivityLogState {
+  final LogActivityModel logActivityModel;
+  const ActivityLogState({required this.logActivityModel});
+}
 
-final class ActivityLogInitial extends ActivityLogState {}
+final class ActivityLogInitial extends ActivityLogState {
+  ActivityLogInitial() : super(logActivityModel: LogActivityModel());
+}
+
+final class ActivityLogLoading extends ActivityLogState {
+  ActivityLogLoading() : super(logActivityModel: LogActivityModel());
+}
+
+final class ActivityLogSuccess extends ActivityLogState {
+  final LogActivityModel logActivityModelData;
+  ActivityLogSuccess(this.logActivityModelData)
+      : super(logActivityModel: logActivityModelData);
+}
+
+final class ActivityLogFailure extends ActivityLogState {
+  final String error;
+  ActivityLogFailure(this.error) : super(logActivityModel: LogActivityModel());
+}
+
+final class ActivityLogTokenExpired extends ActivityLogState {
+  ActivityLogTokenExpired() : super(logActivityModel: LogActivityModel());
+}
 
 sealed class UploadProfilePictState {}
 

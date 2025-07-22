@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:duitaja/cubit/auth_cubit.dart';
 import 'package:duitaja/cubit/setting_cubit.dart';
+import 'package:duitaja/model/log_activity_model.dart';
 import 'package:duitaja/shared/modal_alert.dart';
 import 'package:duitaja/shared/theme.dart';
 import 'package:flutter/material.dart';
@@ -1143,8 +1144,21 @@ class _EmployeeState extends State<Employee> {
   }
 }
 
-class ActivityLog extends StatelessWidget {
+class ActivityLog extends StatefulWidget {
   const ActivityLog({super.key});
+
+  @override
+  State<ActivityLog> createState() => _ActivityLogState();
+}
+
+class _ActivityLogState extends State<ActivityLog> {
+  @override
+  void initState() {
+    context
+        .read<ActivityLogCubit>()
+        .getActivityLog(token: context.read<AuthCubit>().state.token ?? "");
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1186,22 +1200,43 @@ class ActivityLog extends StatelessWidget {
       );
     }
 
-    return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 20,
-      ),
-      child: Column(
-        children: [
-          for (var i = 0; i < 20; i++)
-            generateLogItem(
-              name: "Login",
-              dateTime: "05/01/2024, 05.30",
-            ),
-          const SizedBox(
-            height: 20,
+    return BlocConsumer<ActivityLogCubit, ActivityLogState>(
+      listener: (context, state) {
+        if (state is ActivityLogTokenExpired) {
+          context.read<AuthCubit>().logout();
+          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+        }
+      },
+      builder: (context, state) {
+        return Container(
+          margin: const EdgeInsets.symmetric(
+            horizontal: 20,
           ),
-        ],
-      ),
+          child: Column(
+            children: [
+              for (var i = 0;
+                  i <
+                      (context
+                                  .read<ActivityLogCubit>()
+                                  .state
+                                  .logActivityModel
+                                  .data ??
+                              [])
+                          .length;
+                  i++)
+                generateLogItem(
+                  name:
+                      "${context.read<ActivityLogCubit>().state.logActivityModel.data?[i].name} from ${context.read<ActivityLogCubit>().state.logActivityModel.data?[i].device}",
+                  dateTime:
+                      "${context.read<ActivityLogCubit>().state.logActivityModel.data?[i].createdAt}",
+                ),
+              const SizedBox(
+                height: 20,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
