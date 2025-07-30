@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:duitaja/model/login_model.dart';
 import 'package:duitaja/model/profile_model.dart';
@@ -13,15 +12,10 @@ class AuthService {
       {required String email, required String password}) async {
     var url = Uri.parse("$baseURL/auth/login");
     var header = {'Content-Type': 'application/json'};
-
     Map data = {
       "key": email,
       "password": password,
-      "device": "iphone 30" //await getDeviceName(),
     };
-
-    print("login dengan isi $data");
-
     var body = jsonEncode(data);
     var response = await http.post(
       url,

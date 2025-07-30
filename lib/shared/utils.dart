@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'dart:math';
 
-import 'package:device_information/device_information.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -51,19 +49,6 @@ int generateSixDigitNumber() {
       random.nextInt(900000); // Generates a number between 100000 and 999999
 }
 
-Future<String> getDeviceName() async {
-  try {
-    String modelName = await DeviceInformation.deviceModel;
-    String manufacturer = await DeviceInformation.deviceManufacturer;
-
-    return "$manufacturer $modelName";
-  } catch (e) {
-    return "Unknown Device";
-  }
-}
-
 // Base URL yang digunakan untuk mengambil data
 var baseURL =
     "https://be-duitaja-dev.cahayateknik.works/api/v1"; // https://staging-duitaja.cahayateknik.works/
-
-

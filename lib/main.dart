@@ -10,7 +10,6 @@ import 'package:duitaja/cubit/sale_cubit.dart';
 import 'package:duitaja/cubit/setting_cubit.dart';
 import 'package:duitaja/cubit/stock_management_cubit.dart';
 import 'package:duitaja/cubit/stock_opname_cubit.dart';
-import 'package:duitaja/shared/utils.dart';
 import 'package:duitaja/ui/add_report_page.dart';
 import 'package:duitaja/ui/cashier_page.dart';
 import 'package:duitaja/ui/detail_order_page.dart';
@@ -31,7 +30,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp, // Portrait mode
     DeviceOrientation.portraitDown, // Upside-down portrait mode
