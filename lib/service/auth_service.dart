@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:duitaja/model/login_model.dart';
 import 'package:duitaja/model/profile_model.dart';
 import 'package:duitaja/shared/utils.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,9 +13,16 @@ class AuthService {
       {required String email, required String password}) async {
     var url = Uri.parse("$baseURL/auth/login");
     var header = {'Content-Type': 'application/json'};
+
+    const platform =
+        MethodChannel('com.example.deviceInfo'); // Ensure the name matches
+
+    final model = await platform.invokeMethod<String>('getDeviceModel');
+
     Map data = {
       "key": email,
       "password": password,
+      "device": model,
     };
     var body = jsonEncode(data);
     var response = await http.post(
