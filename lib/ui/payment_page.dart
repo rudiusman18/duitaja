@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:duitaja/cubit/auth_cubit.dart';
 import 'package:duitaja/cubit/cashier_cubit.dart';
+import 'package:duitaja/cubit/sale_cubit.dart';
 import 'package:duitaja/model/order_model.dart';
 import 'package:duitaja/shared/loading.dart';
 import 'package:duitaja/shared/modal_alert.dart';
@@ -287,14 +288,41 @@ class _PaymentPageState extends State<PaymentPage> {
                                       message:
                                           "Apakah nominal yang telah anda masukan sudah sesuai dengan nominal yang anda terima?",
                                       completion: () {
-                                        orderModel.moneyReceived =
-                                            int.parse(paymenttextField.text);
-                                        context.read<CashierCubit>().order(
-                                            token: context
-                                                    .read<AuthCubit>()
-                                                    .token ??
-                                                "",
-                                            orderModel: orderModel);
+                                        print(
+                                            "${context.read<DetailSaleCubit>().dataToAddOrderModel?.payload?.customerName}");
+                                        if (context
+                                                .read<DetailSaleCubit>()
+                                                .dataToAddOrderModel
+                                                ?.payload !=
+                                            null) {
+                                          orderModel.moneyReceived =
+                                              int.parse(paymenttextField.text);
+                                          context
+                                              .read<CashierCubit>()
+                                              .updateOrder(
+                                                  token: context
+                                                          .read<AuthCubit>()
+                                                          .token ??
+                                                      "",
+                                                  orderModel: orderModel,
+                                                  orderId: context
+                                                          .read<
+                                                              DetailSaleCubit>()
+                                                          .dataToAddOrderModel
+                                                          ?.payload
+                                                          ?.id ??
+                                                      "");
+                                        } else {
+                                          orderModel.moneyReceived =
+                                              int.parse(paymenttextField.text);
+
+                                          context.read<CashierCubit>().order(
+                                              token: context
+                                                      .read<AuthCubit>()
+                                                      .token ??
+                                                  "",
+                                              orderModel: orderModel);
+                                        }
                                       });
                                 }));
                           },

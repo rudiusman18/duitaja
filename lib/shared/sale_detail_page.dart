@@ -339,10 +339,17 @@ class _SaleDetailPageState extends State<SaleDetailPage> {
                         );
 
                         context
+                            .read<DetailSaleCubit>()
+                            .detailSalesHistoryToAddOrder(
+                                detailSaleHistoryModel: detailSaleHistoryModel);
+                        context
                             .read<CashierCubit>()
                             .saveOrder(orderModel: orderModel);
                         Navigator.pushNamed(context, '/main-page/payment-page')
                             .then((value) {
+                          context
+                              .read<DetailSaleCubit>()
+                              .clearSalesHistory(dataOrder: null);
                           context.read<CashierCubit>().tax(
                               token: context.read<AuthCubit>().token ?? "");
                         });
