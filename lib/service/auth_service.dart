@@ -55,7 +55,7 @@ class AuthService {
       ProfileModel profileModel = ProfileModel.fromJson(data);
       return profileModel;
     } else {
-      throw Exception("${data['errors']}");
+      throw ("${data['errors']}");
     }
   }
 
@@ -88,7 +88,7 @@ class AuthService {
       return data;
     } else {
       final data = jsonDecode(response.body);
-      throw Exception(data['errors']);
+      throw (data['errors']);
     }
   }
 

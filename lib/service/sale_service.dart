@@ -32,8 +32,7 @@ class SaleService {
       return saleHistoryModel;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception(
-          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+      throw ("${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
 
@@ -54,8 +53,7 @@ class SaleService {
       return detailSaleHistoryModel;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception(
-          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+      throw ("${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
 
@@ -74,8 +72,7 @@ class SaleService {
       return data;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception(
-          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+      throw ("${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
 }

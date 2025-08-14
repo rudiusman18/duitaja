@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:duitaja/model/employee_model.dart';
 import 'package:duitaja/model/log_activity_model.dart';
 import 'package:duitaja/shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class SettingService {
       final decodedImage = img.decodeImage(originalBytes);
 
       if (decodedImage == null) {
-        throw Exception("❌ Failed to decode image");
+        throw ("❌ Failed to decode image");
       }
 
       // Resize (optional)
@@ -55,10 +56,10 @@ class SettingService {
       } else {
         final respStr = await response.stream.bytesToString();
         final data = jsonDecode(respStr);
-        throw Exception('❌ ${data["message"] ?? "Upload failed"}');
+        throw ('❌ ${data["message"] ?? "Upload failed"}');
       }
     } catch (e) {
-      throw Exception('❌ Error uploading image: $e');
+      throw ('❌ Error uploading image: $e');
     }
   }
 
@@ -77,8 +78,26 @@ class SettingService {
       return saleHistoryModel;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception(
-          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+      throw ("${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+    }
+  }
+
+  Future<EmployeeModel> getAllEmployee({required String token}) async {
+    var url = Uri.parse("$baseURL/sub-users");
+
+    var header = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+    var response = await http.get(url, headers: header);
+
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      var data = jsonDecode(response.body);
+      final EmployeeModel employeeModel = EmployeeModel.fromJson(data);
+      return employeeModel;
+    } else {
+      var data = jsonDecode(response.body);
+      throw ("${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
 }

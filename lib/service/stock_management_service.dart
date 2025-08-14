@@ -30,8 +30,7 @@ class StockManagementService {
       return stockManagementModel;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception(
-          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+      throw ("${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
 
@@ -52,8 +51,7 @@ class StockManagementService {
       return detailStockManagementModel;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception(
-          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+      throw ("${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
 
@@ -87,8 +85,7 @@ class StockManagementService {
       return data;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception(
-          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+      throw ("${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
 }

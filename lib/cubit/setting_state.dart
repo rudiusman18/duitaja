@@ -46,3 +46,7 @@ final class UploadProfilePictFailure extends UploadProfilePictState {
 }
 
 final class UploadProfilePictTokenExpired extends UploadProfilePictState {}
+
+abstract class EmployeeState {}
+
+final class EmployeeInitial extends EmployeeState {}

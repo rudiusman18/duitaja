@@ -21,8 +21,7 @@ class DashboardService {
       return dashboardModel;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception(
-          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+      throw ("${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
 }

@@ -52,3 +52,7 @@ class UploadProfilePictCubit extends Cubit<UploadProfilePictState> {
     }
   }
 }
+
+class employeeCubit extends Cubit<EmployeeState> {
+  employeeCubit() : super(EmployeeInitial());
+}

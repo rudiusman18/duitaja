@@ -32,8 +32,7 @@ class CashierService {
       return sellableProductModel;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception(
-          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+      throw ("${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
 
@@ -54,8 +53,7 @@ class CashierService {
       return taxModel;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception(
-          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+      throw ("${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
 
@@ -75,8 +73,7 @@ class CashierService {
       return cashierCategoryModel;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception(
-          "${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
+      throw ("${data["message"] == null || data["message"] == "" ? "Gagal mendapatkan data" : data["message"]}");
     }
   }
 
@@ -102,7 +99,7 @@ class CashierService {
       return data;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception("${data['errors'] ?? data['message']}");
+      throw ("${data['errors'] ?? data['message']}");
     }
   }
 
@@ -129,7 +126,7 @@ class CashierService {
       return data;
     } else {
       var data = jsonDecode(response.body);
-      throw Exception("${data['errors'] ?? data['message']}");
+      throw ("${data['errors'] ?? data['message']}");
     }
   }
 }
