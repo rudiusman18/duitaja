@@ -672,7 +672,9 @@ class _PrinterPageState extends State<PrinterPage> {
                                 ? "-"
                                 : widget.detailSaleHistoryModel.payload!
                                     .phoneNumber!;
-                            bytes += generator.text("No Hp: $phone");
+                            bytes += generator.text(
+                              "No Hp: $phone",
+                            );
                             bytes += generator.feed(1);
 
                             bytes += generator.text(
